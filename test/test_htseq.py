@@ -27,7 +27,7 @@ def test_long_short(parser):
 def test_choice(parser):
     flag = parser.flag_with_arg.parseString('--format {sam,bam}')[0]
     assert flag.name == '--format'
-    assert flag.argtype.choices == ['sam', 'bam']
+    assert list(flag.argtype.choices) == ['sam', 'bam']
 
 
 def test_full(parser):

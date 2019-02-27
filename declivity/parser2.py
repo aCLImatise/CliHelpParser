@@ -31,9 +31,11 @@ class FlagName:
 class FlagArg:
     pass
 
+
 @dataclass
 class EmptyFlagArg(FlagArg):
     pass
+
 
 @dataclass
 class SimpleFlagArg(FlagArg):
@@ -77,7 +79,7 @@ class CliParser:
                 + matchPreviousLiteral(self.arg)
                 + Literal('...')
                 + Literal(']')
-        )
+        ).setParseAction(lambda s, loc, toks: )
         """When the argument is an array of values, e.g. when the help says `--samout SAMOUTS [SAMOUTS ...]`"""
 
         self.choice_type_arg = nestedExpr(
@@ -87,13 +89,11 @@ class CliParser:
         ).setParseAction(lambda s, loc, toks: ChoiceFlagArg(toks[0]))
         """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
-        # self.arg_list = delimitedList(self.arg, delim=)
-        self.arg_expression = (self.flag_arg_sep.suppress() + (
-                self.list_type_arg ^ self.choice_type_arg ^ self.arg)).setParseAction(
-            lambda s, loc, toks: toks[0]
-            # 0/0
-            # toks[1:]
-        )
+        self.arg_expression = (
+                self.flag_arg_sep.suppress()
+                + (
+                        self.list_type_arg ^ self.choice_type_arg ^ self.arg)).setParseAction(
+            lambda s, loc, toks: toks[0])
         """An argument with separator, e.g. `=FILE`"""
 
         self.flag_with_arg = (self.any_flag + Optional(self.arg_expression)).setParseAction(
