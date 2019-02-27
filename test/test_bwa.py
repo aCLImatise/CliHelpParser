@@ -7,7 +7,7 @@ import pytest
 def test_flag_arg(parser):
     result = parser.flag_with_arg.parseString("-A INT")[0]
     assert isinstance(result, FlagName)
-    assert result.args == ['INT']
+    assert result.argtype.arg == 'INT'
     assert result.name == '-A'
 
 
@@ -17,7 +17,7 @@ def test_flag(parser):
     )[0]
     assert isinstance(result, Flag)
     assert result.flags[0].name == '-A'
-    assert result.flags[0].args == ['INT']
+    assert result.flags[0].argtype.arg == 'INT'
 
 
 def test_flag_b(parser):

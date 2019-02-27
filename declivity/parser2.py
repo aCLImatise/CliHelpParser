@@ -1,5 +1,5 @@
 from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, OneOrMore, originalTextFor, SkipTo, \
-    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr
+    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas
 from dataclasses import dataclass
 import re
 import typing
@@ -55,10 +55,11 @@ class ChoiceFlagArg(FlagArg):
 class CliParser:
     def __init__(self):
         stack = [1]
+        self.cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
 
         self.short_flag = originalTextFor(Literal('-') + Word(alphanums, max=1))
         """A short flag has only a single dash and single character, e.g. `-m`"""
-        self.long_flag = originalTextFor(Literal('--') + Word(alphanums))
+        self.long_flag = originalTextFor(Literal('--') + self.cli_id)
         """A long flag has two dashes and any amount of characters, e.g. `--max-count`"""
         self.any_flag = self.short_flag ^ self.long_flag
         """The flag is the part with the dashes, e.g. `-m` or `--max-count`"""
@@ -69,8 +70,10 @@ class CliParser:
         self.arg_arg_sep = Or([Literal('='), Literal(' ')]).leaveWhitespace()
         """The term that separates arguments from each other, e.g. in `--file=FILE` it's `=`"""
 
-        self.arg = Word(alphanums)
+        self.arg = self.cli_id.copy()
         """A single argument name, e.g. `FILE`"""
+
+        self.simple_arg = self.arg.copy().setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
 
         self.list_type_arg = (
                 self.arg
@@ -79,26 +82,25 @@ class CliParser:
                 + matchPreviousLiteral(self.arg)
                 + Literal('...')
                 + Literal(']')
-        ).setParseAction(lambda s, loc, toks: )
+        ).setParseAction(lambda s, loc, toks: RepeatFlagArg(toks[0]))
         """When the argument is an array of values, e.g. when the help says `--samout SAMOUTS [SAMOUTS ...]`"""
 
         self.choice_type_arg = nestedExpr(
             opener='{',
             closer='}',
-            content=delimitedList(Word(alphanums), delim=',')
+            content=delimitedList(self.cli_id, delim=',')
         ).setParseAction(lambda s, loc, toks: ChoiceFlagArg(toks[0]))
         """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
         self.arg_expression = (
-                self.flag_arg_sep.suppress()
-                + (
-                        self.list_type_arg ^ self.choice_type_arg ^ self.arg)).setParseAction(
+                self.flag_arg_sep.suppress() + (self.list_type_arg ^ self.choice_type_arg ^ self.simple_arg)
+        ).setParseAction(
             lambda s, loc, toks: toks[0])
         """An argument with separator, e.g. `=FILE`"""
 
         self.flag_with_arg = (self.any_flag + Optional(self.arg_expression)).setParseAction(
             lambda s, loc, toks: (
-                FlagName(name=toks[0], argtype=toks[1] if len(toks) > 0 else EmptyFlagArg())
+                FlagName(name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
             )
         )
         """e.g. `--max-count=NUM`"""
@@ -142,6 +144,7 @@ class CliParser:
         )
 
         self.flags = indentedBlock(OneOrMore(self.flag), indentStack=stack, indent=True).setParseAction(
-            lambda s, loc, toks: toks[0][0])
+            lambda s, loc, toks: toks[0][0]
+        )
         self.flag_section_header = Regex('(arguments|options):', flags=re.IGNORECASE)
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(lambda s, loc, toks: toks[1:])

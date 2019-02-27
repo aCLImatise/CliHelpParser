@@ -6,7 +6,8 @@ setup(
     packages=['declivity'],
     version='0.0.1',
     install_requires=[
-        'parsimonious'
+        'parsimonious',
+        'pyparsing'
     ],
     entry_points={
         'console_scripts': [
