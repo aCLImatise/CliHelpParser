@@ -54,10 +54,6 @@ class ChoiceFlagArg(FlagArg):
 
 class CliParser:
     def __init__(self):
-        def fail(a, b, c, d):
-            pass
-        def succeed(a, b, c):
-            pass
         stack = [1]
         self.cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
 
