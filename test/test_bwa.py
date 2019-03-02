@@ -80,8 +80,9 @@ Algorithm options:
 def test_bwa(parser):
     # Parse help
     help_text = get_help(['bwa', 'mem'])
-    results = list(parser.flag_section.scanString(help_text))
+    results = list(parser.flags.scanString(help_text))
 
+    # The bwa help has 3 sections
     assert len(results) == 3
 
     for tokens, start, end in results:

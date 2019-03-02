@@ -54,6 +54,10 @@ class ChoiceFlagArg(FlagArg):
 
 class CliParser:
     def __init__(self):
+        def fail(a, b, c, d):
+            pass
+        def succeed(a, b, c):
+            pass
         stack = [1]
         self.cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
 
@@ -77,7 +81,6 @@ class CliParser:
 
         self.list_type_arg = (
                 self.arg
-                + Literal(' ')
                 + Literal('[')
                 + matchPreviousLiteral(self.arg)
                 + Literal('...')
@@ -143,8 +146,8 @@ class CliParser:
             )
         )
 
-        self.flags = indentedBlock(OneOrMore(self.flag), indentStack=stack, indent=True).setParseAction(
-            lambda s, loc, toks: toks[0][0]
+        self.flags = indentedBlock(self.flag, indentStack=stack, indent=True).setParseAction(
+            lambda s, loc, toks: toks[0]
         )
         self.flag_section_header = Regex('(arguments|options):', flags=re.IGNORECASE)
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(lambda s, loc, toks: toks[1:])

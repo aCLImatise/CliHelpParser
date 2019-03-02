@@ -4,6 +4,7 @@ Uses htseq-count, which is used as an example of a Python argparse CLI
 from test.util import get_help, parser
 from textwrap import dedent
 import pytest
+from declivity.parser2 import RepeatFlagArg
 
 
 def test_short(parser):
@@ -45,10 +46,16 @@ optional arguments:
                         (default: sam)
         """))[0]
     assert len(flags) == 2
+    
+def test_reapeat_type(parser):
+    flag = parser.flag_synonyms.parseString("--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]")[0]
+    assert flag.name == '--additional-attr'
+    assert isinstance(flag.argtype, RepeatFlagArg)
+    assert flag.argtype.arg == 'ADDITIONAL_ATTR'
 
 
 def test_full_flags(parser):
-    results = parser.flag.scanString("""
+    results = parser.flag.scanString(dedent("""
   -h, --help            show this help message and exit
   -f {sam,bam}, --format {sam,bam}
                         type of <alignment_file> data, either 'sam' or 'bam'
@@ -102,7 +109,7 @@ def test_full_flags(parser):
                         'XF')
   -q, --quiet           suppress progress report
 """
-                                            )
+                                            ))
     assert len(list(results)) == 15
 
 
@@ -115,9 +122,5 @@ def test_choice(parser):
 def test_full(parser):
     # Parse help
     help_text = get_help(['htseq-count', '--help'])
-    results = list(parser.flag_section.scanString(help_text))
-
-    assert len(results) == 3
-
-    for tokens, start, end in results:
-        assert len(tokens) > 0
+    for flags, b, c in parser.flags.scanString(help_text):
+        assert len(flags) == 15
