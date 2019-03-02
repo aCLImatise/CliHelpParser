@@ -1,5 +1,5 @@
 import subprocess
-from declivity import parser2
+from declivity.parser import CliParser
 import pytest
 
 def get_help(cmd):
@@ -8,5 +8,5 @@ def get_help(cmd):
 
 @pytest.fixture
 def parser():
-    return parser2.CliParser()
+    return CliParser()
 

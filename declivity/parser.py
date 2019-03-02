@@ -1,124 +1,153 @@
-from parsimonious.grammar import Grammar, NodeVisitor
-from parsimonious.nodes import RegexNode
-
-grammar = Grammar(
-    """
-    help = spaced_section+
-    spaced_section = space* section space*
-    section = option_section / usage_section
-    
-    usage_section = ~r"usage:"i usage
-    usage = ~r".+$"m
-    
-    option_section = option_preamble space? option_list
-    option_preamble = ~r".+(arguments|options):"i
-    option_list = space* option+ space*
-    option = whitespace* flags whitespace* description?
-    flags = flag (flagsep flag)*
-    flagsep = ("," / "|") " "?
-    
-    space = whitespace / newline
-    whitespace = ~r"\s"
-    newline = "\\n"
-    
-    flag = (short_flag / long_flag) metavar?
-    short_flag = ~r"-\w"
-    long_flag = ~r"--\w+"
-    
-    description = description_char+
-    description_char = ~r"."s
-    
-    choices = "{" choice_list "}"
-    choice_list = option ("," option)
-    
-    metavar = metavar_sep word
-    metavar_sep = "=" / " "
-    word = ~r"\w+"
-    """
-)
+from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, OneOrMore, originalTextFor, SkipTo, \
+    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas
+from dataclasses import dataclass
+import re
+import typing
 
 
-class RuleVisitor(NodeVisitor):
-    @staticmethod
-    def parse_list(args):
+def pick(*args):
+    def action(s, loc, toks):
+        if len(args) == 1:
+            return toks[args[0]]
+        else:
+            return [toks[arg] for arg in args]
+
+    return action
+
+
+@dataclass
+class Flag:
+    flags: list
+    description: str
+
+
+@dataclass
+class FlagName:
+    name: str
+    argtype: 'FlagArg'
+
+
+@dataclass
+class FlagArg:
+    pass
+
+
+@dataclass
+class EmptyFlagArg(FlagArg):
+    pass
+
+
+@dataclass
+class SimpleFlagArg(FlagArg):
+    arg: str
+
+
+@dataclass
+class RepeatFlagArg(FlagArg):
+    arg: str
+
+
+@dataclass
+class ChoiceFlagArg(FlagArg):
+    choices: typing.List[str]
+
+
+class CliParser:
+    def __init__(self):
+        def fail(a, b, c, d):
+            pass
+        def succeed(a, b, c):
+            pass
+        stack = [1]
+        self.cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
+
+        self.short_flag = originalTextFor(Literal('-') + Word(alphanums, max=1))
+        """A short flag has only a single dash and single character, e.g. `-m`"""
+        self.long_flag = originalTextFor(Literal('--') + self.cli_id)
+        """A long flag has two dashes and any amount of characters, e.g. `--max-count`"""
+        self.any_flag = self.short_flag ^ self.long_flag
+        """The flag is the part with the dashes, e.g. `-m` or `--max-count`"""
+
+        self.flag_arg_sep = Or([Literal('='), Literal(' ')]).leaveWhitespace()
+        """The term that separates the flag from the arguments, e.g. in `--file=FILE` it's `=`"""
+
+        self.arg_arg_sep = Or([Literal('='), Literal(' ')]).leaveWhitespace()
+        """The term that separates arguments from each other, e.g. in `--file=FILE` it's `=`"""
+
+        self.arg = self.cli_id.copy()
+        """A single argument name, e.g. `FILE`"""
+
+        self.simple_arg = self.arg.copy().setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
+
+        self.list_type_arg = (
+                self.arg
+                + Literal('[')
+                + matchPreviousLiteral(self.arg)
+                + Literal('...')
+                + Literal(']')
+        ).setParseAction(lambda s, loc, toks: RepeatFlagArg(toks[0]))
+        """When the argument is an array of values, e.g. when the help says `--samout SAMOUTS [SAMOUTS ...]`"""
+
+        self.choice_type_arg = nestedExpr(
+            opener='{',
+            closer='}',
+            content=delimitedList(self.cli_id, delim=',')
+        ).setParseAction(lambda s, loc, toks: ChoiceFlagArg(toks[0]))
+        """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
+
+        self.arg_expression = (
+                self.flag_arg_sep.suppress() + (self.list_type_arg ^ self.choice_type_arg ^ self.simple_arg)
+        ).setParseAction(
+            lambda s, loc, toks: toks[0])
+        """An argument with separator, e.g. `=FILE`"""
+
+        self.flag_with_arg = (self.any_flag + Optional(self.arg_expression)).setParseAction(
+            lambda s, loc, toks: (
+                FlagName(name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
+            )
+        )
+        """e.g. `--max-count=NUM`"""
+
+        self.flag_synonyms = delimitedList(self.flag_with_arg, delim=Literal(' ') ^ Literal(','))
         """
-        Parses a rule where we have a mandatory first argument, then an optional list of separator + argument
-        For example:
-            option_list = option ("," option)
-        :param args:
-        :return:
+        When the help lists multiple synonyms for a flag, e.g:
+        -n, --lines=NUM
         """
-        ret = [args[0]]
-        for optional in args[1]:
-            ret.append(optional[2])
-        return ret
 
-    def visit_description(self, node, children):
-        return ''.join(children)
+        # The description of the flag
+        # e.g. for grep's `-o, --only-matching`, this is:
+        # "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line."
+        self.desc_line = originalTextFor(SkipTo(LineEnd()))
+        self.indented_desc = indentedBlock(
+            self.desc_line,
+            indentStack=stack,
+            indent=True
+        ).setParseAction(
+            lambda s, loc, toks: ' '.join([tok[0] for tok in toks[0]])
+        )
+        self.description = self.indented_desc  # Optional(one_line_desc) + Optional(self.indented_desc)
+        # A self.description that takes up one line
+        # one_line_desc = SkipTo(LineEnd())
 
-    def visit_option_section(self, node, children):
-        _, _, option_list = children
-        return option_list
+        # A flag self.description that makes up an indented block
+        # originalTextFor(SkipTo(flag_prefix ^ LineEnd()))
 
-    def visit_section(self, node, children):
-        return children
+        # The entire flag documentation, including all synonyms and description
+        self.flag = (
+                self.flag_synonyms
+                + self.description
+        ).setParseAction(
+            lambda s, loc, toks:
+            (
+                Flag(
+                    flags=toks[0:-1],
+                    description=toks[-1]
+                )
+            )
+        )
 
-    def visit_spaced_section(self, node, children):
-        _, section, _ = children
-        return section
-
-    def visit_option_list(self, node, children):
-        _, option, _ = children
-        return option
-
-    def visit_option(self, node, children):
-        _, flags, _, description = children
-        metavar = [flag['metavar'] for flag in flags if flag['metavar'] is not None]
-        return {
-            'flags': [flag['flag'] for flag in flags],
-            'metavar': metavar[0] if len(metavar) > 0 else None,
-            'description': description[0]
-        }
-
-    def visit_flags(self, node, children):
-        return self.parse_list(children)
-
-    def visit_flag(self, node, children):
-        flag, metavar = children
-        return {
-            'flag': flag[0],
-            'metavar': metavar[0] if isinstance(metavar, list) else None
-        }
-
-    def visit_metavar(self, node, children):
-        metavar_sep, word = children
-        return word
-
-    def visit_choices(self, node, children):
-        l_brace, option_list, r_brace = children
-        return option_list
-
-    def visit_choice_list(self, node, children):
-        return self.parse_list(children)
-
-    def generic_visit(self, node, visited_children):
-        """Replace childbearing nodes with a list of their children; keep
-        others untouched.
-        For our case, if a node has children, only the children are important.
-        Otherwise, keep the node around for (for example) the flags of the
-        regex rule. Most of these kept-around nodes are subsequently thrown
-        away by the other visitor methods.
-        We can't simply hang the visited children off the original node; that
-        would be disastrous if the node occurred in more than one place in the
-        tree.
-        """
-        if isinstance(node, RegexNode):
-            return node.text
-
-        return visited_children or node  # should semantically be a tuple
-
-
-def parse(text: str):
-    tree = grammar.parse(text)
-    visitor = RuleVisitor()
-    return visitor.visit(tree)
+        self.flags = indentedBlock(self.flag, indentStack=stack, indent=True).setParseAction(
+            lambda s, loc, toks: toks[0]
+        )
+        self.flag_section_header = Regex('(arguments|options):', flags=re.IGNORECASE)
+        self.flag_section = (self.flag_section_header + self.flags).setParseAction(lambda s, loc, toks: toks[1:])

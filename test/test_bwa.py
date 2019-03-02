@@ -1,5 +1,5 @@
-from declivity import parser2
-from declivity.parser2 import Flag, FlagName
+from declivity import parser
+from declivity.parser import Flag, FlagName
 from test.util import get_help, parser
 import pytest
 

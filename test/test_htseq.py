@@ -4,7 +4,7 @@ Uses htseq-count, which is used as an example of a Python argparse CLI
 from test.util import get_help, parser
 from textwrap import dedent
 import pytest
-from declivity.parser2 import RepeatFlagArg
+from declivity.parser import RepeatFlagArg
 
 
 def test_short(parser):
