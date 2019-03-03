@@ -1,5 +1,5 @@
 from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, OneOrMore, originalTextFor, SkipTo, \
-    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas
+    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas, Forward
 from dataclasses import dataclass
 import re
 import typing
@@ -36,6 +36,9 @@ class FlagArg:
 class EmptyFlagArg(FlagArg):
     pass
 
+@dataclass
+class OptionalFlagArg(FlagArg):
+    args: list
 
 @dataclass
 class SimpleFlagArg(FlagArg):
@@ -73,6 +76,19 @@ class CliParser:
         self.arg = self.cli_id.copy()
         """A single argument name, e.g. `FILE`"""
 
+        self.optional_args = Forward()
+        def stortn(a, b, c):
+            if len(c) == 1:
+                return OptionalFlagArg(args=[c[0]])
+            else:
+                return OptionalFlagArg(args=[c[0]] + c[3].args)
+            print(c)
+
+        self.optional_args <<= (
+                self.arg
+                + Optional(Literal('[') + Literal(',') + self.optional_args + Literal(']'))
+        ).setParseAction(stortn)
+
         self.simple_arg = self.arg.copy().setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
 
         self.list_type_arg = (
@@ -92,7 +108,8 @@ class CliParser:
         """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
         self.arg_expression = (
-                self.flag_arg_sep.suppress() + (self.list_type_arg ^ self.choice_type_arg ^ self.simple_arg)
+                self.flag_arg_sep.suppress() + (
+                    self.list_type_arg ^ self.choice_type_arg ^ self.optional_args ^ self.simple_arg)
         ).setParseAction(
             lambda s, loc, toks: toks[0])
         """An argument with separator, e.g. `=FILE`"""
@@ -113,7 +130,10 @@ class CliParser:
         # The description of the flag
         # e.g. for grep's `-o, --only-matching`, this is:
         # "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line."
-        self.desc_line = originalTextFor(SkipTo(LineEnd()))
+        def success(a, b, c):
+            pass
+
+        self.desc_line = originalTextFor(SkipTo(LineEnd()).setParseAction(success))
         self.indented_desc = indentedBlock(
             self.desc_line,
             indentStack=stack,

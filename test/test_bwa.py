@@ -1,13 +1,14 @@
 from declivity import parser
-from declivity.parser import Flag, FlagName
+from declivity.parser import Flag, FlagName, OptionalFlagArg
 from test.util import get_help, parser
 import pytest
+from textwrap import dedent
 
 
 def test_flag_arg(parser):
     result = parser.flag_with_arg.parseString("-A INT")[0]
     assert isinstance(result, FlagName)
-    assert result.argtype.arg == 'INT'
+    assert result.argtype.args[0] == 'INT'
     assert result.name == '-A'
 
 
@@ -17,7 +18,7 @@ def test_flag(parser):
     )[0]
     assert isinstance(result, Flag)
     assert result.flags[0].name == '-A'
-    assert result.flags[0].argtype.arg == 'INT'
+    assert result.flags[0].argtype.args[0] == 'INT'
 
 
 def test_flag_b(parser):
@@ -75,6 +76,37 @@ Algorithm options:
 
     for tokens, start, end in results:
         assert len(tokens) == 12
+
+def test_bwa_multisection(parser):
+    s = """
+Scoring options:
+
+       -x STR        read type. Setting -x changes multiple parameters unless overriden [null]
+                     pacbio: -k17 -W40 -r10 -A1 -B1 -O1 -E1 -L0  (PacBio reads to ref)
+                     ont2d: -k14 -W20 -r10 -A1 -B1 -O1 -E1 -L0  (Oxford Nanopore 2D-reads to ref)
+                     intractg: -B9 -O16 -L5  (intra-species contigs to ref)
+
+Input/output options:
+
+       -p            smart pairing (ignoring in2.fq)
+    """
+    result_lists = list(parser.flags.scanString(s))
+    assert len(result_lists) == 2
+    for result_list, b, c in result_lists:
+        assert len(result_list) == 1
+
+
+def test_complex_optionals(parser):
+    s = dedent("""
+       -I FLOAT[,FLOAT[,INT[,INT]]]
+                     specify the mean, standard deviation (10% of the mean if absent), max
+                     (4 sigma from the mean if absent) and min of the insert size distribution.
+                     FR orientation only. [inferred]
+    """)
+    results = list(parser.flag.parseString(s))[0]
+    assert isinstance(results, Flag)
+    assert isinstance(results.flags[0].argtype, OptionalFlagArg)
+    assert results.flags[0].argtype.args == ['FLOAT', 'FLOAT', 'INT', 'INT']
 
 
 def test_bwa(parser):
