@@ -77,6 +77,7 @@ Algorithm options:
     for tokens, start, end in results:
         assert len(tokens) == 12
 
+
 def test_bwa_multisection(parser):
     s = """
 Scoring options:

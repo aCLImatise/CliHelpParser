@@ -3,6 +3,9 @@ from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, O
 from dataclasses import dataclass
 import re
 import typing
+import abc
+import enum
+from declivity import types
 
 
 def pick(*args):
@@ -13,6 +16,12 @@ def pick(*args):
             return [toks[arg] for arg in args]
 
     return action
+
+
+@dataclass
+class Command:
+    flags: list
+    command: str
 
 
 @dataclass
@@ -28,34 +37,85 @@ class FlagName:
 
 
 @dataclass
-class FlagArg:
-    pass
+class FlagArg(abc.ABC):
+    int_re = re.compile('int(eger)?', flags=re.IGNORECASE)
+    str_re = re.compile('str(ing)?', flags=re.IGNORECASE)
+    float_re = re.compile('float|decimal', flags=re.IGNORECASE)
+    bool_re = re.compile('bool(ean)?', flags=re.IGNORECASE)
+    file_re = re.compile('file', flags=re.IGNORECASE)
+
+    @classmethod
+    def infer_type(cls, string) -> type[types.CliType]:
+        if cls.bool_re.match(string):
+            return types.CliBoolean
+        elif cls.float_re.match(string):
+            return types.CliFloat
+        elif cls.int_re.match(string):
+            return types.CliInteger
+        elif cls.str_re.match(string):
+            return types.CliString
+        else:
+            return types.CliString
+
+    @abc.abstractmethod
+    def get_type(self) -> types.CliType:
+        pass
 
 
 @dataclass
 class EmptyFlagArg(FlagArg):
-    pass
+
+    def get_type(self):
+        return types.CliBoolean
+
 
 @dataclass
 class OptionalFlagArg(FlagArg):
+    """
+    When the flag has multiple arguments, some of which are optional, e.g.
+    -I FLOAT[,FLOAT[,INT[,INT]]]
+    """
     args: list
+
+    def get_type(self):
+        return types.CliTuple([self.infer_type(arg) for arg in self.args])
+
 
 @dataclass
 class SimpleFlagArg(FlagArg):
+    def get_type(self):
+        return self.infer_type(self.arg)
+
     arg: str
 
 
 @dataclass
 class RepeatFlagArg(FlagArg):
+    def get_type(self):
+        t = self.infer_type(self.arg)
+        return typing.List[t]
+
     arg: str
 
 
 @dataclass
 class ChoiceFlagArg(FlagArg):
+    def get_type(self):
+        return enum.Enum(value=','.join(self.choices), names=self.choices)
+
     choices: typing.List[str]
 
 
 class CliParser:
+    @staticmethod
+    def parse_command(self, cmd, name):
+        flag_block = list(self.flags.searchString(cmd))
+        flags = [flag for flags in flag_block for flag in flags]
+        return Command(
+            command=name,
+            flags=flags
+        )
+
     def __init__(self):
         stack = [1]
         self.cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
@@ -77,17 +137,16 @@ class CliParser:
         """A single argument name, e.g. `FILE`"""
 
         self.optional_args = Forward()
-        def stortn(a, b, c):
-            if len(c) == 1:
-                return OptionalFlagArg(args=[c[0]])
-            else:
-                return OptionalFlagArg(args=[c[0]] + c[3].args)
-            print(c)
-
         self.optional_args <<= (
                 self.arg
                 + Optional(Literal('[') + Literal(',') + self.optional_args + Literal(']'))
-        ).setParseAction(stortn)
+        ).setParseAction(
+            lambda a, b, toks:
+            OptionalFlagArg(args=[toks[0]]) if len(toks) == 1 else OptionalFlagArg(args=[toks[0]] + toks[3].args))
+        """
+        When the flag has multiple arguments, some of which are optional, e.g.
+        -I FLOAT[,FLOAT[,INT[,INT]]]
+        """
 
         self.simple_arg = self.arg.copy().setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
 
@@ -109,7 +168,7 @@ class CliParser:
 
         self.arg_expression = (
                 self.flag_arg_sep.suppress() + (
-                    self.list_type_arg ^ self.choice_type_arg ^ self.optional_args ^ self.simple_arg)
+                self.list_type_arg ^ self.choice_type_arg ^ self.optional_args ^ self.simple_arg)
         ).setParseAction(
             lambda s, loc, toks: toks[0])
         """An argument with separator, e.g. `=FILE`"""
@@ -163,7 +222,7 @@ class CliParser:
         )
 
         self.flags = indentedBlock(self.flag, indentStack=stack, indent=True).setParseAction(
-            lambda s, loc, toks: toks[0]
+            lambda s, loc, toks: toks[0][0]
         )
         self.flag_section_header = Regex('(arguments|options):', flags=re.IGNORECASE)
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(lambda s, loc, toks: toks[1:])

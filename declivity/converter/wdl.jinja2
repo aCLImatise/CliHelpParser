@@ -1,0 +1,17 @@
+task {{ taskname }} {
+  input {
+    {% for input in inputs %}
+    {{ input.type }} {{ input.name }}
+    {% endfor %}
+  }
+
+  command {
+    {{ command }}
+  }
+
+  runtime {
+  }
+
+  output {
+  }
+}
