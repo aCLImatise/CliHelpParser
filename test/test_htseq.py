@@ -37,17 +37,18 @@ def test_long_short_choices(parser):
 
 
 def test_help_section_preamble(parser):
-    flags = next(parser.flag_section.scanString(
+    flags = list(parser.flags.searchString(dedent(
         """
 optional arguments:
   -h, --help            show this help message and exit
   -f {sam,bam}, --format {sam,bam}
                         type of <alignment_file> data, either 'sam' or 'bam'
                         (default: sam)
-        """))[0]
+        """)))
     assert len(flags) == 2
-    
-def test_reapeat_type(parser):
+
+
+def test_repeat_type(parser):
     flag = parser.flag_synonyms.parseString("--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]")[0]
     assert flag.name == '--additional-attr'
     assert isinstance(flag.argtype, RepeatFlagArg)

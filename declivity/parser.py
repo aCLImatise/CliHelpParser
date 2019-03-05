@@ -45,17 +45,19 @@ class FlagArg(abc.ABC):
     file_re = re.compile('file', flags=re.IGNORECASE)
 
     @classmethod
-    def infer_type(cls, string) -> type[types.CliType]:
+    def infer_type(cls, string) -> types.CliType:
         if cls.bool_re.match(string):
-            return types.CliBoolean
+            return types.CliBoolean()
         elif cls.float_re.match(string):
-            return types.CliFloat
+            return types.CliFloat()
         elif cls.int_re.match(string):
-            return types.CliInteger
+            return types.CliInteger()
+        elif cls.file_re.match(string):
+            return types.CliFile()
         elif cls.str_re.match(string):
-            return types.CliString
+            return types.CliString()
         else:
-            return types.CliString
+            return types.CliString()
 
     @abc.abstractmethod
     def get_type(self) -> types.CliType:
@@ -107,7 +109,6 @@ class ChoiceFlagArg(FlagArg):
 
 
 class CliParser:
-    @staticmethod
     def parse_command(self, cmd, name):
         flag_block = list(self.flags.searchString(cmd))
         flags = [flag for flags in flag_block for flag in flags]
@@ -192,7 +193,7 @@ class CliParser:
         def success(a, b, c):
             pass
 
-        self.desc_line = originalTextFor(SkipTo(LineEnd()).setParseAction(success))
+        self.desc_line = originalTextFor(SkipTo(LineEnd()))#.setParseAction(success))
         self.indented_desc = indentedBlock(
             self.desc_line,
             indentStack=stack,
