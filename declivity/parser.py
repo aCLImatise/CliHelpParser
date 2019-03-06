@@ -6,6 +6,10 @@ import typing
 import abc
 import enum
 from declivity import types
+import spacy
+from spacy import displacy, tokens
+
+nlp = spacy.load('en_core_web_sm')
 
 
 def pick(*args):
@@ -20,14 +24,68 @@ def pick(*args):
 
 @dataclass
 class Command:
-    flags: list
-    command: str
+    flags: typing.List['Flag']
+    command: typing.List[str]
 
 
 @dataclass
 class Flag:
-    flags: list
+    synonyms: typing.List['FlagName']
     description: str
+
+    @property
+    def args(self) -> 'FlagName':
+        return max(self.synonyms, key=lambda synonym: synonym.argtype.num_args)
+
+    @property
+    def longest_synonym(self) -> 'FlagName':
+        return max(self.synonyms, key=lambda synonym: len(synonym.name))
+
+    def shortest_synonym(self) -> 'FlagName':
+        return min(self.synonyms, key=lambda synonym: len(synonym.name))
+
+    def tokens_to_name(self, tokens: typing.List[tokens.Token]):
+        return re.sub('[^\w]', '', ''.join([tok.text.capitalize() for tok in tokens]))
+
+    @property
+    def name(self):
+        """
+        A short name for this flag
+        """
+        no_brackets = re.sub('[[({].+[\])}]', '', self.description)
+        words = nlp(no_brackets)
+        # for chunk in words.noun_chunks:
+        #     if chunk.root.dep_ == 'ROOT':
+        #         return chunk.text
+        root = None
+
+        # Find the actual root
+        for word in words:
+            if (word.dep_ == 'ROOT' or word.dep == 'nsubj') and word.pos_ == 'NOUN':
+                root = word
+
+        # If that isn't there, get the first noun
+        if root is None:
+            for word in words:
+                if word.pos_ == 'NOUN':
+                    root = word
+
+        # If that isn't there, get the first word
+        if root is None:
+            return self.tokens_to_name(words)
+
+        subtree = list(root.subtree)
+        if len(subtree) < 4:
+            # If the whole subtree is a reasonable length, use that
+            return self.tokens_to_name(subtree)
+        else:
+            good_children = [tok for tok in subtree if tok.dep_ != 'prep']
+            if len(good_children) >= 1:
+                subtree = sorted([root, good_children[0]], key=lambda tok: tok.i)
+                # Otherwise, just add the first child token
+                return self.tokens_to_name(subtree)
+            else:
+                return self.tokens_to_name([root])
 
 
 @dataclass
@@ -63,9 +121,16 @@ class FlagArg(abc.ABC):
     def get_type(self) -> types.CliType:
         pass
 
+    @abc.abstractmethod
+    def num_args(self) -> int:
+        pass
+
 
 @dataclass
 class EmptyFlagArg(FlagArg):
+
+    def num_args(self) -> int:
+        return 0
 
     def get_type(self):
         return types.CliBoolean
@@ -77,6 +142,10 @@ class OptionalFlagArg(FlagArg):
     When the flag has multiple arguments, some of which are optional, e.g.
     -I FLOAT[,FLOAT[,INT[,INT]]]
     """
+
+    def num_args(self) -> int:
+        return len(self.args)
+
     args: list
 
     def get_type(self):
@@ -85,6 +154,9 @@ class OptionalFlagArg(FlagArg):
 
 @dataclass
 class SimpleFlagArg(FlagArg):
+    def num_args(self) -> int:
+        return 1
+
     def get_type(self):
         return self.infer_type(self.arg)
 
@@ -93,6 +165,9 @@ class SimpleFlagArg(FlagArg):
 
 @dataclass
 class RepeatFlagArg(FlagArg):
+    def num_args(self) -> int:
+        return 1
+
     def get_type(self):
         t = self.infer_type(self.arg)
         return typing.List[t]
@@ -105,13 +180,16 @@ class ChoiceFlagArg(FlagArg):
     def get_type(self):
         return enum.Enum(value=','.join(self.choices), names=self.choices)
 
+    def num_args(self) -> int:
+        return 1
+
     choices: typing.List[str]
 
 
 class CliParser:
     def parse_command(self, cmd, name):
         flag_block = list(self.flags.searchString(cmd))
-        flags = [flag for flags in flag_block for flag in flags]
+        flags = [flag[0] for flags in flag_block for flag in flags]
         return Command(
             command=name,
             flags=flags
@@ -137,13 +215,21 @@ class CliParser:
         self.arg = self.cli_id.copy()
         """A single argument name, e.g. `FILE`"""
 
+        def visit_optional_args(s, lok, toks):
+            if len(toks) == 1:
+                return OptionalFlagArg(args=[toks[0]])
+            else:
+                other = toks[3]
+                if isinstance(other, str):
+                    return OptionalFlagArg(args=[toks[0], other])
+                elif isinstance(other, OptionalFlagArg):
+                    return OptionalFlagArg(args=[toks[0]] + other.args)
+
         self.optional_args = Forward()
         self.optional_args <<= (
                 self.arg
-                + Optional(Literal('[') + Literal(',') + self.optional_args + Literal(']'))
-        ).setParseAction(
-            lambda a, b, toks:
-            OptionalFlagArg(args=[toks[0]]) if len(toks) == 1 else OptionalFlagArg(args=[toks[0]] + toks[3].args))
+                + Literal('[') + Literal(',') + (self.optional_args ^ self.arg) + Literal(']')
+        ).setParseAction(visit_optional_args)
         """
         When the flag has multiple arguments, some of which are optional, e.g.
         -I FLOAT[,FLOAT[,INT[,INT]]]
@@ -193,7 +279,7 @@ class CliParser:
         def success(a, b, c):
             pass
 
-        self.desc_line = originalTextFor(SkipTo(LineEnd()))#.setParseAction(success))
+        self.desc_line = originalTextFor(SkipTo(LineEnd()))  # .setParseAction(success))
         self.indented_desc = indentedBlock(
             self.desc_line,
             indentStack=stack,
@@ -216,14 +302,15 @@ class CliParser:
             lambda s, loc, toks:
             (
                 Flag(
-                    flags=toks[0:-1],
+                    synonyms=toks[0:-1],
                     description=toks[-1]
                 )
             )
         )
 
-        self.flags = indentedBlock(self.flag, indentStack=stack, indent=True).setParseAction(
-            lambda s, loc, toks: toks[0][0]
-        )
+        def visit_flags(s, loc, toks):
+            return toks[0]
+
+        self.flags = indentedBlock(self.flag, indentStack=stack, indent=True).setParseAction(visit_flags)
         self.flag_section_header = Regex('(arguments|options):', flags=re.IGNORECASE)
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(lambda s, loc, toks: toks[1:])

@@ -1,6 +1,7 @@
 from declivity.parser import Command
 from declivity import types
 import jinja2
+import subprocess
 
 
 def type_to_wdl(typ: types.CliType) -> str:
@@ -12,6 +13,22 @@ def type_to_wdl(typ: types.CliType) -> str:
         return 'Boolean'
     elif isinstance(typ, types.CliInteger):
         return 'Integer'
+    elif isinstance(typ, types.CliFile):
+        return 'File'
+    elif isinstance(typ, types.CliTuple):
+        return 'Array[String]'
+    else:
+        return 'A'
+
+
+def formulate_command(cmd: Command) -> str:
+    args = subprocess.list2cmdline(cmd.command)
+
+    for flag in cmd.flags:
+        args += ' \\\n\t'
+        args += '~{{"{} " + {}}}'.format(flag.longest_synonym.name, flag.name)
+
+    return args
 
 
 env = jinja2.Environment(
@@ -22,8 +39,8 @@ env = jinja2.Environment(
 
 def make_tasks(cmd: Command):
     template = env.get_template('wdl.jinja2')
-    print(template.render(
-        taskname=cmd.command.capitalize(),
-        inputs=cmd.flags,
-        command=cmd.command
-    ))
+    return template.render(
+        taskname=''.join([token.capitalize() for token in cmd.command]),
+        inputs=[(type_to_wdl(flag.longest_synonym.argtype.get_type()), flag.name) for flag in cmd.flags],
+        command=formulate_command(cmd)
+    )

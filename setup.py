@@ -11,6 +11,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
+            'declivity = declivity.cli:main'
         ]
     },
     extras_require={

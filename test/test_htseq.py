@@ -44,7 +44,7 @@ optional arguments:
   -f {sam,bam}, --format {sam,bam}
                         type of <alignment_file> data, either 'sam' or 'bam'
                         (default: sam)
-        """)))
+        """)))[0]
     assert len(flags) == 2
 
 

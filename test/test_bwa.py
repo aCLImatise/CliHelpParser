@@ -8,7 +8,7 @@ from textwrap import dedent
 def test_flag_arg(parser):
     result = parser.flag_with_arg.parseString("-A INT")[0]
     assert isinstance(result, FlagName)
-    assert result.argtype.args[0] == 'INT'
+    assert result.argtype.arg == 'INT'
     assert result.name == '-A'
 
 
@@ -17,8 +17,8 @@ def test_flag(parser):
         "-A INT        score for a sequence match, which scales options -TdBOELU unless overridden [1]"
     )[0]
     assert isinstance(result, Flag)
-    assert result.flags[0].name == '-A'
-    assert result.flags[0].argtype.args[0] == 'INT'
+    assert result.synonyms[0].name == '-A'
+    assert result.synonyms[0].argtype.arg == 'INT'
 
 
 def test_flag_b(parser):
@@ -106,8 +106,8 @@ def test_complex_optionals(parser):
     """)
     results = list(parser.flag.parseString(s))[0]
     assert isinstance(results, Flag)
-    assert isinstance(results.flags[0].argtype, OptionalFlagArg)
-    assert results.flags[0].argtype.args == ['FLOAT', 'FLOAT', 'INT', 'INT']
+    assert isinstance(results.synonyms[0].argtype, OptionalFlagArg)
+    assert results.synonyms[0].argtype.args == ['FLOAT', 'FLOAT', 'INT', 'INT']
 
 
 def test_bwa(parser):
