@@ -2,13 +2,19 @@ version 1.0
 
 task {{ taskname }} {
   input {
-    {% for input in inputs -%}
-    {{ input[0] }} {{ input[1] }}
-    {% endfor -%}
+      {% for flag in named -%}
+      {{ flag.args.get_type() | type_to_wdl }} {{ flag.longest_synonym | synonym_to_snake }}
+      {% endfor -%}
   }
 
   command {
     {{ command }}
+  }
+
+  parameter_meta {
+    {% for flag in named -%}
+        {{ flag.longest_synonym | synonym_to_snake }}: "{{ flag.description | sanitize_str }}"
+    {% endfor -%}
   }
 
   runtime {

@@ -1,5 +1,5 @@
 from declivity import parser
-from declivity.parser import Flag, FlagName, OptionalFlagArg
+from declivity.parser import Flag, _FlagSynonym, OptionalFlagArg
 from test.util import get_help, parser
 import pytest
 from textwrap import dedent
@@ -7,8 +7,8 @@ from textwrap import dedent
 
 def test_flag_arg(parser):
     result = parser.flag_with_arg.parseString("-A INT")[0]
-    assert isinstance(result, FlagName)
-    assert result.argtype.arg == 'INT'
+    assert isinstance(result, _FlagSynonym)
+    assert result.argtype.name == 'INT'
     assert result.name == '-A'
 
 
@@ -17,8 +17,8 @@ def test_flag(parser):
         "-A INT        score for a sequence match, which scales options -TdBOELU unless overridden [1]"
     )[0]
     assert isinstance(result, Flag)
-    assert result.synonyms[0].name == '-A'
-    assert result.synonyms[0].argtype.arg == 'INT'
+    assert result.synonyms[0] == '-A'
+    assert result.args.name == 'INT'
 
 
 def test_flag_b(parser):
@@ -106,8 +106,8 @@ def test_complex_optionals(parser):
     """)
     results = list(parser.flag.parseString(s))[0]
     assert isinstance(results, Flag)
-    assert isinstance(results.synonyms[0].argtype, OptionalFlagArg)
-    assert results.synonyms[0].argtype.args == ['FLOAT', 'FLOAT', 'INT', 'INT']
+    assert isinstance(results.args, OptionalFlagArg)
+    assert results.args.names == ['FLOAT', 'FLOAT', 'INT', 'INT']
 
 
 def test_bwa(parser):

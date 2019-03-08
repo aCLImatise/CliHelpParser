@@ -1,13 +1,8 @@
 from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, OneOrMore, originalTextFor, SkipTo, \
     tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas, Forward
-from dataclasses import dataclass
 import re
-import typing
-import abc
-import enum
-from declivity import types
 import spacy
-from spacy import displacy, tokens
+from declivity.model import Command, Flag, EmptyFlagArg, OptionalFlagArg, SimpleFlagArg, RepeatFlagArg, _FlagSynonym, ChoiceFlagArg
 
 nlp = spacy.load('en_core_web_sm')
 
@@ -22,169 +17,6 @@ def pick(*args):
     return action
 
 
-@dataclass
-class Command:
-    flags: typing.List['Flag']
-    command: typing.List[str]
-
-
-@dataclass
-class Flag:
-    synonyms: typing.List['FlagName']
-    description: str
-
-    @property
-    def args(self) -> 'FlagName':
-        return max(self.synonyms, key=lambda synonym: synonym.argtype.num_args)
-
-    @property
-    def longest_synonym(self) -> 'FlagName':
-        return max(self.synonyms, key=lambda synonym: len(synonym.name))
-
-    def shortest_synonym(self) -> 'FlagName':
-        return min(self.synonyms, key=lambda synonym: len(synonym.name))
-
-    def tokens_to_name(self, tokens: typing.List[tokens.Token]):
-        return re.sub('[^\w]', '', ''.join([tok.text.capitalize() for tok in tokens]))
-
-    @property
-    def name(self):
-        """
-        A short name for this flag
-        """
-        no_brackets = re.sub('[[({].+[\])}]', '', self.description)
-        words = nlp(no_brackets)
-        # for chunk in words.noun_chunks:
-        #     if chunk.root.dep_ == 'ROOT':
-        #         return chunk.text
-        root = None
-
-        # Find the actual root
-        for word in words:
-            if (word.dep_ == 'ROOT' or word.dep == 'nsubj') and word.pos_ == 'NOUN':
-                root = word
-
-        # If that isn't there, get the first noun
-        if root is None:
-            for word in words:
-                if word.pos_ == 'NOUN':
-                    root = word
-
-        # If that isn't there, get the first word
-        if root is None:
-            return self.tokens_to_name(words)
-
-        subtree = list(root.subtree)
-        if len(subtree) < 4:
-            # If the whole subtree is a reasonable length, use that
-            return self.tokens_to_name(subtree)
-        else:
-            good_children = [tok for tok in subtree if tok.dep_ != 'prep']
-            if len(good_children) >= 1:
-                subtree = sorted([root, good_children[0]], key=lambda tok: tok.i)
-                # Otherwise, just add the first child token
-                return self.tokens_to_name(subtree)
-            else:
-                return self.tokens_to_name([root])
-
-
-@dataclass
-class FlagName:
-    name: str
-    argtype: 'FlagArg'
-
-
-@dataclass
-class FlagArg(abc.ABC):
-    int_re = re.compile('int(eger)?', flags=re.IGNORECASE)
-    str_re = re.compile('str(ing)?', flags=re.IGNORECASE)
-    float_re = re.compile('float|decimal', flags=re.IGNORECASE)
-    bool_re = re.compile('bool(ean)?', flags=re.IGNORECASE)
-    file_re = re.compile('file', flags=re.IGNORECASE)
-
-    @classmethod
-    def infer_type(cls, string) -> types.CliType:
-        if cls.bool_re.match(string):
-            return types.CliBoolean()
-        elif cls.float_re.match(string):
-            return types.CliFloat()
-        elif cls.int_re.match(string):
-            return types.CliInteger()
-        elif cls.file_re.match(string):
-            return types.CliFile()
-        elif cls.str_re.match(string):
-            return types.CliString()
-        else:
-            return types.CliString()
-
-    @abc.abstractmethod
-    def get_type(self) -> types.CliType:
-        pass
-
-    @abc.abstractmethod
-    def num_args(self) -> int:
-        pass
-
-
-@dataclass
-class EmptyFlagArg(FlagArg):
-
-    def num_args(self) -> int:
-        return 0
-
-    def get_type(self):
-        return types.CliBoolean
-
-
-@dataclass
-class OptionalFlagArg(FlagArg):
-    """
-    When the flag has multiple arguments, some of which are optional, e.g.
-    -I FLOAT[,FLOAT[,INT[,INT]]]
-    """
-
-    def num_args(self) -> int:
-        return len(self.args)
-
-    args: list
-
-    def get_type(self):
-        return types.CliTuple([self.infer_type(arg) for arg in self.args])
-
-
-@dataclass
-class SimpleFlagArg(FlagArg):
-    def num_args(self) -> int:
-        return 1
-
-    def get_type(self):
-        return self.infer_type(self.arg)
-
-    arg: str
-
-
-@dataclass
-class RepeatFlagArg(FlagArg):
-    def num_args(self) -> int:
-        return 1
-
-    def get_type(self):
-        t = self.infer_type(self.arg)
-        return typing.List[t]
-
-    arg: str
-
-
-@dataclass
-class ChoiceFlagArg(FlagArg):
-    def get_type(self):
-        return enum.Enum(value=','.join(self.choices), names=self.choices)
-
-    def num_args(self) -> int:
-        return 1
-
-    choices: typing.List[str]
-
 
 class CliParser:
     def parse_command(self, cmd, name):
@@ -192,7 +24,8 @@ class CliParser:
         flags = [flag[0] for flags in flag_block for flag in flags]
         return Command(
             command=name,
-            flags=flags
+            positional=[],
+            named=flags
         )
 
     def __init__(self):
@@ -217,13 +50,13 @@ class CliParser:
 
         def visit_optional_args(s, lok, toks):
             if len(toks) == 1:
-                return OptionalFlagArg(args=[toks[0]])
+                return OptionalFlagArg(names=[toks[0]])
             else:
                 other = toks[3]
                 if isinstance(other, str):
-                    return OptionalFlagArg(args=[toks[0], other])
+                    return OptionalFlagArg(names=[toks[0], other])
                 elif isinstance(other, OptionalFlagArg):
-                    return OptionalFlagArg(args=[toks[0]] + other.args)
+                    return OptionalFlagArg(names=[toks[0]] + other.names)
 
         self.optional_args = Forward()
         self.optional_args <<= (
@@ -239,8 +72,10 @@ class CliParser:
 
         self.list_type_arg = (
                 self.arg
+                + Literal(' ')
                 + Literal('[')
                 + matchPreviousLiteral(self.arg)
+                + Optional(Literal(' '))
                 + Literal('...')
                 + Literal(']')
         ).setParseAction(lambda s, loc, toks: RepeatFlagArg(toks[0]))
@@ -250,19 +85,19 @@ class CliParser:
             opener='{',
             closer='}',
             content=delimitedList(self.cli_id, delim=',')
-        ).setParseAction(lambda s, loc, toks: ChoiceFlagArg(toks[0]))
+        ).setParseAction(lambda s, loc, toks: ChoiceFlagArg(list(toks[0])))
         """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
         self.arg_expression = (
                 self.flag_arg_sep.suppress() + (
                 self.list_type_arg ^ self.choice_type_arg ^ self.optional_args ^ self.simple_arg)
-        ).setParseAction(
+        ).leaveWhitespace().setParseAction(
             lambda s, loc, toks: toks[0])
         """An argument with separator, e.g. `=FILE`"""
 
         self.flag_with_arg = (self.any_flag + Optional(self.arg_expression)).setParseAction(
             lambda s, loc, toks: (
-                FlagName(name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
+                _FlagSynonym(name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
             )
         )
         """e.g. `--max-count=NUM`"""
@@ -301,10 +136,7 @@ class CliParser:
         ).setParseAction(
             lambda s, loc, toks:
             (
-                Flag(
-                    synonyms=toks[0:-1],
-                    description=toks[-1]
-                )
+                Flag.from_synonyms(synonyms=toks[0:-1], description=toks[-1])
             )
         )
 

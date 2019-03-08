@@ -4,7 +4,7 @@ Uses htseq-count, which is used as an example of a Python argparse CLI
 from test.util import get_help, parser
 from textwrap import dedent
 import pytest
-from declivity.parser import RepeatFlagArg
+from declivity.parser import RepeatFlagArg, EmptyFlagArg
 
 
 def test_short(parser):
@@ -52,7 +52,7 @@ def test_repeat_type(parser):
     flag = parser.flag_synonyms.parseString("--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]")[0]
     assert flag.name == '--additional-attr'
     assert isinstance(flag.argtype, RepeatFlagArg)
-    assert flag.argtype.arg == 'ADDITIONAL_ATTR'
+    assert flag.argtype.name == 'ADDITIONAL_ATTR'
 
 
 def test_full_flags(parser):
@@ -118,6 +118,13 @@ def test_choice(parser):
     flag = parser.flag_with_arg.parseString('--format {sam,bam}')[0]
     assert flag.name == '--format'
     assert list(flag.argtype.choices) == ['sam', 'bam']
+
+
+def test_noarg(parser):
+    flag = parser.flag.parseString('-q, --quiet           suppress progress report')[0]
+    assert flag.longest_synonym== '--quiet'
+    assert len(flag.synonyms) == 2
+    assert isinstance(flag.args, EmptyFlagArg)
 
 
 def test_full(parser):

@@ -1,10 +1,16 @@
 from dataclasses import dataclass
 import typing
+from enum import Enum
 
 
 @dataclass
 class CliType:
     pass
+
+
+@dataclass
+class CliEnum(CliType):
+    enum: Enum
 
 
 @dataclass
