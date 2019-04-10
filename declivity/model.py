@@ -1,44 +1,168 @@
+"""
+Contains the CLI data model
+"""
 import typing
 import abc
 import enum
 from declivity import cli_types
 from dataclasses import dataclass
 import re
-import math
+import spacy
+from spacy import tokens
+from abc import abstractmethod
 
-"""
-Contains the CLI data model
-"""
+try:
+    nlp = spacy.load('en')
+except IOError:
+    nlp = None
+
+
+@dataclass
+class CliArgument:
+    """
+    A generic parent class for both named and positional CLI arguments
+    """
+    description: str
+
+    @staticmethod
+    def tokens_to_name(tokens: typing.List[tokens.Token]):
+        return re.sub('[^\w]', '', ''.join([tok.text.capitalize() for tok in tokens]))
+
+    @abstractmethod
+    def full_name(self) -> str:
+        pass
+
+    def name_to_words(self) -> typing.Iterable[str]:
+        """
+        Splits this argument's name into multiple words
+        """
+        return re.split('[-_]', self.full_name().lstrip('-'))
+
+    def name_to_camel(self) -> str:
+        """
+        Gets a representation of this argument in CamelCase
+        """
+        words = self.name_to_words()
+        return ''.join([segment.capitalize() for segment in words])
+
+    def name_to_snake(self) -> str:
+        """
+        Gets a representation of this argument in snake case
+        """
+        words = self.name_to_words()
+        return '_'.join([segment for segment in words])
+
+    def generate_name(self) -> str:
+        """
+        Generate a 1-3 word variable name for this flag, by parsing the description
+        """
+        if nlp is None:
+            raise Exception("Spacy model doesn't exist! Install it with `python -m spacy download en`")
+
+        no_brackets = re.sub('[\[({].+[\])}]', '', self.description)
+        words = nlp(no_brackets)
+        # for chunk in words.noun_chunks:
+        #     if chunk.root.dep_ == 'ROOT':
+        #         return chunk.text
+        root = None
+
+        # Find the actual root
+        for word in words:
+            if (word.dep_ == 'ROOT' or word.dep == 'nsubj') and word.pos_ == 'NOUN':
+                root = word
+
+        # If that isn't there, get the first noun
+        if root is None:
+            for word in words:
+                if word.pos_ == 'NOUN':
+                    root = word
+
+        # If that isn't there, get the first word
+        if root is None:
+            return self.tokens_to_name(words)
+
+        subtree = list(root.subtree)
+        if len(subtree) < 4:
+            # If the whole subtree is a reasonable length, use that
+            return self.tokens_to_name(subtree)
+        else:
+            good_children = [tok for tok in subtree if tok.dep_ != 'prep']
+            if len(good_children) >= 1:
+                subtree = sorted([root, good_children[0]], key=lambda tok: tok.i)
+                # Otherwise, just add the first child token
+                return self.tokens_to_name(subtree)
+            else:
+                return self.tokens_to_name([root])
 
 
 @dataclass
 class Command:
-    def __init__(self, command: typing.List[str], positional: typing.List['Flag'], named: typing.List['Flag']):
+    """
+    Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
+    """
+
+    def __init__(self, command: typing.List[str], positional: typing.List['Positional'], named: typing.List['Flag'], **kwargs):
+        super(**kwargs)
+
         self.command = command
         self.named = []
 
         # Put the help and usage flag into separate variables
         for flag in named:
-            if flag.longest_synonym == '--help' or flag.longest_synonym == '-help':
+            if '--help' in flag.synonyms or '-help' in flag.synonyms or '-h' in flag.synonyms:
                 self.help_flag = flag
-            elif flag.longest_synonym == '--usage':
+            elif '--usage' in flag.synonyms:
                 self.usage_flag = flag
+            elif '--version' in flag.synonyms or '-v' in flag.synonyms:
+                self.version_flag = flag
             else:
                 self.named.append(flag)
         self.positional = positional
 
-    positional: typing.List['Flag']
+    positional: typing.List['Positional']
     help_flag: 'Flag'
     usage_flag: 'Flag'
+    version_flag: 'Flag'
     named: typing.List['Flag']
     command: typing.List[str]
 
 
+
 @dataclass
-class Flag:
+class Positional(CliArgument):
     """
-    Represents one single optional flag, with all synonyms for it, and all arguments
+    A positional command-line argument. This probably means that it is required, and has no arguments like flags do
     """
+
+    def full_name(self) -> str:
+        """
+        Getting the full name for a positional argument is easy - it's just the parameter name
+        """
+        return self.name
+
+    position: int
+    name: str
+    description: str
+
+    def get_type(self) -> cli_types.CliType:
+        """
+        Return a type object indicating the type of data this argument holds. e.g. If it's an array type this will be a CliList.
+        """
+        return infer_type(self.description)
+
+
+@dataclass
+class Flag(CliArgument):
+    """
+    Represents one single optional flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
+    """
+
+    def full_name(self) -> str:
+        """
+        Getting the full name for a named flag is slightly harder, we need to find the longest synonym
+        """
+        return self.longest_synonym
+
     synonyms: typing.List[str]
     description: str
     args: 'FlagArg'
@@ -46,7 +170,7 @@ class Flag:
     @staticmethod
     def from_synonyms(synonyms: typing.Iterable['_FlagSynonym'], description: str):
         """
-        Creates a useable Flag object by combining the synonyms provided
+        Creates a usable Flag object by combining the synonyms provided
         """
         synonym_str = []
         args = None
@@ -64,71 +188,19 @@ class Flag:
             description=description
         )
 
-    @staticmethod
-    def synonym_to_words(synonym: str) -> typing.Iterable[str]:
-        return re.split('[-_]', synonym.lstrip('-'))
-
-    @staticmethod
-    def synonym_to_camel(synonym: str) -> str:
-        words = Flag.synonym_to_words(synonym)
-        return ''.join([segment.capitalize() for segment in words])
-
-    @staticmethod
-    def synonym_to_snake(synonym: str) -> str:
-        words = Flag.synonym_to_words(synonym)
-        return '_'.join([segment for segment in words])
-
     @property
     def longest_synonym(self) -> str:
+        """
+        Returns the longest synonym this flag has. e.g. for `-h, --help`, it will return `--help`
+        """
         return max(self.synonyms, key=lambda synonym: len(synonym))
 
     @property
     def shortest_synonym(self) -> str:
+        """
+        Returns the shortest synonym this flag has. e.g. for `-h, --help`, it will return `-h`
+        """
         return min(self.synonyms, key=lambda synonym: len(synonym))
-
-    # @staticmethod
-    # def tokens_to_name(tokens: typing.List[tokens.Token]):
-    #     return re.sub('[^\w]', '', ''.join([tok.text.capitalize() for tok in tokens]))
-
-    # @property
-    # def name(self):
-    #     """
-    #     A short name for this flag
-    #     """
-    #     no_brackets = re.sub('[[({].+[\])}]', '', self.description)
-    #     words = nlp(no_brackets)
-    #     # for chunk in words.noun_chunks:
-    #     #     if chunk.root.dep_ == 'ROOT':
-    #     #         return chunk.text
-    #     root = None
-    #
-    #     # Find the actual root
-    #     for word in words:
-    #         if (word.dep_ == 'ROOT' or word.dep == 'nsubj') and word.pos_ == 'NOUN':
-    #             root = word
-    #
-    #     # If that isn't there, get the first noun
-    #     if root is None:
-    #         for word in words:
-    #             if word.pos_ == 'NOUN':
-    #                 root = word
-    #
-    #     # If that isn't there, get the first word
-    #     if root is None:
-    #         return self.tokens_to_name(words)
-    #
-    #     subtree = list(root.subtree)
-    #     if len(subtree) < 4:
-    #         # If the whole subtree is a reasonable length, use that
-    #         return self.tokens_to_name(subtree)
-    #     else:
-    #         good_children = [tok for tok in subtree if tok.dep_ != 'prep']
-    #         if len(good_children) >= 1:
-    #             subtree = sorted([root, good_children[0]], key=lambda tok: tok.i)
-    #             # Otherwise, just add the first child token
-    #             return self.tokens_to_name(subtree)
-    #         else:
-    #             return self.tokens_to_name([root])
 
 
 @dataclass
@@ -144,36 +216,38 @@ class _FlagSynonym:
         return ''.join([segment.capitalize() for segment in re.split('[-_]', self.name.lstrip('-'))])
 
 
+int_re = re.compile('(int(eger)?)|size|length|max|min', flags=re.IGNORECASE)
+str_re = re.compile('str(ing)?', flags=re.IGNORECASE)
+float_re = re.compile('float|decimal', flags=re.IGNORECASE)
+bool_re = re.compile('bool(ean)?', flags=re.IGNORECASE)
+file_re = re.compile('file', flags=re.IGNORECASE)
+
+
+def infer_type(string) -> cli_types.CliType:
+    """
+    Reads a string (argument description etc) to find hints about what type this argument might be. This is
+    generally called by the get_type() methods
+    """
+    if bool_re.match(string):
+        return cli_types.CliBoolean()
+    elif float_re.match(string):
+        return cli_types.CliFloat()
+    elif int_re.match(string):
+        return cli_types.CliInteger()
+    elif file_re.match(string):
+        return cli_types.CliFile()
+    elif str_re.match(string):
+        return cli_types.CliString()
+    else:
+        return cli_types.CliString()
+
+
 @dataclass
 class FlagArg(abc.ABC):
     """
     The data model for the argument or arguments for a flag, for example a flag might have no arguments, it might have
     one argument, it might accept one option from a list of options, or it might accept an arbitrary number of inputs
     """
-    int_re = re.compile('(int(eger)?)|size|length|max|min', flags=re.IGNORECASE)
-    str_re = re.compile('str(ing)?', flags=re.IGNORECASE)
-    float_re = re.compile('float|decimal', flags=re.IGNORECASE)
-    bool_re = re.compile('bool(ean)?', flags=re.IGNORECASE)
-    file_re = re.compile('file', flags=re.IGNORECASE)
-
-    @classmethod
-    def infer_type(cls, string) -> cli_types.CliType:
-        """
-        Reads a string (argument description etc) to find hints about what type this argument might be. This is
-        generally called by the get_type() methods
-        """
-        if cls.bool_re.match(string):
-            return cli_types.CliBoolean()
-        elif cls.float_re.match(string):
-            return cli_types.CliFloat()
-        elif cls.int_re.match(string):
-            return cli_types.CliInteger()
-        elif cls.file_re.match(string):
-            return cli_types.CliFile()
-        elif cls.str_re.match(string):
-            return cli_types.CliString()
-        else:
-            return cli_types.CliString()
 
     @abc.abstractmethod
     def get_type(self) -> cli_types.CliType:
@@ -216,7 +290,7 @@ class OptionalFlagArg(FlagArg):
         return len(self.names)
 
     def get_type(self):
-        return cli_types.CliTuple([self.infer_type(arg) for arg in self.names])
+        return cli_types.CliTuple([infer_type(arg) for arg in self.names])
 
 
 @dataclass
@@ -230,7 +304,7 @@ class SimpleFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        return self.infer_type(self.name)
+        return infer_type(self.name)
 
 
 @dataclass
@@ -244,12 +318,15 @@ class RepeatFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        t = self.infer_type(self.name)
+        t = infer_type(self.name)
         return cli_types.CliList(t)
 
 
 @dataclass
 class ChoiceFlagArg(FlagArg):
+    """
+    When a flag accepts one option from a list of options, e.g. `-s {yes,no,reverse}`
+    """
     choices: typing.List[str]
 
     def get_type(self):
@@ -258,4 +335,3 @@ class ChoiceFlagArg(FlagArg):
 
     def num_args(self) -> int:
         return 1
-

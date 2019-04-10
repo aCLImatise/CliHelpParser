@@ -4,18 +4,26 @@ Uses htseq-count, which is used as an example of a Python argparse CLI
 from test.util import get_help, parser
 from textwrap import dedent
 import pytest
-from declivity.parser import RepeatFlagArg, EmptyFlagArg
+from declivity.parser import RepeatFlagArg, EmptyFlagArg, _FlagSynonym
 
 
 def test_short(parser):
-    flag = parser.short_flag.parseString(dedent(
+    flag = parser.flag_with_arg.parseString(dedent(
         """
         -i IDATTR
         """
-    ))
+    ))[0]
+    assert isinstance(flag, _FlagSynonym)
 
+def test_long_short_synonyms(parser):
+    flag = parser.flag_synonyms.parseString(dedent(
+        """
+        -i IDATTR, --idattr IDATTR
+        """
+    ))[0]
+    print(flag)
 
-def test_long_short(parser):
+def test_long_short_desc(parser):
     flag = parser.flag.parseString(dedent(
         """
         -i IDATTR, --idattr IDATTR
@@ -130,5 +138,10 @@ def test_noarg(parser):
 def test_full(parser):
     # Parse help
     help_text = get_help(['htseq-count', '--help'])
-    for flags, b, c in parser.flags.scanString(help_text):
-        assert len(flags) == 15
+    flag_sections = parser.flags.searchString(help_text)
+    # There is one section for positional arguments and one for named arguments
+    assert len(flag_sections) == 2
+    # There are two positional arguments
+    assert len(flag_sections[0]) == 2
+    # There are 15 flags
+    assert len(flag_sections[1]) == 15

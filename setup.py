@@ -7,7 +7,7 @@ setup(
     version='0.0.1',
     install_requires=[
         'pyparsing',
-        'jinja2'
+        'jinja2',
     ],
     entry_points={
         'console_scripts': [

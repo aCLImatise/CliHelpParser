@@ -1,7 +1,5 @@
-from declivity import parser
 from declivity.parser import Flag, _FlagSynonym, OptionalFlagArg
 from test.util import get_help, parser
-import pytest
 from textwrap import dedent
 
 
@@ -56,7 +54,7 @@ def test_bwa_segmented_options(parser):
 
 
 def test_bwa_help_part(parser):
-    results = list(parser.flag_section.scanString("""
+    results = list(parser.flags.scanString("""
 Algorithm options:
 
        -t INT        number of threads [1]
