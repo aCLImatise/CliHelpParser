@@ -1,12 +1,9 @@
 from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, OneOrMore, originalTextFor, SkipTo, \
     tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas, Forward, LineStart
 import re
-import spacy
 from declivity.model import Command, Flag, EmptyFlagArg, OptionalFlagArg, SimpleFlagArg, RepeatFlagArg, _FlagSynonym, \
     ChoiceFlagArg, Positional
 import itertools
-
-nlp = spacy.load('en_core_web_sm')
 
 
 def pick(*args):
