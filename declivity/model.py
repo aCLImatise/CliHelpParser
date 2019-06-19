@@ -32,6 +32,13 @@ class CliArgument:
     def full_name(self) -> str:
         pass
 
+    @abstractmethod
+    def get_type(self) -> cli_types.CliType:
+        """
+        Return a type object indicating the type of data this argument holds. e.g. If it's an array type this will be a CliList.
+        """
+        pass
+
     def name_to_words(self) -> typing.Iterable[str]:
         """
         Splits this argument's name into multiple words
@@ -101,7 +108,8 @@ class Command:
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
     """
 
-    def __init__(self, command: typing.List[str], positional: typing.List['Positional'], named: typing.List['Flag'], **kwargs):
+    def __init__(self, command: typing.List[str], positional: typing.List['Positional'], named: typing.List['Flag'],
+                 **kwargs):
         super(**kwargs)
 
         self.command = command
@@ -127,7 +135,6 @@ class Command:
     command: typing.List[str]
 
 
-
 @dataclass
 class Positional(CliArgument):
     """
@@ -145,10 +152,17 @@ class Positional(CliArgument):
     description: str
 
     def get_type(self) -> cli_types.CliType:
-        """
-        Return a type object indicating the type of data this argument holds. e.g. If it's an array type this will be a CliList.
-        """
-        return infer_type(self.description)
+        # Try the the flag name, then the description in that order
+
+        name_type = infer_type(self.name)
+        if name_type is not None:
+            return name_type
+
+        flag_type = infer_type(self.full_name())
+        if flag_type is not None:
+            return flag_type
+
+        return cli_types.CliString()
 
 
 @dataclass
@@ -156,16 +170,31 @@ class Flag(CliArgument):
     """
     Represents one single optional flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
     """
+    synonyms: typing.List[str]
+    description: str
+    args: 'FlagArg'
+
+    def get_type(self) -> cli_types.CliType:
+        # Try the argument name, then the flag name, then the description in that order
+        arg_type = self.args.get_type()
+        if arg_type is not None:
+            return arg_type
+
+        flag_type = infer_type(self.full_name())
+        if flag_type is not None:
+            return flag_type
+
+        description_type = infer_type(self.description)
+        if description_type is not None:
+            return description_type
+
+        return cli_types.CliString()
 
     def full_name(self) -> str:
         """
         Getting the full name for a named flag is slightly harder, we need to find the longest synonym
         """
         return self.longest_synonym
-
-    synonyms: typing.List[str]
-    description: str
-    args: 'FlagArg'
 
     @staticmethod
     def from_synonyms(synonyms: typing.Iterable['_FlagSynonym'], description: str):
@@ -220,10 +249,11 @@ int_re = re.compile('(int(eger)?)|size|length|max|min', flags=re.IGNORECASE)
 str_re = re.compile('str(ing)?', flags=re.IGNORECASE)
 float_re = re.compile('float|decimal', flags=re.IGNORECASE)
 bool_re = re.compile('bool(ean)?', flags=re.IGNORECASE)
-file_re = re.compile('file', flags=re.IGNORECASE)
+file_re = re.compile('file|path', flags=re.IGNORECASE)
+dir_re = re.compile('folder|directory', flags=re.IGNORECASE)
 
 
-def infer_type(string) -> cli_types.CliType:
+def infer_type(string) -> typing.Optional[cli_types.CliType]:
     """
     Reads a string (argument description etc) to find hints about what type this argument might be. This is
     generally called by the get_type() methods
@@ -236,10 +266,12 @@ def infer_type(string) -> cli_types.CliType:
         return cli_types.CliInteger()
     elif file_re.match(string):
         return cli_types.CliFile()
+    elif dir_re.match(string):
+        return cli_types.CliDir()
     elif str_re.match(string):
         return cli_types.CliString()
     else:
-        return cli_types.CliString()
+        return None
 
 
 @dataclass

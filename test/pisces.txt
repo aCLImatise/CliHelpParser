@@ -1,0 +1,198 @@
+---------------------------------------------------------------------------
+Pisces                                          Copyright (c) Illumina 2018
+https://github.com/Illumina/Pisces                                5.2.9.122
+---------------------------------------------------------------------------
+
+USAGE: dotnet Pisces.dll -bam <bam path> -g <genome path>
+Pisces: variant caller
+
+REQUIRED:
+  -g, --genomepaths, --genomefolders <FOLDERS>
+                             FOLDERS Genome folder(s).  Single value, or 
+                               comma delimited list corresponding to -bamFiles. 
+                                Must be single value if -bamFolder is specifie-
+                               d.  No default value.
+  -b, --bam, --bampaths <PATHS>
+                             PATHS BAM filepath(s).  Single value or comma 
+                               delimited list of multiple file paths. If a 
+                               single value, it can be a full BAM path or a 
+                               directory containing BAM files. No default value.
+
+
+COMMON:
+  -i, --intervalpaths <PATHS>
+                             PATHS IntervalPath(s), single value or comma 
+                               delimited list corresponding to BAMPath(s). At 
+                               most one value should be provided if BAM folder 
+                               is specified
+      --forcedalleles <PATHS>
+                             PATHS vcf path(s) for alleles that are forced to 
+                               report
+      --callmnvs <BOOL>      BOOL Call MNVs (a.k.a. phased SNPs) 'true' or 
+                               'false'
+      --maxmnvlength <FOLDER>
+                             FOLDER Max length phased SNPs that can be called
+      --maxgapbetweenmnv, --maxrefgapinmnv <INT>
+                             INT Max allowed gap between phased SNPs that can 
+                               be called
+      --outputsbfiles <BOOL> BOOL Output strand bias files, 'true' or 'false'
+      --threadbychr <BOOL>   BOOL Thread by chr. More memory intensive.  This 
+                               will temporarily create output per chr.
+      --collapse <BOOL>      BOOL Whether or not to collapse variants 
+                               together, 'true' or 'false'. default, True
+      --collapsefreqthreshold <FLOAT>
+                             FLOAT When collapsing, minimum frequency 
+                               required for target variants. Default 0
+      --collapsefreqratiothreshold <FLOAT>
+                             FLOAT When collapsing, minimum ratio required of 
+                               target variant frequency to collapsible variant 
+                               frequency. Default '0.5f'
+      --priorspath <FOLDER>  FOLDER PriorsPath for vcf file containing known 
+                               variants, used with -collapse to preferentially 
+                               reconcile variants
+      --trimmnvpriors <BOOL> BOOL Whether or not to trim preceeding base from 
+                               MNVs in priors file.  Note: COSMIC convention is 
+                               to include preceeding base for MNV.  Default is 
+                               false.
+      --coveragemethod <STRING>
+                             STRING'approximate' or 'exact'. Exact is more 
+                               precise but requires more memory (minimum 8 GB). 
+                                Default approximate
+      --baselogname <STRING> STRING 
+  -d, --debug <BOOL>         BOOL
+      --usestitchedxd <BOOL> BOOL Set to true to make use of the consensus 
+                               read-direction information (the XD tag) from 
+                               stitched reads. This is on by default when using 
+                               Stitcher output bam, but must be deliberately 
+                               set for Gemini output.
+      --trackedanchorsize <FLOAT>
+                             FLOAT Maximum size of anchor to granularly trac-
+                               k, when collecting reference coverage at 
+                               insertion sites. If zero, all coverage counts 
+                               equally. Higher values will yield more precise 
+                               spanning coverage results but require more 
+                               memory and compromise speed. Default '5'
+      --insidesubprocess <BOOL>
+                             BOOL When threading by chr, this setting flags 
+                               an internal process. Default false
+      --multiprocess <BOOL>  BOOL When threading by chr, launch separate 
+                               processes to parallelize. Default true
+      --chrfilter <STRING>   STRING Chromosome to process. If provided, other 
+                               chromosomes are filtered out of output.  No 
+                               default value.
+  -o, --outfolder <FOLDER>   FOLDER Output folder.  No default value.
+  -t, --maxthreads, --maxnumthreads <INT>
+                             INT Maximum number of threads. Default 20
+      --help, -h             displays the help menu
+      --version, -v          displays the version
+
+
+BAM_Filtering:
+      --minbq, --minbasecallquality <INT>
+                             INT MinimumBaseCallQuality to use a base of the 
+                               read
+      --minmq, --minmapquality <INT>
+                             INT MinimumMapQuality required to use a read
+      --filterduplicates, --duplicatereadfilter <BOOL>
+                             BOOL To filter reads marked as duplicates
+      --pp, --onlyuseproperpairs <BOOL>
+                             BOOL Only use proper pairs, 'true' or 'false
+
+
+VARIANT_CALLING:
+      --minvq, --minvariantqscore <INT>
+                             INT MinimumVariantQScore to report variant
+  -c, --mindp, --mindepth, --mincoverage <INT>
+                             INT Minimum depth to call a variant
+      --minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>
+                             FLOAT MinimumFrequency to call a variant
+      --targetlodfrequency, --targetvf <FLOAT>
+                             FLOAT Target Frequency to call a variant. Ie, to 
+                               target a 5% allele frequency, we must call down 
+                               to 2.6%, to capture that 5% allele 95% of the 
+                               time. This parameter is used by the Somatic 
+                               Genotyping Model
+      --vqfilter, --variantqualityfilter <INT>
+                             INT FilteredVariantQScore to report variant as 
+                               filtered
+      --vffilter, --minvariantfrequencyfilter <FLOAT>
+                             FLOAT FilteredVariantFrequency to report variant 
+                               as filtered
+      --gqfilter, --genotypequalityfilter <INT>
+                             INT Filtered Genotype quality to report variant 
+                               as filtered
+      --repeatfilter_toberetired <INT>
+                             INT FilteredIndelRepeats to report variant as 
+                               filtered. To be retired. Please transition to 
+                               RMxN.
+      --mindpfilter, --mindepthfilter <INT>
+                             INT FilteredLowDepth to report variant as 
+                               filtered
+      --ssfilter, --enablesinglestrandfilter <BOOL>
+                             BOOL Flag variants as filtered if coverage 
+                               limited to one strand
+      --nl, --noiselevelforqmodel <INT>
+                             INT Overrides the noise level to used by the 
+                               quality model with this value. By default, this 
+                               is driven by the basecall filter.
+      --ploidy <STRING>      STRING 'somatic' or 'diploid'. default, Somatic.
+      --diploidsnvgenotypeparameters <STRING>
+                             STRING A,B,C. default 0.20,0.70,0.80
+      --diploidindelgenotypeparameters <STRING>
+                             STRING A,B,C. default 0.20,0.70,0.80
+      --sbmodel <STRING>     STRING 
+      --maxvq, --maxvariantqscore <INT>
+                             INT MaximumVariantQScore to cap output variant 
+                               Qscores
+      --maxgq, --maxgenotypeqscore <INT>
+                             INT Maximum genotype QScore to cap output 
+                               variant Qscores 
+      --mingq, --mingenotypeqscore <INT>
+                             INT Minimum genotype QScore to cap output 
+                               variant Qscores 
+      --sbfilter, --maxacceptablestrandbiasfilter <FLOAT>
+                             FLOAT Strand bias cutoff
+      --noisemodel <STRING>  STRING Window/Flat. Default Flat
+      --gender <BOOL>        BOOL Gender of the sample, if known. Male=TRUE, 
+                               Female=FALSE . Default, unset.
+      --rmxnfilter <STRING>  STRING M,N,F. Comma-separated list of integers 
+                               indicating max length of the repeat section (M), 
+                               the minimum number of repetitions of that repeat 
+                               (N), to be applied if the variant frequency is 
+                               less than (F). Default is R5x9,F=20.
+      --ncfilter <FLOAT>     FLOAT No-call rate filter
+
+
+VCF_WRITER:
+      --gvcf <BOOL>          BOOL Output gVCF files, 'true' or 'false'
+      --crushvcf <BOOL>      BOOL To crush vcf output to one line per loci
+      --reportnocalls <BOOL> BOOL 'true' or 'false'. default, false
+      --reportrccounts <BOOL>
+                             BOOL Report collapsed read count, When BAM files 
+                               contain X1 and X2 tags, output read counts for 
+                               duplex-stitched, duplex-nonstitched, simplex-
+                               stitched, and simplex-nonstitched.  'true' or 
+                               'false'. default, false
+      --reporttscounts <BOOL>
+                             BOOL Report collapsed read count by different 
+                               template strands, Conditional on ReportRcCounts, 
+                               output read counts for duplex-stitched, duplex-
+                               nonstitched, simplex-forward-stitched, simplex-
+                               forward-nonstitched, simplex-reverse-stitched, 
+                               simplex-reverse-nonstitched.  'true' or 'false'. 
+                               default, false
+      --reportsuspiciouscoveragefraction <BOOL>
+                             BOOL Report fraction of total coverage (for 
+                               spanning variants, this is start + end coverage, 
+                               so up to double the reported coverage) that is 
+                               'suspicious' i.e. unanchored and bearing some 
+                               resemblance to an insertion at that site.  
+                               'true' or 'false'. default, false
+
+
+
+5.2.9.122
+
+Some problems were encountered when parsing the command line options:
+
+For a complete list of command line options, type "dotnet Pisces.dll -h"

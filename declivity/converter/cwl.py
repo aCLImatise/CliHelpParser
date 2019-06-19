@@ -2,7 +2,6 @@ from declivity.parser import Command
 from declivity import cli_types
 from declivity.converter import WrapperGenerator
 import cwlgen
-from io import StringIO
 import tempfile
 
 

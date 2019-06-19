@@ -6,7 +6,7 @@ task {{ taskname }} {
         {{ flag.get_type() | type_to_wdl(false) }} {{ flag | choose_variable_name('snake')}}
     {% endfor -%}
     {% for flag in named -%}
-      {{ flag.args.get_type() | type_to_wdl(true) }} {{ flag | choose_variable_name('snake')}}
+      {{ flag.get_type() | type_to_wdl(true) }} {{ flag | choose_variable_name('snake')}}
     {% endfor -%}
   }
 

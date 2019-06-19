@@ -29,6 +29,8 @@ class WdlGenerator(WrapperGenerator):
         elif isinstance(typ, cli_types.CliList):
             inner_type = cls.type_to_wdl(typ.value)
             wdl_type = f'Array[{inner_type}]'
+        elif isinstance(typ, cli_types.CliDir):
+            wdl_type = 'File'
         else:
             raise Exception('Unknown CliType')
 
