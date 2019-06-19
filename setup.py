@@ -9,7 +9,8 @@ setup(
         'pyparsing',
         'jinja2',
         'spacy',
-        'illusional.cwlgen'
+        'illusional.cwlgen',
+        'wordsegment'
     ],
     entry_points={
         'console_scripts': [

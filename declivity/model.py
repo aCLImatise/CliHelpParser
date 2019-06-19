@@ -1,6 +1,7 @@
 """
 Contains the CLI data model
 """
+import itertools
 import typing
 import abc
 import enum
@@ -10,11 +11,14 @@ import re
 import spacy
 from spacy import tokens
 from abc import abstractmethod
+import wordsegment
 
 try:
     nlp = spacy.load('en')
 except IOError:
     nlp = None
+
+wordsegment.load()
 
 
 @dataclass
@@ -43,7 +47,9 @@ class CliArgument:
         """
         Splits this argument's name into multiple words
         """
-        return re.split('[-_]', self.full_name().lstrip('-'))
+        dash_tokens = re.split('[-_]', self.full_name().lstrip('-'))
+        segment_tokens = itertools.chain.from_iterable([wordsegment.segment(w) for w in dash_tokens])
+        return segment_tokens
 
     def name_to_camel(self) -> str:
         """
