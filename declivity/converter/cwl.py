@@ -29,7 +29,7 @@ class CwlGenerator(WrapperGenerator):
         elif isinstance(typ, cli_types.CliList):
             return CwlGenerator.to_cwl_type(typ.value) + '[]'
         elif isinstance(typ, cli_types.CliTuple):
-            return list(set(typ.values))
+            return [CwlGenerator.to_cwl_type(subtype) for subtype in set(typ.values)]
         else:
             raise Exception('Invalid type!')
 

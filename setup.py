@@ -8,6 +8,8 @@ setup(
     install_requires=[
         'pyparsing',
         'jinja2',
+        'spacy',
+        'illusional.cwlgen'
     ],
     entry_points={
         'console_scripts': [

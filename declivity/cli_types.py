@@ -7,7 +7,7 @@ from enum import Enum
 import functools
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliType:
     @property
     def representable(self) -> set:
@@ -21,53 +21,53 @@ class CliType:
     _representable = set()
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliEnum(CliType):
     enum: Enum
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliFloat(CliType):
     pass
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliInteger(CliType):
     _representable = {CliFloat}
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliString(CliType):
     pass
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliBoolean(CliType):
     pass
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliDir(CliType):
     pass
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliFile(CliType):
     pass
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliDict(CliType):
     key: CliType
     value: CliType
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliList(CliType):
     value: CliType
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliTuple(CliType):
     values: typing.List[CliType]
 
