@@ -2,7 +2,7 @@ from declivity.parser import CliParser
 from declivity.converter.wdl import WdlGenerator
 from test.util import get_help
 
-from wdl_parser import version_1_0
+from WDL import parse_document
 
 
 def test_bwa():
@@ -11,4 +11,4 @@ def test_bwa():
     wdl = WdlGenerator().generate_wrapper(cmd)
 
     # Check that the generated WDL parses
-    version_1_0.parse(wdl)
+    parse_document(wdl)

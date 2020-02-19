@@ -9,7 +9,9 @@ setup(
         'pyparsing',
         'jinja2',
         'spacy',
-        'illusional.cwlgen'
+        'cwlgen',
+        'dataclasses',
+        'miniwdl'
     ],
     entry_points={
         'console_scripts': [
