@@ -11,7 +11,8 @@ setup(
         'spacy',
         'cwlgen',
         'dataclasses',
-        'miniwdl'
+        'miniwdl',
+        'wordsegment'
     ],
     entry_points={
         'console_scripts': [

@@ -1,5 +1,6 @@
 from pyparsing import Literal, Regex, indentedBlock, And, Word, alphanums, Or, OneOrMore, originalTextFor, SkipTo, \
-    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas, Forward, LineStart
+    tokenMap, LineEnd, White, Optional, delimitedList, matchPreviousLiteral, nestedExpr, alphas, Forward, LineStart, \
+    Group, col, Empty, _bslash, ParseException
 import re
 from declivity.model import Command, Flag, EmptyFlagArg, OptionalFlagArg, SimpleFlagArg, RepeatFlagArg, _FlagSynonym, \
     ChoiceFlagArg, Positional
@@ -16,6 +17,50 @@ def pick(*args):
     return action
 
 
+def descriptionBlock(blockStatementExpr, indentStack, indent=True):
+    backup_stack = indentStack[:]
+
+    def reset_stack():
+        indentStack[:] = backup_stack
+
+    def checkPeerIndent(s, l, t):
+        if l >= len(s): return
+        curCol = col(l, s)
+
+        # This rule fails if the block unindents far enough to match the previous indent level or further
+        if curCol <= indentStack[-2]:
+            raise ParseException(s, l, "not a peer entry")
+
+    def checkSubIndent(s, l, t):
+        curCol = col(l, s)
+        if curCol > indentStack[-1]:
+            indentStack.append(curCol)
+        else:
+            raise ParseException(s, l, "not a subentry")
+
+    def checkUnindent(s, l, t):
+        if l >= len(s): return
+        curCol = col(l, s)
+        if not (indentStack and curCol < indentStack[-1] and curCol <= indentStack[-2]):
+            raise ParseException(s, l, "not an unindent")
+        indentStack.pop()
+
+    NL = OneOrMore(LineEnd().setWhitespaceChars("\t ").suppress())
+    INDENT = (Empty() + Empty().setParseAction(checkSubIndent)).setName('INDENT')
+    PEER = Empty().setParseAction(checkPeerIndent).setName('')
+    UNDENT = Empty().setParseAction(checkUnindent).setName('UNINDENT')
+    if indent:
+        smExpr = Group(Optional(NL) +
+                       # ~ FollowedBy(blockStatementExpr) +
+                       INDENT + (OneOrMore(PEER + Group(blockStatementExpr) + Optional(NL))) + UNDENT)
+    else:
+        smExpr = Group(Optional(NL) +
+                       (OneOrMore(PEER + Group(blockStatementExpr) + Optional(NL))))
+    smExpr.setFailAction(lambda a, b, c, d: reset_stack())
+    blockStatementExpr.ignore(_bslash + LineEnd())
+    return smExpr.setName('indented block')
+
+
 class CliParser:
     def parse_command(self, cmd, name):
         all_flags = list(itertools.chain.from_iterable(self.flags.searchString(cmd)))
@@ -29,7 +74,7 @@ class CliParser:
 
     def __init__(self, parse_positionals=True):
         stack = [1]
-        self.cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
+        self.cli_id = Word(initChars=alphas + '<>', bodyChars=alphanums + '-_<>')
 
         self.short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
         """A short flag has only a single dash and single character, e.g. `-m`"""
@@ -40,9 +85,6 @@ class CliParser:
 
         self.flag_arg_sep = Or([Literal('='), Literal(' ')]).leaveWhitespace()
         """The term that separates the flag from the arguments, e.g. in `--file=FILE` it's `=`"""
-
-        self.arg_arg_sep = Or([Literal('='), Literal(' ')]).leaveWhitespace()
-        """The term that separates arguments from each other, e.g. in `--file=FILE` it's `=`"""
 
         self.arg = self.cli_id.copy()
         """A single argument name, e.g. `FILE`"""
@@ -88,7 +130,6 @@ class CliParser:
         """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
         def noop(s, loc, toks):
-            print()
             return toks
 
         self.arg_expression = (
@@ -125,7 +166,7 @@ class CliParser:
             pass
 
         self.desc_line = originalTextFor(SkipTo(LineEnd()))  # .setParseAction(success))
-        self.indented_desc = indentedBlock(
+        self.indented_desc = descriptionBlock(
             self.desc_line,
             indentStack=stack,
             indent=True
@@ -174,13 +215,13 @@ class CliParser:
             return processed
 
         if parse_positionals:
-            self.flags = LineStart().leaveWhitespace() + indentedBlock(
+            self.flags = LineStart().leaveWhitespace() + descriptionBlock(
                 self.flag ^ self.positional,
                 indentStack=stack,
                 indent=True
             ).setParseAction(visit_flags)
         else:
-            self.flags = LineStart().leaveWhitespace() + indentedBlock(
+            self.flags = LineStart().leaveWhitespace() + descriptionBlock(
                 self.flag,
                 indentStack=stack,
                 indent=True
