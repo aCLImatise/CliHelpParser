@@ -2,6 +2,10 @@ from abc import abstractmethod
 from declivity.model import Command, CliArgument
 from dataclasses import dataclass
 
+cases = [
+    'snake',
+    'camel'
+]
 
 @dataclass
 class WrapperGenerator:
@@ -17,17 +21,22 @@ class WrapperGenerator:
         """
         pass
 
-    def choose_variable_name(self, flag: CliArgument, format='snake') -> str:
+    def choose_variable_name(self, flag: CliArgument) -> str:
         """
         Choose a name for this flag (e.g. the variable name when this is used to generate code), based on whether
         the user wants an auto generated one or not
         """
         if self.generate_names:
             return flag.generate_name()
-        elif format == 'snake':
+        elif self.case == 'snake':
             return flag.name_to_snake()
-        elif format == 'camel':
+        elif self.case == 'camel':
             return flag.name_to_camel()
+
+    case: str = 'snake'
+    """
+    Which case to use for variable names
+    """
 
     generate_names: bool = False
     """

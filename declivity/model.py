@@ -55,8 +55,9 @@ class CliArgument:
         """
         Gets a representation of this argument in CamelCase
         """
-        words = self.name_to_words()
-        return ''.join([segment.capitalize() for segment in words])
+        words = list(self.name_to_words())
+        cased = [words[0].lower()] + [segment.capitalize() for segment in words]
+        return ''.join(cased)
 
     def name_to_snake(self) -> str:
         """

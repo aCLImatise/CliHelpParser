@@ -6,9 +6,11 @@ from declivity import cli_types, jinja, model
 from declivity.parser import Command
 from declivity.converter import WrapperGenerator
 import re
+from dataclasses import dataclass
 
 
 class WdlGenerator(WrapperGenerator):
+    case = 'snake'
 
     @classmethod
     def type_to_wdl(cls, typ: cli_types.CliType, optional: bool = False) -> str:
@@ -32,7 +34,8 @@ class WdlGenerator(WrapperGenerator):
         elif isinstance(typ, cli_types.CliDir):
             wdl_type = 'File'
         else:
-            raise Exception('Unknown CliType')
+            wdl_type = 'String'
+            # raise Exception('Unknown CliType')
 
         if optional:
             return wdl_type + '?'
@@ -45,9 +48,10 @@ class WdlGenerator(WrapperGenerator):
         for flag in cmd.named:
             args += ' \\\n\t'
             if isinstance(flag.args.get_type(), cli_types.CliBoolean):
-                args += '~{{true="{}" false="" {}}}'.format(flag.longest_synonym, self.choose_variable_name(flag, format='snake'))
+                args += '~{{true="{}" false="" {}}}'.format(flag.longest_synonym,
+                                                            self.choose_variable_name(flag))
             else:
-                args += '~{{"{} " + {}}}'.format(flag.longest_synonym, self.choose_variable_name(flag, format='snake'))
+                args += '~{{"{} " + {}}}'.format(flag.longest_synonym, self.choose_variable_name(flag))
 
         return args
 

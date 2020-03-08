@@ -3,9 +3,12 @@ from declivity import cli_types
 from declivity.converter import WrapperGenerator
 import cwlgen
 import tempfile
+from dataclasses import dataclass
 
-
+@dataclass
 class CwlGenerator(WrapperGenerator):
+    case = 'snake'
+
     @staticmethod
     def snake_case(words: list):
         return '_'.join([word.lower() for word in words])
@@ -31,7 +34,7 @@ class CwlGenerator(WrapperGenerator):
         elif isinstance(typ, cli_types.CliTuple):
             return [CwlGenerator.to_cwl_type(subtype) for subtype in set(typ.values)]
         else:
-            raise Exception('Invalid type!')
+            raise Exception(f'Invalid type {typ}!')
 
     def generate_wrapper(self, cmd: Command) -> str:
         cwl_tool = cwlgen.CommandLineTool(
@@ -42,7 +45,7 @@ class CwlGenerator(WrapperGenerator):
 
         for pos in cmd.positional:
             cwl_tool.inputs.append(cwlgen.CommandInputParameter(
-                param_id=self.choose_variable_name(pos, format='snake'),
+                param_id=self.choose_variable_name(pos),
                 param_type=self.to_cwl_type(pos.get_type()),
                 input_binding=cwlgen.CommandLineBinding(
                     position=pos.position
@@ -52,8 +55,8 @@ class CwlGenerator(WrapperGenerator):
 
         for flag in cmd.named:
             cwl_tool.inputs.append(cwlgen.CommandInputParameter(
-                param_id=self.choose_variable_name(flag, format='snake'),
-                param_type=self.to_cwl_type(flag.args.get_type()),
+                param_id=self.choose_variable_name(flag),
+                param_type=self.to_cwl_type(flag.get_type()),
                 input_binding=cwlgen.CommandLineBinding(
                     prefix=flag.longest_synonym
                 ),

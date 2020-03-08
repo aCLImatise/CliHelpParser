@@ -3,29 +3,16 @@ Code relating to the command line interface to Declivity
 """
 import argparse
 import sys
+from declivity import run_parser
 from declivity.parser import CliParser
-from declivity.converter import wdl, cwl, WrapperGenerator
+from declivity.converter import wdl, cwl, WrapperGenerator, cases
 import typing
 
 
 def main():
     args = get_parser().parse_args()
-
     input = ''.join(sys.stdin.readlines())
-    cmd = CliParser().parse_command(input, args.cmd.split())
-
-    converter_cls: typing.Type[WrapperGenerator]
-    if args.format == 'wdl':
-        converter_cls = wdl.WdlGenerator
-    elif args.format == 'cwl':
-        converter_cls = cwl.CwlGenerator
-
-    converter = converter_cls(
-        generate_names=args.generate_names,
-        ignore_positionals=args.no_pos
-    )
-
-    print(converter.generate_wrapper(cmd))
+    print(run_parser(text=input, **vars(args)))
 
 
 def get_parser():
@@ -57,6 +44,16 @@ def get_parser():
             "Rather than using the long flag to generate the argument name, generate them automatically using the "
             "flag description. Generally helpful if there are no long flags, only short flags."
         )
+    )
+    parser.add_argument(
+        '-c',
+        '--case',
+        choices=cases,
+        help=(
+            "Which case to use for variable names. If not set, defaults to the language defaults: snake_case for CWL"
+            " and snake_case for WDL"
+        ),
+        default='snake'
     )
     return parser
 

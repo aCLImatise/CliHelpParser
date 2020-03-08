@@ -18,6 +18,9 @@ def pick(*args):
 
 
 def descriptionBlock(blockStatementExpr, indentStack, indent=True):
+    """
+    Modified version of the indentedBlock construct provided by pyparsing. Allows fuzzier indent boundaries
+    """
     backup_stack = indentStack[:]
 
     def reset_stack():
@@ -27,7 +30,7 @@ def descriptionBlock(blockStatementExpr, indentStack, indent=True):
         if l >= len(s): return
         curCol = col(l, s)
 
-        # This rule fails if the block unindents far enough to match the previous indent level or further
+        # Anything that is indented more than the previous indent level counts as a peer
         if curCol <= indentStack[-2]:
             raise ParseException(s, l, "not a peer entry")
 
@@ -41,7 +44,7 @@ def descriptionBlock(blockStatementExpr, indentStack, indent=True):
     def checkUnindent(s, l, t):
         if l >= len(s): return
         curCol = col(l, s)
-        if not (indentStack and curCol < indentStack[-1] and curCol <= indentStack[-2]):
+        if not (indentStack and curCol < indentStack[-1]):
             raise ParseException(s, l, "not an unindent")
         indentStack.pop()
 
