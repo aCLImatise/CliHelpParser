@@ -1,10 +1,11 @@
 """
 Uses htseq-count, which is used as an example of a Python argparse CLI
 """
-from test.util import get_help, parser
+from test.util import get_help
 from textwrap import dedent
 import pytest
 from declivity.parser import RepeatFlagArg, EmptyFlagArg, _FlagSynonym
+import shutil
 
 
 def test_short(parser):
@@ -135,6 +136,7 @@ def test_noarg(parser):
     assert isinstance(flag.args, EmptyFlagArg)
 
 
+@pytest.mark.skipif(not shutil.which('htseq-count'), reason='htseq-count is not installed')
 def test_full(parser):
     # Parse help
     help_text = get_help(['htseq-count', '--help'])

@@ -6,6 +6,7 @@ from declivity import cli_types, jinja, model
 from declivity.parser import Command
 from declivity.converter import WrapperGenerator
 import re
+from inflection import camelize
 from dataclasses import dataclass
 
 
@@ -75,8 +76,10 @@ class WdlGenerator(WrapperGenerator):
         env.filters['choose_variable_name'] = self.choose_variable_name
         env.filters['sanitize_str'] = self.sanitize_wdl_str
         template = env.get_template('wdl.jinja2')
+
+        name = camelize('_'.join(cmd.command).replace('-', '_'))
         return template.render(
-            taskname=''.join([token.capitalize() for token in cmd.command]),
+            taskname=name,
             positional=cmd.positional,
             named=cmd.named,
             command=self.formulate_command(cmd),

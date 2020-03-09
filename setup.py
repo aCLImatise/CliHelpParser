@@ -12,7 +12,8 @@ setup(
         'cwlgen',
         'dataclasses',
         'miniwdl',
-        'wordsegment'
+        'wordsegment',
+        'inflection'
     ],
     entry_points={
         'console_scripts': [

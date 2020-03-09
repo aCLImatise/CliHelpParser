@@ -1,5 +1,7 @@
-from test.util import get_help, parser
+from test.util import get_help
 from declivity.parser import CliParser
+import shutil
+import pytest
 
 
 def test_samtools_index(parser):
@@ -18,6 +20,7 @@ def test_singularity_style_flags(parser):
     assert flag.synonyms == ['-n', '--name']
 
 
+@pytest.mark.skipif(not shutil.which('singularity'), reason='samtools is not installed')
 def test_singularity_pull():
     parser = CliParser(parse_positionals=False)
 

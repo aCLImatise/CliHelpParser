@@ -1,6 +1,8 @@
 from declivity.parser import Flag, _FlagSynonym, OptionalFlagArg
-from test.util import get_help, parser
+from test.util import get_help
 from textwrap import dedent
+import pytest
+import shutil
 
 
 def test_flag_arg(parser):
@@ -108,6 +110,7 @@ def test_complex_optionals(parser):
     assert results.args.names == ['FLOAT', 'FLOAT', 'INT', 'INT']
 
 
+@pytest.mark.skipif(not shutil.which('bwa'), reason='Singularity is not installed')
 def test_bwa(parser):
     # Parse help
     help_text = get_help(['bwa', 'mem'])

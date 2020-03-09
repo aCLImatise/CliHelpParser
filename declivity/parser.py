@@ -17,7 +17,7 @@ def pick(*args):
     return action
 
 
-def descriptionBlock(blockStatementExpr, indentStack, indent=True):
+def customIndentedBlock(blockStatementExpr, indentStack, indent=True, terminal=False, lax=False):
     """
     Modified version of the indentedBlock construct provided by pyparsing. Allows fuzzier indent boundaries
     """
@@ -30,8 +30,16 @@ def descriptionBlock(blockStatementExpr, indentStack, indent=True):
         if l >= len(s): return
         curCol = col(l, s)
 
+        # A terminal block doesn't have children, so we can assume that any sub-indent is a peer
+        if terminal and curCol >= indentStack[-1]:
+            return
+
+        # If we're being lax, anything that's not a full dedent is a peer
+        if lax and curCol > indentStack[-2]:
+            return
+
         # Anything that is indented more than the previous indent level counts as a peer
-        if curCol <= indentStack[-2]:
+        if curCol < indentStack[-1] or curCol <= indentStack[-2]:
             raise ParseException(s, l, "not a peer entry")
 
     def checkSubIndent(s, l, t):
@@ -61,7 +69,7 @@ def descriptionBlock(blockStatementExpr, indentStack, indent=True):
                        (OneOrMore(PEER + Group(blockStatementExpr) + Optional(NL))))
     smExpr.setFailAction(lambda a, b, c, d: reset_stack())
     blockStatementExpr.ignore(_bslash + LineEnd())
-    return smExpr.setName('indented block')
+    return smExpr.setName('custom indented block')
 
 
 class CliParser:
@@ -169,10 +177,11 @@ class CliParser:
             pass
 
         self.desc_line = originalTextFor(SkipTo(LineEnd()))  # .setParseAction(success))
-        self.indented_desc = descriptionBlock(
+        self.indented_desc = customIndentedBlock(
             self.desc_line,
             indentStack=stack,
-            indent=True
+            indent=True,
+            terminal=True
         ).setParseAction(
             lambda s, loc, toks: ' '.join([tok[0] for tok in toks[0]])
         )
@@ -218,16 +227,18 @@ class CliParser:
             return processed
 
         if parse_positionals:
-            self.flags = LineStart().leaveWhitespace() + descriptionBlock(
+            self.flags = LineStart().leaveWhitespace() + customIndentedBlock(
                 self.flag ^ self.positional,
                 indentStack=stack,
-                indent=True
+                indent=True,
+                lax=True
             ).setParseAction(visit_flags)
         else:
-            self.flags = LineStart().leaveWhitespace() + descriptionBlock(
+            self.flags = LineStart().leaveWhitespace() + customIndentedBlock(
                 self.flag,
                 indentStack=stack,
-                indent=True
+                indent=True,
+                lax=True
             ).setParseAction(visit_flags)
         self.flag_section_header = Regex('(arguments|options):', flags=re.IGNORECASE)
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(lambda s, loc, toks: toks[1:])
