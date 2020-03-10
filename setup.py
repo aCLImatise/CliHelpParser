@@ -13,7 +13,8 @@ setup(
         'dataclasses',
         'miniwdl',
         'wordsegment',
-        'inflection'
+        'inflection',
+        'illusional.wdlgen~=0.2'
     ],
     entry_points={
         'console_scripts': [

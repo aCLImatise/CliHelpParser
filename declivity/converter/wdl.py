@@ -8,40 +8,43 @@ from declivity.converter import WrapperGenerator
 import re
 from inflection import camelize
 from dataclasses import dataclass
+from wdlgen import WdlType, ArrayType, PrimitiveType, Task, Input
 
 
 class WdlGenerator(WrapperGenerator):
     case = 'snake'
 
     @classmethod
-    def type_to_wdl(cls, typ: cli_types.CliType, optional: bool = False) -> str:
+    def type_to_wdl(cls, typ: cli_types.CliType,
+                    optional: bool = False) -> WdlType:
         if isinstance(typ, cli_types.CliString):
-            wdl_type = 'String'
+            return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
         elif isinstance(typ, cli_types.CliFloat):
-            wdl_type = 'Float'
+            return WdlType(PrimitiveType(PrimitiveType.kFloat), optional=optional)
         elif isinstance(typ, cli_types.CliBoolean):
-            wdl_type = 'Boolean'
+            return WdlType(PrimitiveType(PrimitiveType.kBoolean), optional=optional)
         elif isinstance(typ, cli_types.CliInteger):
-            wdl_type = 'Integer'
+            return WdlType(PrimitiveType(PrimitiveType.kInt), optional=optional)
         elif isinstance(typ, cli_types.CliFile):
-            wdl_type = 'File'
-        elif isinstance(typ, cli_types.CliTuple):
-            wdl_type = 'Array[String]'
-        elif isinstance(typ, cli_types.CliEnum):
-            wdl_type = 'String'
-        elif isinstance(typ, cli_types.CliList):
-            inner_type = cls.type_to_wdl(typ.value)
-            wdl_type = f'Array[{inner_type}]'
+            return WdlType(PrimitiveType(PrimitiveType.kFile), optional=optional)
         elif isinstance(typ, cli_types.CliDir):
-            wdl_type = 'File'
+            return WdlType(PrimitiveType(PrimitiveType.kDirectory), optional=optional)
+        elif isinstance(typ, cli_types.CliTuple):
+            if typ.homogenous:
+                return WdlType(ArrayType(
+                    cls.type_to_wdl(typ.values[0]),
+                    requires_multiple=not optional))
+            else:
+                raise Exception("WDL can't deal with hetrogenous array types")
+        elif isinstance(typ, cli_types.CliList):
+            return WdlType(ArrayType(
+                cls.type_to_wdl(typ.value),
+                requires_multiple=not optional)
+            )
+        elif isinstance(typ, cli_types.CliEnum):
+            return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
         else:
-            wdl_type = 'String'
-            # raise Exception('Unknown CliType')
-
-        if optional:
-            return wdl_type + '?'
-        else:
-            return wdl_type
+            return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
 
     def formulate_command(self, cmd: Command) -> str:
         args = subprocess.list2cmdline(cmd.command)
@@ -50,9 +53,11 @@ class WdlGenerator(WrapperGenerator):
             args += ' \\\n\t'
             if isinstance(flag.args.get_type(), cli_types.CliBoolean):
                 args += '~{{true="{}" false="" {}}}'.format(flag.longest_synonym,
-                                                            self.choose_variable_name(flag))
+                                                            self.choose_variable_name(
+                                                                flag))
             else:
-                args += '~{{"{} " + {}}}'.format(flag.longest_synonym, self.choose_variable_name(flag))
+                args += '~{{"{} " + {}}}'.format(flag.longest_synonym,
+                                                 self.choose_variable_name(flag))
 
         return args
 
@@ -75,13 +80,41 @@ class WdlGenerator(WrapperGenerator):
         env.filters['type_to_wdl'] = self.type_to_wdl
         env.filters['choose_variable_name'] = self.choose_variable_name
         env.filters['sanitize_str'] = self.sanitize_wdl_str
-        template = env.get_template('wdl.jinja2')
 
         name = camelize('_'.join(cmd.command).replace('-', '_'))
-        return template.render(
-            taskname=name,
-            positional=cmd.positional,
-            named=cmd.named,
-            command=self.formulate_command(cmd),
-            generate_names=self.generate_names
+
+        tool = Task(
+            name=name,
+            command=Task.Command(
+                command=cmd.command,
+                inputs=[Task.Command.CommandInput(
+                    name=pos.name_to_camel(),
+                    optional=False,
+                    position=pos.position
+                ) for pos in cmd.positional],
+                arguments=[Task.Command.CommandInput(
+                    name=named.name_to_camel(),
+                    prefix=named.longest_synonym,
+                    optional=True
+
+                ) for named in cmd.named]
+            ),
+            version="1.0",
+            inputs=[Input(
+                data_type=self.type_to_wdl(pos.get_type(), optional=False),
+                name=pos.name_to_camel(),
+            ) for pos in cmd.named] + [Input(
+                data_type=self.type_to_wdl(pos.get_type(), optional=True),
+                name=pos.name_to_camel(),
+            ) for pos in cmd.positional]
         )
+
+        return tool.get_string()
+
+        # return template.render(
+        #     taskname=name,
+        #     positional=cmd.positional,
+        #     named=cmd.named,
+        #     command=self.formulate_command(cmd),
+        #     generate_names=self.generate_names
+        # )
