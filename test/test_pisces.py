@@ -1,16 +1,16 @@
-from test.util import get_help
-from declivity.parser import CliParser
-from declivity.model import SimpleFlagArg
+from acclimatise.flag_parser.parser import CliParser
+from acclimatise.model import SimpleFlagArg
 from pkg_resources import resource_filename
 from textwrap import dedent
 from .util import process_help_section as process
+from acclimatise.flag_parser import elements
 
 
 def test_pisces_flag(parser):
     cmd = """
   --targetlodfrequency, --targetvf <FLOAT>
     """
-    flag_synonyms = parser.flag_synonyms.parseString(cmd)
+    flag_synonyms = elements.flag_synonyms.parseString(cmd)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_synonyms) == 2
     assert isinstance(flag_synonyms[1].argtype, SimpleFlagArg)
@@ -70,7 +70,7 @@ def test_pisces_indent_dedent(parser):
 
 def test_pisces_triple_long_flag_synonyms(parser):
     cmd = "--minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>"
-    synonyms = parser.flag_synonyms.parseString(cmd)
+    synonyms = elements.flag_synonyms.parseString(cmd)
 
     assert len(synonyms) == 3
 
@@ -88,7 +88,7 @@ def test_pisces_triple_long_flag(parser):
 
 def test_pisces_quad_flag_synonyms(parser):
     cmd = "-c, --mindp, --mindepth, --mincoverage <INT>"
-    synonyms = parser.flag_synonyms.parseString(cmd)
+    synonyms = elements.flag_synonyms.parseString(cmd)
 
     assert len(synonyms) == 4
 

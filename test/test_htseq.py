@@ -1,23 +1,24 @@
 """
 Uses htseq-count, which is used as an example of a Python argparse CLI
 """
-from test.util import get_help
 from textwrap import dedent
 import pytest
-from declivity.parser import RepeatFlagArg, EmptyFlagArg, _FlagSynonym
+from acclimatise.model import RepeatFlagArg, EmptyFlagArg, FlagSynonym
+from acclimatise.cli import execute_cmd
 import shutil
+from acclimatise.flag_parser import elements
 
 
 def test_short(parser):
-    flag = parser.flag_with_arg.parseString(dedent(
+    flag = elements.flag_with_arg.parseString(dedent(
         """
         -i IDATTR
         """
     ))[0]
-    assert isinstance(flag, _FlagSynonym)
+    assert isinstance(flag, FlagSynonym)
 
 def test_long_short_synonyms(parser):
-    flag = parser.flag_synonyms.parseString(dedent(
+    flag = elements.flag_synonyms.parseString(dedent(
         """
         -i IDATTR, --idattr IDATTR
         """
@@ -58,7 +59,7 @@ optional arguments:
 
 
 def test_repeat_type(parser):
-    flag = parser.flag_synonyms.parseString("--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]")[0]
+    flag = elements.flag_synonyms.parseString("--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]")[0]
     assert flag.name == '--additional-attr'
     assert isinstance(flag.argtype, RepeatFlagArg)
     assert flag.argtype.name == 'ADDITIONAL_ATTR'
@@ -124,7 +125,7 @@ def test_full_flags(parser):
 
 
 def test_choice(parser):
-    flag = parser.flag_with_arg.parseString('--format {sam,bam}')[0]
+    flag = elements.flag_with_arg.parseString('--format {sam,bam}')[0]
     assert flag.name == '--format'
     assert list(flag.argtype.choices) == ['sam', 'bam']
 
@@ -139,7 +140,7 @@ def test_noarg(parser):
 @pytest.mark.skipif(not shutil.which('htseq-count'), reason='htseq-count is not installed')
 def test_full(parser):
     # Parse help
-    help_text = get_help(['htseq-count', '--help'])
+    help_text = execute_cmd(['htseq-count', '--help'])
     flag_sections = parser.flags.searchString(help_text)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 2

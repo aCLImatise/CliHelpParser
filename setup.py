@@ -2,8 +2,8 @@
 from setuptools import setup
 
 setup(
-    name='declivity',
-    packages=['declivity'],
+    name='acclimatise',
+    packages=['acclimatise'],
     version='0.0.1',
     install_requires=[
         'pyparsing',
@@ -18,7 +18,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'declivity = declivity.cli:main'
+            'acclimatise = acclimatise.cli:main'
         ]
     },
     extras_require={

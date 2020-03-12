@@ -2,9 +2,9 @@
 Functions for generating WDL from the CLI data model
 """
 import subprocess
-from declivity import cli_types, jinja, model
-from declivity.parser import Command
-from declivity.converter import WrapperGenerator
+from acclimatise import cli_types, jinja, model
+from acclimatise.model import Command
+from acclimatise.converter import WrapperGenerator
 import re
 from inflection import camelize
 from dataclasses import dataclass
@@ -13,6 +13,10 @@ from wdlgen import WdlType, ArrayType, PrimitiveType, Task, Input
 
 class WdlGenerator(WrapperGenerator):
     case = 'snake'
+
+    @classmethod
+    def format(cls) -> str:
+        return 'wdl'
 
     @classmethod
     def type_to_wdl(cls, typ: cli_types.CliType,
@@ -83,30 +87,51 @@ class WdlGenerator(WrapperGenerator):
 
         name = camelize('_'.join(cmd.command).replace('-', '_'))
 
+        def flagToCommandInput(flag: model.CliArgument):
+            args = dict(
+                name= flag.name_to_camel()
+            )
+
+            if isinstance(flag, model.Flag):
+                args.update(dict(
+                    optional=True,
+                ))
+                if isinstance(flag.args, model.EmptyFlagArg):
+                    args.update(dict(
+                        true=flag.longest_synonym,
+                        false=""
+                    ))
+                else:
+                    args.update(dict(
+                        prefix=flag.longest_synonym,
+                    ))
+            elif isinstance(flag, model.Positional):
+                args.update(dict(
+                    optional=False,
+                    position=flag.position
+                ))
+
+            return Task.Command.CommandInput( **args )
+
+        inputs = [Input(
+            data_type=self.type_to_wdl(pos.get_type(), optional=False),
+            name=pos.name_to_camel(),
+        ) for pos in cmd.named]
+        if not self.ignore_positionals:
+            inputs += [Input(
+                data_type=self.type_to_wdl(pos.get_type(), optional=True),
+                name=pos.name_to_camel(),
+            ) for pos in cmd.positional]
+
         tool = Task(
             name=name,
             command=Task.Command(
                 command=cmd.command,
-                inputs=[Task.Command.CommandInput(
-                    name=pos.name_to_camel(),
-                    optional=False,
-                    position=pos.position
-                ) for pos in cmd.positional],
-                arguments=[Task.Command.CommandInput(
-                    name=named.name_to_camel(),
-                    prefix=named.longest_synonym,
-                    optional=True
-
-                ) for named in cmd.named]
+                inputs=[flagToCommandInput(pos) for pos in cmd.positional],
+                arguments=[flagToCommandInput(named) for named in cmd.named]
             ),
             version="1.0",
-            inputs=[Input(
-                data_type=self.type_to_wdl(pos.get_type(), optional=False),
-                name=pos.name_to_camel(),
-            ) for pos in cmd.named] + [Input(
-                data_type=self.type_to_wdl(pos.get_type(), optional=True),
-                name=pos.name_to_camel(),
-            ) for pos in cmd.positional]
+            inputs=inputs
         )
 
         return tool.get_string()

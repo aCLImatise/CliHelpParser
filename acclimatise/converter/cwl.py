@@ -1,6 +1,6 @@
-from declivity.parser import Command
-from declivity import cli_types
-from declivity.converter import WrapperGenerator
+from acclimatise import cli_types
+from acclimatise.model import Command
+from acclimatise.converter import WrapperGenerator
 import cwlgen
 import tempfile
 from dataclasses import dataclass
@@ -8,6 +8,10 @@ from dataclasses import dataclass
 @dataclass
 class CwlGenerator(WrapperGenerator):
     case = 'snake'
+
+    @classmethod
+    def format(cls) -> str:
+        return 'cwl'
 
     @staticmethod
     def snake_case(words: list):
@@ -43,15 +47,16 @@ class CwlGenerator(WrapperGenerator):
             cwl_version='v1.0'
         )
 
-        for pos in cmd.positional:
-            cwl_tool.inputs.append(cwlgen.CommandInputParameter(
-                param_id=self.choose_variable_name(pos),
-                param_type=self.to_cwl_type(pos.get_type()),
-                input_binding=cwlgen.CommandLineBinding(
-                    position=pos.position
-                ),
-                doc=pos.description
-            ))
+        if not self.ignore_positionals:
+            for pos in cmd.positional:
+                cwl_tool.inputs.append(cwlgen.CommandInputParameter(
+                    param_id=self.choose_variable_name(pos),
+                    param_type=self.to_cwl_type(pos.get_type()),
+                    input_binding=cwlgen.CommandLineBinding(
+                        position=pos.position
+                    ),
+                    doc=pos.description
+                ))
 
         for flag in cmd.named:
             cwl_tool.inputs.append(cwlgen.CommandInputParameter(

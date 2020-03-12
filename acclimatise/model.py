@@ -5,8 +5,8 @@ import itertools
 import typing
 import abc
 import enum
-from declivity import cli_types
-from dataclasses import dataclass
+from acclimatise import cli_types
+from dataclasses import dataclass, field
 import re
 import spacy
 from spacy import tokens
@@ -26,7 +26,11 @@ class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
     """
+    #: Description of the function of this argument
     description: str
+
+    #: Whether the existence of this argument is supported by it appearing in the usage
+    usage_supported: bool = field(default=False, init=False)
 
     @staticmethod
     def tokens_to_name(tokens: typing.List[tokens.Token]):
@@ -48,7 +52,8 @@ class CliArgument:
         Splits this argument's name into multiple words
         """
         dash_tokens = re.split('[-_]', self.full_name().lstrip('-'))
-        segment_tokens = itertools.chain.from_iterable([wordsegment.segment(w) for w in dash_tokens])
+        segment_tokens = itertools.chain.from_iterable(
+            [wordsegment.segment(w) for w in dash_tokens])
         return segment_tokens
 
     def name_to_camel(self) -> str:
@@ -71,7 +76,8 @@ class CliArgument:
         Generate a 1-3 word variable name for this flag, by parsing the description
         """
         if nlp is None:
-            raise Exception("Spacy model doesn't exist! Install it with `python -m spacy download en`")
+            raise Exception(
+                "Spacy model doesn't exist! Install it with `python -m spacy download en`")
 
         no_brackets = re.sub('[\[({].+[\])}]', '', self.description)
         words = nlp(no_brackets)
@@ -115,7 +121,8 @@ class Command:
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
     """
 
-    def __init__(self, command: typing.List[str], positional: typing.List['Positional'], named: typing.List['Flag'],
+    def __init__(self, command: typing.List[str], positional: typing.List['Positional'],
+                 named: typing.List['Flag'],
                  **kwargs):
         super(**kwargs)
 
@@ -204,7 +211,7 @@ class Flag(CliArgument):
         return self.longest_synonym
 
     @staticmethod
-    def from_synonyms(synonyms: typing.Iterable['_FlagSynonym'], description: str):
+    def from_synonyms(synonyms: typing.Iterable['FlagSynonym'], description: str):
         """
         Creates a usable Flag object by combining the synonyms provided
         """
@@ -240,7 +247,7 @@ class Flag(CliArgument):
 
 
 @dataclass
-class _FlagSynonym:
+class FlagSynonym:
     """
     Internal class for storing the arguments for a single synonym
     """
@@ -249,7 +256,8 @@ class _FlagSynonym:
 
     @property
     def capital(self):
-        return ''.join([segment.capitalize() for segment in re.split('[-_]', self.name.lstrip('-'))])
+        return ''.join([segment.capitalize() for segment in
+                        re.split('[-_]', self.name.lstrip('-'))])
 
 
 int_re = re.compile('(int(eger)?)|size|length|max|min', flags=re.IGNORECASE)
@@ -369,7 +377,8 @@ class ChoiceFlagArg(FlagArg):
     choices: typing.List[str]
 
     def get_type(self):
-        e = enum.Enum(''.join([choice.capitalize() for choice in self.choices]), self.choices)
+        e = enum.Enum(''.join([choice.capitalize() for choice in self.choices]),
+                      self.choices)
         return cli_types.CliEnum(e)
 
     def num_args(self) -> int:

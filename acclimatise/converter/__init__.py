@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from declivity.model import Command, CliArgument
+from acclimatise.model import Command, CliArgument
 from dataclasses import dataclass
 
 cases = [
@@ -7,12 +7,33 @@ cases = [
     'camel'
 ]
 
+
 @dataclass
 class WrapperGenerator:
     """
     Abstract base class for a class that converts a Command object into a string that defines a tool
     wrapper in a certain workflow language
     """
+
+    @classmethod
+    def choose_converter(cls, typ):
+        """
+        Returns a converter subclass, given a converter type name
+        :param type: The type of converter, e.g. 'cwl' or 'wdl'
+        """
+        for subclass in cls.__subclasses__():
+            if subclass.format() == typ:
+                return subclass
+
+        raise Exception('Unknown format type')
+
+    @classmethod
+    @abstractmethod
+    def format(cls) -> str:
+        """
+        Returns the output format that this generator produces as a string, e.g. "cwl"
+        """
+        pass
 
     @abstractmethod
     def generate_wrapper(self, cmd: Command) -> str:

@@ -1,4 +1,4 @@
-from declivity.parser import CliParser
+from acclimatise.flag_parser.parser import CliParser
 import pytest
 
 @pytest.fixture

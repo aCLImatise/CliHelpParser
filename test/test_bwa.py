@@ -1,13 +1,14 @@
-from declivity.parser import Flag, _FlagSynonym, OptionalFlagArg
-from test.util import get_help
+from acclimatise.model import Flag, FlagSynonym, OptionalFlagArg
+from acclimatise.flag_parser import elements
+from acclimatise.cli import execute_cmd
 from textwrap import dedent
 import pytest
 import shutil
 
 
 def test_flag_arg(parser):
-    result = parser.flag_with_arg.parseString("-A INT")[0]
-    assert isinstance(result, _FlagSynonym)
+    result = elements.flag_with_arg.parseString("-A INT")[0]
+    assert isinstance(result, FlagSynonym)
     assert result.argtype.name == 'INT'
     assert result.name == '-A'
 
@@ -113,7 +114,7 @@ def test_complex_optionals(parser):
 @pytest.mark.skipif(not shutil.which('bwa'), reason='Singularity is not installed')
 def test_bwa(parser):
     # Parse help
-    help_text = get_help(['bwa', 'mem'])
+    help_text = execute_cmd(['bwa', 'mem'])
     results = list(parser.flags.scanString(help_text))
 
     # The bwa help has 3 sections

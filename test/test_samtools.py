@@ -1,12 +1,13 @@
-from test.util import get_help
-from declivity.parser import CliParser
+from acclimatise.flag_parser.parser import CliParser
+from acclimatise.cli import execute_cmd
 import shutil
 import pytest
 
 
+@pytest.mark.skipif(not shutil.which('samtools'), reason='samtools is not installed')
 def test_samtools_index(parser):
     # Parse help
-    help_text = get_help(['samtools', 'index'])
+    help_text = execute_cmd(['samtools', 'index'])
     flag_sections = parser.flags.searchString(help_text)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 1
@@ -14,20 +15,3 @@ def test_samtools_index(parser):
     assert len(flag_sections[0]) == 4
 
 
-def test_singularity_style_flags(parser):
-    flag = parser.flag.parseString( "    -n|--name   Specify a custom container name (first priority)" )[0]
-    assert len(flag.synonyms) == 2
-    assert flag.synonyms == ['-n', '--name']
-
-
-@pytest.mark.skipif(not shutil.which('singularity'), reason='samtools is not installed')
-def test_singularity_pull():
-    parser = CliParser(parse_positionals=False)
-
-    # Parse help
-    help_text = get_help(['singularity', 'pull', '--help'])
-    flag_sections = parser.flags.searchString(help_text)
-    # There is one section for positional arguments and one for named arguments
-    assert len(flag_sections) == 1
-    # There are two positional arguments
-    assert len(flag_sections[0]) == 5
