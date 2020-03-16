@@ -111,7 +111,7 @@ def test_complex_optionals(parser):
     assert results.args.names == ['FLOAT', 'FLOAT', 'INT', 'INT']
 
 
-@pytest.mark.skipif(not shutil.which('bwa'), reason='Singularity is not installed')
+@pytest.mark.skipif(not shutil.which('bwa'), reason='bwa is not installed')
 def test_bwa(parser):
     # Parse help
     help_text = execute_cmd(['bwa', 'mem'])
