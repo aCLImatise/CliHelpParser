@@ -7,13 +7,13 @@ from acclimatise.usage_parser.model import UsageElement
 
 def delimited_item(open, el, close):
     def action(s, loc, toks):
-        return toks[1]
+        return toks[1:-1]
 
     return (open + el + close).setParseAction(action)
 
 
 usage_element = Forward()
-element_char = Word(initChars=alphanums, bodyChars=alphanums + '_-')
+element_char = Word(initChars=alphanums, bodyChars=alphanums + '_-.')
 
 mandatory_element = element_char.copy().setParseAction(
     lambda s, loc, toks: UsageElement(
@@ -39,7 +39,7 @@ def visit_optional_section(s, loc, toks):
     return inner
 
 
-optional_section = delimited_item("[", usage_element, "]").setParseAction(
+optional_section = delimited_item("[", OneOrMore(usage_element), "]").setParseAction(
     visit_optional_section
 )
 """
@@ -48,7 +48,7 @@ Anything can be nested within square brackets, which indicates that everything t
 
 flag_arg = Or([
     variable_element,
-    mandatory_element
+    element_char
 ])
 """
 The argument after a flag, e.g. in "-b <bamlist.fofn>" this would be everything after "-b"
@@ -60,17 +60,20 @@ The single character for a short flag, e.g. "n" for a "-n" flag
 """
 
 short_flag = (
-        '-' + short_flag_name + " " + Optional(flag_arg)
-).setParseAction(lambda s, loc, toks: Flag.from_synonyms([FlagSynonym(
-    name=toks[0] + toks[1],
-    argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
-)]))
+        '-' + short_flag_name + White() + Optional(flag_arg)
+).setParseAction(
+    lambda s, loc, toks:
+    Flag.from_synonyms([FlagSynonym(
+        name=toks[0] + toks[1],
+        argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
+    )], description=None)
+)
 """
 The usage can contain a flag with its argument
 """
 
 long_flag = (
-        '--' + element_char + " " + Optional(flag_arg)
+        '--' + element_char + White() + Optional(flag_arg)
 ).setParseAction(lambda s, loc, toks: Flag.from_synonyms([FlagSynonym(
     name=toks[1],
     argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
@@ -90,19 +93,26 @@ def visit_short_flag_list(s, loc, toks):
     ]
 
 
-short_flag_list = ('-' + OneOrMore(short_flag_name)).setParseAction(
-    visit_short_flag_list)
+short_flag_list = ('-' + short_flag_name + OneOrMore(short_flag_name)).setParseAction(
+    visit_short_flag_list).leaveWhitespace()
 """
 Used to illustrate where a list of short flags could be used, e.g. -nurlf indicates -n or -u etc
 """
 
-list_element = Or([
+def visit_list_element(s, loc, toks):
+    # Pick the last element if there is one, otherwise use the first element
+    # This gives us a better name like 'inN.bam' instead of 'in2.bam'
+    el = toks[2] if toks[2] else toks[0]
+    el.repeatable = True
+    return el
+
+list_element = (Or([
     mandatory_element,
     variable_element
 ]) + '...' + Optional(Or([
     mandatory_element,
     variable_element
-]))
+]))).setParseAction(visit_list_element)
 """
 When one or more arguments are allowed, e.g. "<in2.bam> ... <inN.bam>"
 """
@@ -118,7 +128,7 @@ usage_element <<= Or([
 ])
 
 stack = [0]
-usage = Regex('usage:', flags=re.IGNORECASE) + OneOrMore(usage_element)
+usage = Regex('usage:', flags=re.IGNORECASE).suppress() + OneOrMore(usage_element)
 # indentedBlock(
 #     delimitedList(usage_element, delim=' '),
 #     indentStack=stack,
