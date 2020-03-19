@@ -29,7 +29,7 @@ def test_samtools_merge_variable():
     els = usage_element.parseString(text)
     assert len(els) == 1
     assert isinstance(els[0], UsageElement)
-    assert els[0].var
+    assert els[0].variable
 
 
 def test_samtools_merge_flag_arg():
