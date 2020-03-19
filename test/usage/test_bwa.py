@@ -1,4 +1,6 @@
 from acclimatise.usage_parser.elements import usage, usage_element, short_flag_list
+from acclimatise.usage_parser.model import UsageElement
+from acclimatise.model import Flag
 
 
 def test_bwa():
@@ -9,13 +11,24 @@ def test_bwa():
 
 def test_samtools_merge_short_flags():
     text = "-nurlf"
-    short_flag_list.parseString(text)
+    els = short_flag_list.parseString(text)
+    assert len(els) == 5
+    assert isinstance(els[0], Flag)
 
 
 def test_samtools_merge_optional_short_flags():
     text = "[-nurlf]"
-    usage_element.parseString(text)
+    els = usage_element.parseString(text)
+    assert len(els) == 5
+    assert isinstance(els[0], Flag)
+    assert els[0].optional
 
+def test_samtools_merge_variable():
+    text = "<out.bam>"
+    els = usage_element.parseString(text)
+    assert len(els) == 1
+    assert isinstance(els[0], UsageElement)
+    assert els[0].var
 
 def test_samtools_merge_full():
     text = "Usage: samtools merge [-nurlf] [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]"

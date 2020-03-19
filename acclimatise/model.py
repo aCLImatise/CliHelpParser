@@ -164,6 +164,7 @@ class Positional(CliArgument):
     position: int
     name: str
     description: str
+    optional: bool = False
 
     def get_type(self) -> cli_types.CliType:
         # Try the the flag name, then the description in that order
@@ -182,11 +183,12 @@ class Positional(CliArgument):
 @dataclass
 class Flag(CliArgument):
     """
-    Represents one single optional flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
+    Represents one single flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
     """
     synonyms: typing.List[str]
-    description: str
+    description: typing.Optional[str]
     args: 'FlagArg'
+    optional: bool = True
 
     def get_type(self) -> cli_types.CliType:
         # Try the argument name, then the flag name, then the description in that order
@@ -211,7 +213,7 @@ class Flag(CliArgument):
         return self.longest_synonym
 
     @staticmethod
-    def from_synonyms(synonyms: typing.Iterable['FlagSynonym'], description: str):
+    def from_synonyms(synonyms: typing.Iterable['FlagSynonym'], description: typing.Optional[str]):
         """
         Creates a usable Flag object by combining the synonyms provided
         """
@@ -252,7 +254,14 @@ class FlagSynonym:
     Internal class for storing the arguments for a single synonym
     """
     name: str
+    """
+    The entire flag string, e.g. "-n" or "--lines"
+    """
+
     argtype: 'FlagArg'
+    """
+    The number and type of arguments that this flag takes
+    """
 
     @property
     def capital(self):
