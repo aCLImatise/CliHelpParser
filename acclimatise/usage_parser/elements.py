@@ -1,7 +1,8 @@
 from pyparsing import *
-# from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag
+# from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
+from acclimatise.flag_parser.elements import flag_with_arg
 import re
-from acclimatise.model import Flag, FlagSynonym, SimpleFlagArg, EmptyFlagArg
+from acclimatise.model import Flag, FlagSynonym, SimpleFlagArg, EmptyFlagArg, Command, Positional
 from acclimatise.usage_parser.model import UsageElement
 
 
@@ -23,7 +24,7 @@ mandatory_element = element_char.copy().setParseAction(
 A mandatory element in the command-line invocation. Might be a variable or a constant
 """
 
-variable_element = delimited_item("<", element_char, ">").setParseAction(
+variable_element = delimited_item("<", Word(initChars=alphanums, bodyChars=alphanums + '_-. '), ">").setParseAction(
     lambda s, loc, toks: UsageElement(text=toks[1], variable=True)
 )
 """
@@ -46,10 +47,10 @@ optional_section = delimited_item("[", OneOrMore(usage_element), "]").setParseAc
 Anything can be nested within square brackets, which indicates that everything there is optional
 """
 
-flag_arg = Or([
-    variable_element,
-    element_char
-])
+# flag_arg = Or([
+#     variable_element,
+#     element_char
+# ])
 """
 The argument after a flag, e.g. in "-b <bamlist.fofn>" this would be everything after "-b"
 """
@@ -59,25 +60,25 @@ short_flag_name = Char(alphas)
 The single character for a short flag, e.g. "n" for a "-n" flag
 """
 
-short_flag = (
-        '-' + short_flag_name + White() + Optional(flag_arg)
-).setParseAction(
-    lambda s, loc, toks:
-    Flag.from_synonyms([FlagSynonym(
-        name=toks[0] + toks[1],
-        argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
-    )], description=None)
-)
+# short_flag = (
+#         '-' + short_flag_name + White() + Optional(flag_arg)
+# ).setParseAction(
+#     lambda s, loc, toks:
+#     Flag.from_synonyms([FlagSynonym(
+#         name=toks[0] + toks[1],
+#         argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
+#     )], description=None)
+# )
 """
 The usage can contain a flag with its argument
 """
 
-long_flag = (
-        '--' + element_char + White() + Optional(flag_arg)
-).setParseAction(lambda s, loc, toks: Flag.from_synonyms([FlagSynonym(
-    name=toks[1],
-    argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
-)]))
+# long_flag = (
+#         '--' + element_char + White() + Optional(flag_arg)
+# ).setParseAction(lambda s, loc, toks: Flag.from_synonyms([FlagSynonym(
+#     name=toks[1],
+#     argtype=SimpleFlagArg(toks[3]) if toks[3] else EmptyFlagArg()
+# )]))
 """
 The usage can contain a flag with its argument
 """
@@ -117,20 +118,55 @@ list_element = (Or([
 When one or more arguments are allowed, e.g. "<in2.bam> ... <inN.bam>"
 """
 
+usage_flag = And([flag_with_arg]).setParseAction(lambda s, loc, toks: Flag.from_synonyms(toks, description=""))
+
 usage_element <<= Or([
     optional_section,
     list_element,
-    short_flag_list,
-    short_flag,
-    long_flag,
+    # short_flag_list,
+    usage_flag,
     variable_element,
     mandatory_element,
 ])
 
 stack = [0]
-usage = Regex('usage:', flags=re.IGNORECASE).suppress() + OneOrMore(usage_element)
+usage = (Regex('usage:', flags=re.IGNORECASE).suppress() + OneOrMore(usage_element))
 # indentedBlock(
 #     delimitedList(usage_element, delim=' '),
 #     indentStack=stack,
 #     indent=True
 # )
+
+def parse_usage(cmd, text):
+    toks = usage.searchString(text)[0]
+
+    positional = [tok for tok in toks if isinstance(tok, UsageElement)]
+    flags = [tok for tok in toks if isinstance(tok, Flag)]
+
+    # The usage often starts with a re-iteration of the command name itself. Remove this if present
+    truncate = 0
+    for i, arg in enumerate(cmd):
+        pos = positional[i]
+        if arg == pos:
+            truncate = i + 1
+        else:
+            break
+    positional = positional[truncate:]
+
+    if not any([tok for tok in positional if tok.variable]):
+        # If the usage didn't explicitly mark anything as a variable using < > brackets, we have to assume that
+        # everything other than flags are positional elements
+        for element in positional:
+            element.variable = True
+
+    return Command(
+        command=cmd,
+        positional=[Positional(
+            description="",
+            position =i,
+            name=el.text,
+            optional=el.optional
+        ) for i, el in enumerate(positional)],
+        named=flags
+    )
+

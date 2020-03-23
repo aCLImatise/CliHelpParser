@@ -2,7 +2,7 @@ from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import SimpleFlagArg
 from pkg_resources import resource_filename
 from textwrap import dedent
-from .util import process_help_section as process
+from ..util import process_help_section as process
 from acclimatise.flag_parser import elements
 
 
@@ -128,12 +128,9 @@ def test_pisces_multi_indent(parser):
     assert len(flags) == 5
 
 
-def test_pisces(parser):
+def test_pisces(parser, pisces_help):
     # Parse help
-    with open(resource_filename(__name__, 'pisces.txt')) as fp:
-        help_text = fp.read()
-
-    flag_sections = parser.flags.searchString(help_text)
+    flag_sections = parser.flags.searchString(pisces_help)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 5
 

@@ -1,4 +1,4 @@
-from acclimatise.usage_parser.elements import usage, usage_element, short_flag_list, short_flag
+from acclimatise.usage_parser.elements import usage, usage_element, short_flag_list, parse_usage
 from acclimatise.usage_parser.model import UsageElement
 from acclimatise.model import Flag, SimpleFlagArg
 
@@ -53,3 +53,11 @@ def test_samtools_merge_full():
     text = "Usage: samtools merge [-nurlf] [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]"
     els = usage.parseString(text)
     print(els)
+
+def test_pisces_usage():
+    text = "USAGE: dotnet Pisces.dll -bam <bam path> -g <genome path>"
+    command = parse_usage(['pisces'], text)
+    assert len(command.named) == 2
+    assert command.named[0].longest_synonym == '-bam'
+    assert command.named[1].longest_synonym == '-g'
+    assert command.positional[0].name == 'dotnet'

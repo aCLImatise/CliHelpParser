@@ -19,7 +19,7 @@ class UsageElement:
     that you shouldn't change, e.g. the name of the application
     """
 
-    flag: bool = False
+    # flag: bool = False
     """
     True if this is a flag (starts with dashes) and not a regular element
     """

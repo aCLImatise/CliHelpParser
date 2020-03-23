@@ -63,13 +63,13 @@ def customIndentedBlock(blockStatementExpr, indentStack, indent=True, terminal=F
     return smExpr.setName('custom indented block')
 
 
-cli_id = Word(initChars=alphas + '<>', bodyChars=alphanums + '-_<>')
+cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
 
-short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
-"""A short flag has only a single dash and single character, e.g. `-m`"""
-long_flag = originalTextFor(Literal('--') + cli_id)
-"""A long flag has two dashes and any amount of characters, e.g. `--max-count`"""
-any_flag = short_flag ^ long_flag
+# short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
+# """A short flag has only a single dash and single character, e.g. `-m`"""
+# long_flag = originalTextFor(Literal('--') + cli_id)
+# """A long flag has two dashes and any amount of characters, e.g. `--max-count`"""
+any_flag = originalTextFor('-' + Optional('-') + cli_id)
 """The flag is the part with the dashes, e.g. `-m` or `--max-count`"""
 
 flag_arg_sep = Or([Literal('='), Literal(' ')]).leaveWhitespace()
@@ -100,8 +100,14 @@ When the flag has multiple arguments, some of which are optional, e.g.
 -I FLOAT[,FLOAT[,INT[,INT]]]
 """
 
-simple_arg = arg.copy().setParseAction(
-    lambda s, loc, toks: SimpleFlagArg(toks[0]))
+# simple_arg = arg.copy().setParseAction(
+#     lambda s, loc, toks: SimpleFlagArg(toks[0]))
+simple_arg = Or([
+    Word(initChars=alphas, bodyChars=alphanums + '-_'),
+
+    # Allow spaces in the argument name, but only if it's enclosed in angle brackets
+    Literal('<').suppress() + Word(initChars=alphas, bodyChars=alphanums + '-_ ') + Literal('>').suppress(),
+]).setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
 
 list_type_arg = (
         arg
@@ -135,10 +141,13 @@ arg_expression = (
 """An argument with separator, e.g. `=FILE`"""
 
 flag_with_arg = (
-        any_flag + Optional(arg_expression)).setParseAction(
+        any_flag + Optional(arg_expression)
+).setParseAction(
     lambda s, loc, toks: (
-        FlagSynonym(name=toks[0],
-                    argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
+        FlagSynonym(
+            name=toks[0],
+            argtype=toks[1] if len(toks) > 1 else EmptyFlagArg()
+        )
     )
 )
 """e.g. `--max-count=NUM`"""
