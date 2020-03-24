@@ -19,7 +19,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python install -e .[dev]
+          pip install --upgrade pip wheel setuptools
+          pip install -e .[dev]
 
       - uses: pre-commit/action@v1.0.1
 
