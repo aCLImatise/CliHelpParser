@@ -104,4 +104,5 @@ def test_trailing_text():
     """
     )
     command = parse_usage(["htseq-count"], text)
-    assert len(command.positional) == 3
+    # We don't count either the command "htseq-count", or "[options]" as an argument, so there are only 2 positionals
+    assert len(command.positional) == 2
