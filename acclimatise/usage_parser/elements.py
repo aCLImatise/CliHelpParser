@@ -1,9 +1,17 @@
-from pyparsing import *
+import re
+
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
 from acclimatise.flag_parser.elements import flag_with_arg
-import re
-from acclimatise.model import Flag, FlagSynonym, SimpleFlagArg, EmptyFlagArg, Command, Positional
+from acclimatise.model import (
+    Command,
+    EmptyFlagArg,
+    Flag,
+    FlagSynonym,
+    Positional,
+    SimpleFlagArg,
+)
 from acclimatise.usage_parser.model import UsageElement
+from pyparsing import *
 
 
 def delimited_item(open, el, close):
@@ -14,19 +22,22 @@ def delimited_item(open, el, close):
 
 
 usage_element = Forward()
-element_char = Word(initChars=alphanums, bodyChars=alphanums + '_-.')
+element_char = Word(initChars=alphanums, bodyChars=alphanums + "_-.")
 
-mandatory_element = element_char.copy().setParseAction(
-    lambda s, loc, toks: UsageElement(
-        text=toks[0],
-    )).setName('mandatory_element')
+mandatory_element = (
+    element_char.copy()
+    .setParseAction(lambda s, loc, toks: UsageElement(text=toks[0],))
+    .setName("mandatory_element")
+)
 """
 A mandatory element in the command-line invocation. Might be a variable or a constant
 """
 
-variable_element = delimited_item("<", Word(initChars=alphanums, bodyChars=alphanums + '_-. '), ">").setParseAction(
-    lambda s, loc, toks: UsageElement(text=toks[1], variable=True)
-).setName('variable_element')
+variable_element = (
+    delimited_item("<", Word(initChars=alphanums, bodyChars=alphanums + "_-. "), ">")
+    .setParseAction(lambda s, loc, toks: UsageElement(text=toks[1], variable=True))
+    .setName("variable_element")
+)
 """
 Any element inside angle brackets is a variable, meaning you are supposed to provide your own value for it.
 However, some usage formats show variables without the angle brackets
@@ -40,9 +51,11 @@ def visit_optional_section(s, loc, toks):
     return inner
 
 
-optional_section = delimited_item("[", OneOrMore(usage_element), "]").setParseAction(
-    visit_optional_section
-).setName('optional_section')
+optional_section = (
+    delimited_item("[", OneOrMore(usage_element), "]")
+    .setParseAction(visit_optional_section)
+    .setName("optional_section")
+)
 """
 Anything can be nested within square brackets, which indicates that everything there is optional
 """
@@ -86,10 +99,9 @@ The usage can contain a flag with its argument
 
 def visit_short_flag_list(s, loc, toks):
     return [
-        Flag.from_synonyms([FlagSynonym(
-            name='-' + flag,
-            argtype=EmptyFlagArg()
-        )], description=None)
+        Flag.from_synonyms(
+            [FlagSynonym(name="-" + flag, argtype=EmptyFlagArg())], description=None
+        )
         for flag in toks[1:]
     ]
 
@@ -109,29 +121,35 @@ def visit_list_element(s, loc, toks):
     return el
 
 
-list_element = (Or([
-    mandatory_element,
-    variable_element
-]) + '...' + Optional(Or([
-    mandatory_element,
-    variable_element
-]))).setParseAction(visit_list_element).setName('list_element')
+list_element = (
+    (
+        Or([mandatory_element, variable_element])
+        + "..."
+        + Optional(Or([mandatory_element, variable_element]))
+    )
+    .setParseAction(visit_list_element)
+    .setName("list_element")
+)
 """
 When one or more arguments are allowed, e.g. "<in2.bam> ... <inN.bam>"
 """
 
-usage_flag = And([flag_with_arg]).setParseAction(lambda s, loc, toks: Flag.from_synonyms(toks, description="")).setName(
-    'usage_flag'
+usage_flag = (
+    And([flag_with_arg])
+    .setParseAction(lambda s, loc, toks: Flag.from_synonyms(toks, description=""))
+    .setName("usage_flag")
 )
 
-usage_element <<= Or([
-    optional_section,
-    list_element,
-    # short_flag_list,
-    usage_flag,
-    variable_element,
-    mandatory_element,
-]).setName('usage_element')
+usage_element <<= Or(
+    [
+        optional_section,
+        list_element,
+        # short_flag_list,
+        usage_flag,
+        variable_element,
+        mandatory_element,
+    ]
+).setName("usage_element")
 
 stack = [1]
 
@@ -145,8 +163,8 @@ def visit_usage(s, loc, toks):
 
 
 usage = (
-        Regex('usage:', flags=re.IGNORECASE).suppress()
-        + indentedBlock(OneOrMore(usage_element, stopOn=LineEnd()), indentStack=stack)
+    Regex("usage:", flags=re.IGNORECASE).suppress()
+    + indentedBlock(OneOrMore(usage_element, stopOn=LineEnd()), indentStack=stack)
 ).setParseAction(visit_usage)
 
 
@@ -156,4 +174,3 @@ usage = (
 #     indentStack=stack,
 #     indent=True
 # )
-

@@ -1,20 +1,21 @@
 """
 Contains the CLI data model
 """
-import itertools
-import typing
 import abc
 import enum
-from acclimatise import cli_types
-from dataclasses import dataclass, field
+import itertools
 import re
-import spacy
-from spacy import tokens
+import typing
 from abc import abstractmethod
+from dataclasses import dataclass, field
+
+import spacy
 import wordsegment
+from acclimatise import cli_types
+from spacy import tokens
 
 try:
-    nlp = spacy.load('en')
+    nlp = spacy.load("en")
 except IOError:
     nlp = None
 
@@ -26,6 +27,7 @@ class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
     """
+
     #: Description of the function of this argument
     description: str
 
@@ -34,7 +36,7 @@ class CliArgument:
 
     @staticmethod
     def tokens_to_name(tokens: typing.List[tokens.Token]):
-        return re.sub('[^\w]', '', ''.join([tok.text.capitalize() for tok in tokens]))
+        return re.sub("[^\w]", "", "".join([tok.text.capitalize() for tok in tokens]))
 
     @abstractmethod
     def full_name(self) -> str:
@@ -51,9 +53,10 @@ class CliArgument:
         """
         Splits this argument's name into multiple words
         """
-        dash_tokens = re.split('[-_]', self.full_name().lstrip('-'))
+        dash_tokens = re.split("[-_]", self.full_name().lstrip("-"))
         segment_tokens = itertools.chain.from_iterable(
-            [wordsegment.segment(w) for w in dash_tokens])
+            [wordsegment.segment(w) for w in dash_tokens]
+        )
         return segment_tokens
 
     def name_to_camel(self) -> str:
@@ -62,14 +65,14 @@ class CliArgument:
         """
         words = list(self.name_to_words())
         cased = [words[0].lower()] + [segment.capitalize() for segment in words]
-        return ''.join(cased)
+        return "".join(cased)
 
     def name_to_snake(self) -> str:
         """
         Gets a representation of this argument in snake case
         """
         words = self.name_to_words()
-        return '_'.join([segment for segment in words])
+        return "_".join([segment for segment in words])
 
     def generate_name(self) -> str:
         """
@@ -77,9 +80,10 @@ class CliArgument:
         """
         if nlp is None:
             raise Exception(
-                "Spacy model doesn't exist! Install it with `python -m spacy download en`")
+                "Spacy model doesn't exist! Install it with `python -m spacy download en`"
+            )
 
-        no_brackets = re.sub('[\[({].+[\])}]', '', self.description)
+        no_brackets = re.sub("[\[({].+[\])}]", "", self.description)
         words = nlp(no_brackets)
         # for chunk in words.noun_chunks:
         #     if chunk.root.dep_ == 'ROOT':
@@ -88,13 +92,13 @@ class CliArgument:
 
         # Find the actual root
         for word in words:
-            if (word.dep_ == 'ROOT' or word.dep == 'nsubj') and word.pos_ == 'NOUN':
+            if (word.dep_ == "ROOT" or word.dep == "nsubj") and word.pos_ == "NOUN":
                 root = word
 
         # If that isn't there, get the first noun
         if root is None:
             for word in words:
-                if word.pos_ == 'NOUN':
+                if word.pos_ == "NOUN":
                     root = word
 
         # If that isn't there, get the first word
@@ -106,7 +110,7 @@ class CliArgument:
             # If the whole subtree is a reasonable length, use that
             return self.tokens_to_name(subtree)
         else:
-            good_children = [tok for tok in subtree if tok.dep_ != 'prep']
+            good_children = [tok for tok in subtree if tok.dep_ != "prep"]
             if len(good_children) >= 1:
                 subtree = sorted([root, good_children[0]], key=lambda tok: tok.i)
                 # Otherwise, just add the first child token
@@ -121,9 +125,13 @@ class Command:
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
     """
 
-    def __init__(self, command: typing.List[str], positional: typing.List['Positional'],
-                 named: typing.List['Flag'],
-                 **kwargs):
+    def __init__(
+        self,
+        command: typing.List[str],
+        positional: typing.List["Positional"],
+        named: typing.List["Flag"],
+        **kwargs
+    ):
         super(**kwargs)
 
         self.command = command
@@ -132,24 +140,24 @@ class Command:
         # Put the help and usage flag into separate variables
         for flag in named:
             if (
-                    '--help' in flag.synonyms
-                    or '-help' in flag.synonyms
-                    or ('-h' in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
+                "--help" in flag.synonyms
+                or "-help" in flag.synonyms
+                or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
             ):
                 self.help_flag = flag
-            elif '--usage' in flag.synonyms:
+            elif "--usage" in flag.synonyms:
                 self.usage_flag = flag
-            elif '--version' in flag.synonyms or '-v' in flag.synonyms:
+            elif "--version" in flag.synonyms: #or "-v" in flag.synonyms:
                 self.version_flag = flag
             else:
                 self.named.append(flag)
         self.positional = positional
 
-    positional: typing.List['Positional']
-    help_flag: 'Flag'
-    usage_flag: 'Flag'
-    version_flag: 'Flag'
-    named: typing.List['Flag']
+    positional: typing.List["Positional"]
+    help_flag: "Flag"
+    usage_flag: "Flag"
+    version_flag: "Flag"
+    named: typing.List["Flag"]
     command: typing.List[str]
 
 
@@ -189,9 +197,10 @@ class Flag(CliArgument):
     """
     Represents one single flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
     """
+
     synonyms: typing.List[str]
     description: typing.Optional[str]
-    args: 'FlagArg'
+    args: "FlagArg"
     optional: bool = True
 
     def get_type(self) -> cli_types.CliType:
@@ -217,13 +226,15 @@ class Flag(CliArgument):
         return self.longest_synonym
 
     @staticmethod
-    def from_synonyms(synonyms: typing.Iterable['FlagSynonym'], description: typing.Optional[str]):
+    def from_synonyms(
+        synonyms: typing.Iterable["FlagSynonym"], description: typing.Optional[str]
+    ):
         """
         Creates a usable Flag object by combining the synonyms provided
         """
         synonym_str = []
         args = None
-        arg_count = float('-inf')
+        arg_count = float("-inf")
 
         for synonym in synonyms:
             synonym_str.append(synonym.name)
@@ -231,11 +242,7 @@ class Flag(CliArgument):
                 arg_count = synonym.argtype.num_args()
                 args = synonym.argtype
 
-        return Flag(
-            synonyms=synonym_str,
-            args=args,
-            description=description
-        )
+        return Flag(synonyms=synonym_str, args=args, description=description)
 
     @property
     def longest_synonym(self) -> str:
@@ -257,28 +264,33 @@ class FlagSynonym:
     """
     Internal class for storing the arguments for a single synonym
     """
+
     name: str
     """
     The entire flag string, e.g. "-n" or "--lines"
     """
 
-    argtype: 'FlagArg'
+    argtype: "FlagArg"
     """
     The number and type of arguments that this flag takes
     """
 
     @property
     def capital(self):
-        return ''.join([segment.capitalize() for segment in
-                        re.split('[-_]', self.name.lstrip('-'))])
+        return "".join(
+            [
+                segment.capitalize()
+                for segment in re.split("[-_]", self.name.lstrip("-"))
+            ]
+        )
 
 
-int_re = re.compile('(int(eger)?)|size|length|max|min', flags=re.IGNORECASE)
-str_re = re.compile('str(ing)?', flags=re.IGNORECASE)
-float_re = re.compile('float|decimal', flags=re.IGNORECASE)
-bool_re = re.compile('bool(ean)?', flags=re.IGNORECASE)
-file_re = re.compile('file|path', flags=re.IGNORECASE)
-dir_re = re.compile('folder|directory', flags=re.IGNORECASE)
+int_re = re.compile("(int(eger)?)|size|length|max|min", flags=re.IGNORECASE)
+str_re = re.compile("str(ing)?", flags=re.IGNORECASE)
+float_re = re.compile("float|decimal", flags=re.IGNORECASE)
+bool_re = re.compile("bool(ean)?", flags=re.IGNORECASE)
+file_re = re.compile("file|path", flags=re.IGNORECASE)
+dir_re = re.compile("folder|directory", flags=re.IGNORECASE)
 
 
 def infer_type(string) -> typing.Optional[cli_types.CliType]:
@@ -344,6 +356,7 @@ class OptionalFlagArg(FlagArg):
     When the flag has multiple arguments, some of which are optional, e.g.
     -I FLOAT[,FLOAT[,INT[,INT]]]
     """
+
     names: list
 
     def num_args(self) -> int:
@@ -358,6 +371,7 @@ class SimpleFlagArg(FlagArg):
     """
     When a flag has one single argument, e.g. `-e PATTERN`, where PATTERN is the argument
     """
+
     name: str
 
     def num_args(self) -> int:
@@ -372,6 +386,7 @@ class RepeatFlagArg(FlagArg):
     """
     When a flag accepts 1 or more arguments, e.g. `--samout SAMOUTS [SAMOUTS ...]`
     """
+
     name: str
 
     def num_args(self) -> int:
@@ -387,11 +402,13 @@ class ChoiceFlagArg(FlagArg):
     """
     When a flag accepts one option from a list of options, e.g. `-s {yes,no,reverse}`
     """
+
     choices: typing.List[str]
 
     def get_type(self):
-        e = enum.Enum(''.join([choice.capitalize() for choice in self.choices]),
-                      self.choices)
+        e = enum.Enum(
+            "".join([choice.capitalize() for choice in self.choices]), self.choices
+        )
         return cli_types.CliEnum(e)
 
     def num_args(self) -> int:

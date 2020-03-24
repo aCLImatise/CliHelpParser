@@ -1,9 +1,13 @@
-from acclimatise.flag_parser.parser import CliParser
-from acclimatise.usage_parser import parse_usage
 import typing
 
+from acclimatise.flag_parser.parser import CliParser
+from acclimatise.usage_parser import parse_usage
+
+
 def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
-    help_command = CliParser(parse_positionals=parse_positionals).parse_command(name=cmd, cmd=text)
+    help_command = CliParser(parse_positionals=parse_positionals).parse_command(
+        name=cmd, cmd=text
+    )
     usage_command = parse_usage(cmd, text)
 
     # Normally parsing the list of flags will provide a better command summary, but if it didn't give us anything,

@@ -11,8 +11,8 @@ def get_env() -> jinja2.Environment:
     :return:
     """
     env = jinja2.Environment(
-        loader=jinja2.PackageLoader('acclimatise', 'converter'),
-        autoescape=jinja2.select_autoescape(['html', 'xml']),
+        loader=jinja2.PackageLoader("acclimatise", "converter"),
+        autoescape=jinja2.select_autoescape(["html", "xml"]),
     )
 
     return env

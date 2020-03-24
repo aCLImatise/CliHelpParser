@@ -1,9 +1,11 @@
+from test.util import process_help_section as process
+from textwrap import dedent
+
+from pkg_resources import resource_filename
+
+from acclimatise.flag_parser import elements
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import SimpleFlagArg
-from pkg_resources import resource_filename
-from textwrap import dedent
-from test.util import process_help_section as process
-from acclimatise.flag_parser import elements
 
 
 def test_pisces_flag(parser):
@@ -14,7 +16,7 @@ def test_pisces_flag(parser):
     # There is one section for positional arguments and one for named arguments
     assert len(flag_synonyms) == 2
     assert isinstance(flag_synonyms[1].argtype, SimpleFlagArg)
-    assert flag_synonyms[1].argtype.name == 'FLOAT'
+    assert flag_synonyms[1].argtype.name == "FLOAT"
 
 
 def test_pisces_arg(parser):
@@ -29,8 +31,9 @@ def test_pisces_arg(parser):
     flag = parser.flag.parseString(cmd)[0]
 
     assert len(flag.synonyms) == 2
-    assert flag.description.startswith('FLOAT Target Frequency')
-    assert flag.args.name == 'FLOAT'
+    assert flag.description.startswith("FLOAT Target Frequency")
+    assert flag.args.name == "FLOAT"
+
 
 def test_pisces_arg_2(parser):
     cmd = """
@@ -41,8 +44,9 @@ def test_pisces_arg_2(parser):
     flag = parser.flag.parseString(cmd)[0]
 
     assert len(flag.synonyms) == 2
-    assert flag.description.startswith('INT FilteredVariantQScore ')
-    assert flag.args.name == 'INT'
+    assert flag.description.startswith("INT FilteredVariantQScore ")
+    assert flag.args.name == "INT"
+
 
 def test_pisces_indent_dedent(parser):
     cmd = """

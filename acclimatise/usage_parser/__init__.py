@@ -1,6 +1,8 @@
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
 from acclimatise.usage_parser.model import UsageElement
+
 from .elements import *
+
 
 def parse_usage(cmd, text):
     toks = usage.searchString(text)
@@ -17,6 +19,9 @@ def parse_usage(cmd, text):
     positional = [tok for tok in toks if isinstance(tok, UsageElement)]
     flags = [tok for tok in toks if isinstance(tok, Flag)]
 
+    # Remove an "options" argument which is just a proxy for other flags
+    positional = [pos for pos in positional if pos.text != 'options']
+
     # The usage often starts with a re-iteration of the command name itself. Remove this if present
     truncate = 0
     for i, arg in enumerate(cmd):
@@ -32,8 +37,6 @@ def parse_usage(cmd, text):
         # everything other than flags are positional elements
         for element in positional:
             element.variable = True
-
-    stack
 
     return Command(
         command=cmd,
