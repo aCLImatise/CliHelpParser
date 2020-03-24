@@ -147,7 +147,7 @@ class Command:
                 self.help_flag = flag
             elif "--usage" in flag.synonyms:
                 self.usage_flag = flag
-            elif "--version" in flag.synonyms: #or "-v" in flag.synonyms:
+            elif "--version" in flag.synonyms:  # or "-v" in flag.synonyms:
                 self.version_flag = flag
             else:
                 self.named.append(flag)
