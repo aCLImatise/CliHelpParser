@@ -1,72 +1,93 @@
 """
 Uses htseq-count, which is used as an example of a Python argparse CLI
 """
-from textwrap import dedent
-import pytest
-from acclimatise.model import RepeatFlagArg, EmptyFlagArg, FlagSynonym
-from acclimatise.cli import execute_cmd
 import shutil
+from textwrap import dedent
+
+import pytest
+from acclimatise.cli import execute_cmd
 from acclimatise.flag_parser import elements
+from acclimatise.model import EmptyFlagArg, FlagSynonym, RepeatFlagArg
 
 
 def test_short(parser):
-    flag = elements.flag_with_arg.parseString(dedent(
-        """
+    flag = elements.flag_with_arg.parseString(
+        dedent(
+            """
         -i IDATTR
         """
-    ))[0]
+        )
+    )[0]
     assert isinstance(flag, FlagSynonym)
 
+
 def test_long_short_synonyms(parser):
-    flag = elements.flag_synonyms.parseString(dedent(
-        """
+    flag = elements.flag_synonyms.parseString(
+        dedent(
+            """
         -i IDATTR, --idattr IDATTR
         """
-    ))[0]
+        )
+    )[0]
     print(flag)
 
+
 def test_long_short_desc(parser):
-    flag = parser.flag.parseString(dedent(
-        """
+    flag = parser.flag.parseString(
+        dedent(
+            """
         -i IDATTR, --idattr IDATTR
                           GFF attribute to be used as feature ID (default,
                           suitable for Ensembl GTF files: gene_id)
         """
-    ))[0]
+        )
+    )[0]
     print(flag)
 
 
 def test_long_short_choices(parser):
-    flag = parser.flag.parseString(dedent(
-        """
+    flag = parser.flag.parseString(
+        dedent(
+            """
           -m {union,intersection-strict,intersection-nonempty}, --mode {union,intersection-strict,intersection-nonempty}
                                 mode to handle reads overlapping more than one feature
                                 (choices: union, intersection-strict, intersection-
                                 nonempty; default: union)
-        """))
+        """
+        )
+    )
 
 
 def test_help_section_preamble(parser):
-    flags = list(parser.flags.searchString(dedent(
-        """
+    flags = list(
+        parser.flags.searchString(
+            dedent(
+                """
 optional arguments:
   -h, --help            show this help message and exit
   -f {sam,bam}, --format {sam,bam}
                         type of <alignment_file> data, either 'sam' or 'bam'
                         (default: sam)
-        """)))[0]
+        """
+            )
+        )
+    )[0]
     assert len(flags) == 2
 
 
 def test_repeat_type(parser):
-    flag = elements.flag_synonyms.parseString("--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]")[0]
-    assert flag.name == '--additional-attr'
+    flag = elements.flag_synonyms.parseString(
+        "--additional-attr ADDITIONAL_ATTR [ADDITIONAL_ATTR ...]"
+    )[0]
+    assert flag.name == "--additional-attr"
     assert isinstance(flag.argtype, RepeatFlagArg)
-    assert flag.argtype.name == 'ADDITIONAL_ATTR'
+    assert flag.argtype.name == "ADDITIONAL_ATTR"
 
 
 def test_full_flags(parser):
-    results = parser.flag.scanString(dedent("""
+    results = parser.flag.scanString(
+        dedent(
+            """
   -h, --help            show this help message and exit
   -f {sam,bam}, --format {sam,bam}
                         type of <alignment_file> data, either 'sam' or 'bam'
@@ -120,27 +141,30 @@ def test_full_flags(parser):
                         'XF')
   -q, --quiet           suppress progress report
 """
-                                            ))
+        )
+    )
     assert len(list(results)) == 15
 
 
 def test_choice(parser):
-    flag = elements.flag_with_arg.parseString('--format {sam,bam}')[0]
-    assert flag.name == '--format'
-    assert list(flag.argtype.choices) == ['sam', 'bam']
+    flag = elements.flag_with_arg.parseString("--format {sam,bam}")[0]
+    assert flag.name == "--format"
+    assert list(flag.argtype.choices) == ["sam", "bam"]
 
 
 def test_noarg(parser):
-    flag = parser.flag.parseString('-q, --quiet           suppress progress report')[0]
-    assert flag.longest_synonym== '--quiet'
+    flag = parser.flag.parseString("-q, --quiet           suppress progress report")[0]
+    assert flag.longest_synonym == "--quiet"
     assert len(flag.synonyms) == 2
     assert isinstance(flag.args, EmptyFlagArg)
 
 
-@pytest.mark.skipif(not shutil.which('htseq-count'), reason='htseq-count is not installed')
+@pytest.mark.skipif(
+    not shutil.which("htseq-count"), reason="htseq-count is not installed"
+)
 def test_full(parser):
     # Parse help
-    help_text = execute_cmd(['htseq-count', '--help'])
+    help_text = execute_cmd(["htseq-count", "--help"])
     flag_sections = parser.flags.searchString(help_text)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 2

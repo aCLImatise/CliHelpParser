@@ -1,11 +1,9 @@
 from abc import abstractmethod
-from acclimatise.model import Command, CliArgument
 from dataclasses import dataclass
 
-cases = [
-    'snake',
-    'camel'
-]
+from acclimatise.model import CliArgument, Command
+
+cases = ["snake", "camel"]
 
 
 @dataclass
@@ -25,7 +23,7 @@ class WrapperGenerator:
             if subclass.format() == typ:
                 return subclass
 
-        raise Exception('Unknown format type')
+        raise Exception("Unknown format type")
 
     @classmethod
     @abstractmethod
@@ -49,12 +47,12 @@ class WrapperGenerator:
         """
         if self.generate_names:
             return flag.generate_name()
-        elif self.case == 'snake':
+        elif self.case == "snake":
             return flag.name_to_snake()
-        elif self.case == 'camel':
+        elif self.case == "camel":
             return flag.name_to_camel()
 
-    case: str = 'snake'
+    case: str = "snake"
     """
     Which case to use for variable names
     """

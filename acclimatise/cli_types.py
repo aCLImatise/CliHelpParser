@@ -1,10 +1,10 @@
 """
 Contains the objects that represent a "type" of data a flag argument might store
 """
-from dataclasses import dataclass
-import typing
-from enum import Enum
 import functools
+import typing
+from dataclasses import dataclass
+from enum import Enum
 
 
 @dataclass(unsafe_hash=True)

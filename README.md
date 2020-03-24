@@ -1,7 +1,7 @@
 # Acclimatise
- 
+
 Acclimatise is a Python library and command-line utility for parsing the help output
-of a command-line tool and then outputting a description of the tool in a more 
+of a command-line tool and then outputting a description of the tool in a more
 structured format, for example a
 [Common Workflow Language tool definition](https://www.commonwl.org/v1.1/CommandLineTool.html).
 
@@ -10,8 +10,10 @@ Currently Acclamitise supports both [CWL](https://www.commonwl.org/) and
 requests to support them.
 
 ## Example
+
 Lets say you want to create a CWL workflow containing the common Unix `wc` (word count)
 utility. Running `wc --help` returns:
+
 ```
 Usage: wc [OPTION]... [FILE]...
   or: wc [OPTION]... --files0-from=F
@@ -41,6 +43,7 @@ or available locally via: info '(coreutils) wc invocation'
 
 If you run `acclimatise -f wdl wc`, which means "convert the wc command into wdl",
 you'll get the following output:
+
 ```wdl
 version 1.0
 
