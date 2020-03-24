@@ -131,7 +131,11 @@ class Command:
 
         # Put the help and usage flag into separate variables
         for flag in named:
-            if '--help' in flag.synonyms or '-help' in flag.synonyms or '-h' in flag.synonyms:
+            if (
+                    '--help' in flag.synonyms
+                    or '-help' in flag.synonyms
+                    or ('-h' in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
+            ):
                 self.help_flag = flag
             elif '--usage' in flag.synonyms:
                 self.usage_flag = flag
@@ -295,7 +299,7 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     elif str_re.match(string):
         return cli_types.CliString()
     else:
-        return None
+        return cli_types.CliString()
 
 
 @dataclass

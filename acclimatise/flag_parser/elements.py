@@ -63,7 +63,7 @@ def customIndentedBlock(blockStatementExpr, indentStack, indent=True, terminal=F
     return smExpr.setName('custom indented block')
 
 
-cli_id = Word(initChars=alphas, bodyChars=alphanums + '-_')
+cli_id = Word(initChars=alphas + '@', bodyChars=alphanums + '-_@')
 
 # short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
 # """A short flag has only a single dash and single character, e.g. `-m`"""
@@ -103,10 +103,10 @@ When the flag has multiple arguments, some of which are optional, e.g.
 # simple_arg = arg.copy().setParseAction(
 #     lambda s, loc, toks: SimpleFlagArg(toks[0]))
 simple_arg = Or([
-    Word(initChars=alphas, bodyChars=alphanums + '-_'),
+    Word(initChars=alphas, bodyChars=alphanums + '-_.'),
 
     # Allow spaces in the argument name, but only if it's enclosed in angle brackets
-    Literal('<').suppress() + Word(initChars=alphas, bodyChars=alphanums + '-_ ') + Literal('>').suppress(),
+    Literal('<').suppress() + Word(initChars=alphas, bodyChars=alphanums + '-_. ') + Literal('>').suppress(),
 ]).setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
 
 list_type_arg = (

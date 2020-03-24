@@ -10,7 +10,7 @@ from pyparsing import ParseBaseException
 
 from acclimatise.converter import WrapperGenerator, cases
 from acclimatise.model import Command
-from acclimatise.flag_parser.parser import CliParser
+from acclimatise.parser import parse_help
 
 
 def main():
@@ -19,8 +19,7 @@ def main():
     # Allow input of help text either by running the command, or using stdin
     if args.stdin:
         stdin = ''.join(sys.stdin.readlines())
-        parser = CliParser()
-        command = parser.parse_command(stdin, args.cmd)
+        command = parse_help(args.cmd, stdin)
     else:
         command = best_cmd(args.cmd)
 
@@ -36,7 +35,7 @@ def main():
 
 def best_cmd(
         cmd: typing.List[str],
-        flags: typing.Iterable[str] = ('-h', '--help', '--usage')
+        flags: typing.Iterable[str] = ([], ['-h'], ['--help'], ['--usage'])
 ) -> Command:
     """
     Determine the best Command instance for a given command line tool, by trying many
@@ -44,15 +43,13 @@ def best_cmd(
     :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
     :param flags: A list of help flags to try, e.g. ['--help', '-h']
     """
-    parser = CliParser()
-
     # For each help flag, run the command and then try to parse it
     commands = []
     for flag in flags:
-        help_cmd = cmd + [flag]
+        help_cmd = cmd + flag
         final = execute_cmd(help_cmd)
         try:
-            commands.append(parser.parse_command(final, cmd))
+            commands.append(parse_help(cmd, final))
         except ParseBaseException:
             # If parsing fails, this wasn't the right flag to use
             continue
