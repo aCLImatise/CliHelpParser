@@ -12,6 +12,8 @@ from dataclasses import dataclass, field
 import spacy
 import wordsegment
 from acclimatise import cli_types
+from acclimatise.yaml import yaml
+from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 
 try:
@@ -22,6 +24,7 @@ except IOError:
 wordsegment.load()
 
 
+@yaml_object(yaml)
 @dataclass
 class CliArgument:
     """
@@ -119,6 +122,7 @@ class CliArgument:
                 return self.tokens_to_name([root])
 
 
+@yaml_object(yaml)
 @dataclass
 class Command:
     """
@@ -154,13 +158,15 @@ class Command:
         self.positional = positional
 
     positional: typing.List["Positional"]
-    help_flag: "Flag"
-    usage_flag: "Flag"
-    version_flag: "Flag"
     named: typing.List["Flag"]
     command: typing.List[str]
 
+    help_flag: typing.Optional["Flag"] = None
+    usage_flag: typing.Optional["Flag"] = None
+    version_flag: typing.Optional["Flag"] = None
 
+
+@yaml_object(yaml)
 @dataclass
 class Positional(CliArgument):
     """
@@ -192,6 +198,7 @@ class Positional(CliArgument):
         return cli_types.CliString()
 
 
+@yaml_object(yaml)
 @dataclass
 class Flag(CliArgument):
     """
@@ -259,6 +266,7 @@ class Flag(CliArgument):
         return min(self.synonyms, key=lambda synonym: len(synonym))
 
 
+@yaml_object(yaml)
 @dataclass
 class FlagSynonym:
     """
@@ -314,6 +322,7 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
         return cli_types.CliString()
 
 
+@yaml_object(yaml)
 @dataclass
 class FlagArg(abc.ABC):
     """
@@ -337,6 +346,7 @@ class FlagArg(abc.ABC):
         pass
 
 
+@yaml_object(yaml)
 @dataclass
 class EmptyFlagArg(FlagArg):
     """
@@ -350,6 +360,7 @@ class EmptyFlagArg(FlagArg):
         return cli_types.CliBoolean()
 
 
+@yaml_object(yaml)
 @dataclass
 class OptionalFlagArg(FlagArg):
     """
@@ -366,6 +377,7 @@ class OptionalFlagArg(FlagArg):
         return cli_types.CliTuple([infer_type(arg) for arg in self.names])
 
 
+@yaml_object(yaml)
 @dataclass
 class SimpleFlagArg(FlagArg):
     """
@@ -381,6 +393,7 @@ class SimpleFlagArg(FlagArg):
         return infer_type(self.name)
 
 
+@yaml_object(yaml)
 @dataclass
 class RepeatFlagArg(FlagArg):
     """
@@ -397,6 +410,7 @@ class RepeatFlagArg(FlagArg):
         return cli_types.CliList(t)
 
 
+@yaml_object(yaml)
 @dataclass
 class ChoiceFlagArg(FlagArg):
     """

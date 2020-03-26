@@ -15,6 +15,7 @@ setup(
         "wordsegment",
         "inflection",
         "illusional.wdlgen~=0.2",
+        "ruamel.yaml",
     ],
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},
     extras_require={"dev": ["pytest", "pre-commit"],},
