@@ -60,8 +60,13 @@ def execute_cmd(help_cmd: typing.List[str]) -> str:
     """
     Execute a command defined by a list of arguments, and return the result as a string
     """
-    proc = subprocess.run(help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return (proc.stdout or proc.stderr).decode("utf_8")
+    try:
+        proc = subprocess.run(
+            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1
+        )
+        return (proc.stdout or proc.stderr).decode("utf_8")
+    except subprocess.TimeoutExpired:
+        return ""
 
 
 def get_parser() -> argparse.ArgumentParser:

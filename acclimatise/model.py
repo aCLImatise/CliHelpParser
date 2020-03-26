@@ -16,13 +16,6 @@ from acclimatise.yaml import yaml
 from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 
-try:
-    nlp = spacy.load("en")
-except IOError:
-    nlp = None
-
-wordsegment.load()
-
 
 @yaml_object(yaml)
 @dataclass
@@ -56,6 +49,10 @@ class CliArgument:
         """
         Splits this argument's name into multiple words
         """
+        # Load wordsegment the first time
+        if len(wordsegment.WORDS) == 0:
+            wordsegment.load()
+
         dash_tokens = re.split("[-_]", self.full_name().lstrip("-"))
         segment_tokens = itertools.chain.from_iterable(
             [wordsegment.segment(w) for w in dash_tokens]
@@ -81,6 +78,11 @@ class CliArgument:
         """
         Generate a 1-3 word variable name for this flag, by parsing the description
         """
+        try:
+            nlp = spacy.load("en")
+        except IOError:
+            nlp = None
+
         if nlp is None:
             raise Exception(
                 "Spacy model doesn't exist! Install it with `python -m spacy download en`"

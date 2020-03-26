@@ -12,6 +12,21 @@ from inflection import camelize
 from wdlgen import ArrayType, Input, PrimitiveType, Task, WdlType
 
 
+def flag_to_command_input(flag: model.CliArgument) -> Task.Command.CommandInput:
+    args = dict(name=flag.name_to_camel())
+
+    if isinstance(flag, model.Flag):
+        args.update(dict(optional=True,))
+        if isinstance(flag.args, model.EmptyFlagArg):
+            args.update(dict(true=flag.longest_synonym, false=""))
+        else:
+            args.update(dict(prefix=flag.longest_synonym,))
+    elif isinstance(flag, model.Positional):
+        args.update(dict(optional=False, position=flag.position))
+
+    return Task.Command.CommandInput(**args)
+
+
 class WdlGenerator(WrapperGenerator):
     case = "snake"
 
@@ -91,20 +106,6 @@ class WdlGenerator(WrapperGenerator):
 
         name = camelize("_".join(cmd.command).replace("-", "_"))
 
-        def flagToCommandInput(flag: model.CliArgument):
-            args = dict(name=flag.name_to_camel())
-
-            if isinstance(flag, model.Flag):
-                args.update(dict(optional=True,))
-                if isinstance(flag.args, model.EmptyFlagArg):
-                    args.update(dict(true=flag.longest_synonym, false=""))
-                else:
-                    args.update(dict(prefix=flag.longest_synonym,))
-            elif isinstance(flag, model.Positional):
-                args.update(dict(optional=False, position=flag.position))
-
-            return Task.Command.CommandInput(**args)
-
         inputs = [
             Input(
                 data_type=self.type_to_wdl(pos.get_type(), optional=False),
@@ -125,8 +126,8 @@ class WdlGenerator(WrapperGenerator):
             name=name,
             command=Task.Command(
                 command=cmd.command,
-                inputs=[flagToCommandInput(pos) for pos in cmd.positional],
-                arguments=[flagToCommandInput(named) for named in cmd.named],
+                inputs=[flag_to_command_input(pos) for pos in cmd.positional],
+                arguments=[flag_to_command_input(named) for named in cmd.named],
             ),
             version="1.0",
             inputs=inputs,
