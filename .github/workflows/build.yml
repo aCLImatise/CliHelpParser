@@ -30,6 +30,7 @@ jobs:
 
   publish:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    runs-on: ubuntu-latest
     steps:
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@master
