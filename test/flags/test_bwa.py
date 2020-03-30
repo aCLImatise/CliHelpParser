@@ -2,9 +2,9 @@ import shutil
 from textwrap import dedent
 
 import pytest
-from acclimatise.cli import execute_cmd
 from acclimatise.flag_parser import elements
 from acclimatise.model import Flag, FlagSynonym, OptionalFlagArg
+from acclimatise.parser import execute_cmd
 
 
 def test_flag_arg(parser):

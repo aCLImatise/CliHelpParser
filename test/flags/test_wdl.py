@@ -1,9 +1,9 @@
 import shutil
 
 import pytest
-from acclimatise.cli import execute_cmd
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.flag_parser.parser import CliParser
+from acclimatise.parser import execute_cmd
 from WDL import parse_document
 
 

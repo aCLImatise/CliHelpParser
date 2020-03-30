@@ -1,8 +1,8 @@
 import shutil
 
 import pytest
-from acclimatise.cli import execute_cmd
 from acclimatise.flag_parser.parser import CliParser
+from acclimatise.parser import execute_cmd
 
 
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
