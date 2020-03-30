@@ -1,7 +1,10 @@
+import subprocess
 import typing
 
 from acclimatise.flag_parser.parser import CliParser
+from acclimatise.model import Command
 from acclimatise.usage_parser import parse_usage
+from pyparsing import ParseBaseException
 
 
 def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
@@ -31,3 +34,40 @@ def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
         #     command.positional = [pos for pos in command.positional if pos.usage_supported]
 
     return command
+
+
+def best_cmd(
+    cmd: typing.List[str],
+    flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
+) -> Command:
+    """
+    Determine the best Command instance for a given command line tool, by trying many
+    different help flags, such as --help and -h
+    :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
+    :param flags: A list of help flags to try, e.g. ['--help', '-h']
+    """
+    # For each help flag, run the command and then try to parse it
+    commands = []
+    for flag in flags:
+        help_cmd = cmd + flag
+        final = execute_cmd(help_cmd)
+        try:
+            commands.append(parse_help(cmd, final))
+        except ParseBaseException:
+            # If parsing fails, this wasn't the right flag to use
+            continue
+
+    return max(commands, key=lambda com: len(com.named) + len(com.positional))
+
+
+def execute_cmd(help_cmd: typing.List[str]) -> str:
+    """
+    Execute a command defined by a list of arguments, and return the result as a string
+    """
+    try:
+        proc = subprocess.run(
+            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1
+        )
+        return (proc.stdout or proc.stderr).decode("utf_8")
+    except subprocess.TimeoutExpired:
+        return ""

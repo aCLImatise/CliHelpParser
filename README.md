@@ -5,7 +5,7 @@ of a command-line tool and then outputting a description of the tool in a more
 structured format, for example a
 [Common Workflow Language tool definition](https://www.commonwl.org/v1.1/CommandLineTool.html).
 
-Currently Acclamitise supports both [CWL](https://www.commonwl.org/) and
+Currently Acclimatise supports both [CWL](https://www.commonwl.org/) and
 [WDL](https://openwdl.org/) outputs, but other formats will be considered in the future, especially pull
 requests to support them.
 
