@@ -2,9 +2,7 @@
 from setuptools import setup
 
 setup(
-    name="acclimatise",
     packages=["acclimatise"],
-    version="0.0.1",
     install_requires=[
         "pyparsing",
         "jinja2",
