@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
-    packages=["acclimatise"],
+    packages=find_packages(exclude="test"),
     install_requires=[
         "pyparsing",
         "jinja2",
