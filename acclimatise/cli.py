@@ -8,7 +8,7 @@ import typing
 
 from acclimatise.converter import WrapperGenerator, cases
 from acclimatise.model import Command
-from acclimatise.parser import parse_help
+from acclimatise.parser import best_cmd, parse_help
 from pyparsing import ParseBaseException
 
 
