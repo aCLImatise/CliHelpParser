@@ -50,10 +50,10 @@ def best_cmd(
     commands = []
     for flag in flags:
         help_cmd = cmd + flag
-        final = execute_cmd(help_cmd)
         try:
+            final = execute_cmd(help_cmd)
             commands.append(parse_help(cmd, final))
-        except ParseBaseException:
+        except (ParseBaseException, UnicodeDecodeError):
             # If parsing fails, this wasn't the right flag to use
             continue
 
