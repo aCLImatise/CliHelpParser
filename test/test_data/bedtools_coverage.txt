@@ -1,0 +1,82 @@
+Tool:    bedtools coverage (aka coverageBed)
+Version: v2.26.0
+Summary: Returns the depth and breadth of coverage of features from B
+	 on the intervals in A.
+
+Usage:   bedtools coverage [OPTIONS] -a <bed/gff/vcf> -b <bed/gff/vcf>
+
+Options: 
+	-hist	Report a histogram of coverage for each feature in A
+		as well as a summary histogram for _all_ features in A.
+
+		Output (tab delimited) after each feature in A:
+		  1) depth
+		  2) # bases at depth
+		  3) size of A
+		  4) % of A at depth
+
+	-d	Report the depth at each position in each A feature.
+		Positions reported are one based.  Each position
+		and depth follow the complete A feature.
+
+	-counts	Only report the count of overlaps, don't compute fraction, etc.
+
+	-mean	Report the mean depth of all positions in each A feature.
+
+	-s	Require same strandedness.  That is, only report hits in B
+		that overlap A on the _same_ strand.
+		- By default, overlaps are reported without respect to strand.
+
+	-S	Require different strandedness.  That is, only report hits in B
+		that overlap A on the _opposite_ strand.
+		- By default, overlaps are reported without respect to strand.
+
+	-f	Minimum overlap required as a fraction of A.
+		- Default is 1E-9 (i.e., 1bp).
+		- FLOAT (e.g. 0.50)
+
+	-F	Minimum overlap required as a fraction of B.
+		- Default is 1E-9 (i.e., 1bp).
+		- FLOAT (e.g. 0.50)
+
+	-r	Require that the fraction overlap be reciprocal for A AND B.
+		- In other words, if -f is 0.90 and -r is used, this requires
+		  that B overlap 90% of A and A _also_ overlaps 90% of B.
+
+	-e	Require that the minimum fraction be satisfied for A OR B.
+		- In other words, if -e is used with -f 0.90 and -F 0.10 this requires
+		  that either 90% of A is covered OR 10% of  B is covered.
+		  Without -e, both fractions would have to be satisfied.
+
+	-split	Treat "split" BAM or BED12 entries as distinct BED intervals.
+
+	-g	Provide a genome file to enforce consistent chromosome sort order
+		across input files. Only applies when used with -sorted option.
+
+	-nonamecheck	For sorted data, don't throw an error if the file has different naming conventions
+			for the same chromosome. ex. "chr1" vs "chr01".
+
+	-sorted	Use the "chromsweep" algorithm for sorted (-k1,1 -k2,2n) input.
+
+	-bed	If using BAM input, write output as BED.
+
+	-header	Print the header from the A file prior to results.
+
+	-nobuf	Disable buffered output. Using this option will cause each line
+		of output to be printed as it is generated, rather than saved
+		in a buffer. This will make printing large output files 
+		noticeably slower, but can be useful in conjunction with
+		other software tools and scripts that need to process one
+		line of bedtools output at a time.
+
+	-iobuf	Specify amount of memory to use for input buffer.
+		Takes an integer argument. Optional suffixes K/M/G supported.
+		Note: currently has no effect with compressed files.
+
+Default Output:  
+	 After each entry in A, reports: 
+	   1) The number of features in B that overlapped the A interval.
+	   2) The number of bases in A that had non-zero coverage.
+	   3) The length of the entry in A.
+	   4) The fraction of bases in A that had non-zero coverage.
+

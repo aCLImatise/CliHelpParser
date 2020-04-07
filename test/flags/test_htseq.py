@@ -5,9 +5,9 @@ import shutil
 from textwrap import dedent
 
 import pytest
+from acclimatise import execute_cmd
 from acclimatise.flag_parser import elements
 from acclimatise.model import EmptyFlagArg, FlagSynonym, RepeatFlagArg
-from acclimatise.parser import execute_cmd
 
 
 def test_short(parser):

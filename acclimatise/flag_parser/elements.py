@@ -1,9 +1,10 @@
 """
 Re-usable parser elements that aren't tied to the parser object
 """
-from acclimatise.model import *
 from pyparsing import *
 from pyparsing import _bslash
+
+from acclimatise.model import *
 
 
 def customIndentedBlock(
@@ -162,6 +163,25 @@ flag_with_arg = (any_flag + Optional(arg_expression)).setParseAction(
 synonym_delim = Word(" ,|", max=2).setParseAction(noop)
 """
 The character used to separate synonyms of a flag. Depending on the help text this might be a comma, pipe or space
+"""
+
+description_sep = White(min=1).setName("description_sep").suppress()
+"""
+The section that separates a flag from its description. This needs to be broad enough that it will match all different
+formats of help outputs but not so broad that every single word starting with a dash will be matched as a flag
+"""
+
+block_element_prefix = LineStart().leaveWhitespace()
+# block_element_prefix = (
+#         (LineStart().leaveWhitespace() ^ Literal(':')) + White(min=1)
+# ).setName('block_element_prefix').leaveWhitespace().suppress()
+"""
+Each element (e.g. flag) in a list of flags must either start with a colon or nothing
+
+e.g. in this example "index" is prefixed by a colon and "mem" is prefixed by a LineStart
+
+Command: index         index sequences in the FASTA format
+         mem           BWA-MEM algorithm
 """
 
 flag_synonyms = delimitedList(flag_with_arg, delim=synonym_delim)

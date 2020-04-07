@@ -6,10 +6,11 @@ import subprocess
 import sys
 import typing
 
+from pyparsing import ParseBaseException
+
+from acclimatise import best_cmd, parse_help
 from acclimatise.converter import WrapperGenerator, cases
 from acclimatise.model import Command
-from acclimatise.parser import best_cmd, parse_help
-from pyparsing import ParseBaseException
 
 
 def main():

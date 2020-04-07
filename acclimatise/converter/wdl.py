@@ -125,7 +125,7 @@ class WdlGenerator(WrapperGenerator):
         tool = Task(
             name=name,
             command=Task.Command(
-                command=cmd.command,
+                command=" ".join(cmd.command),
                 inputs=[flag_to_command_input(pos) for pos in cmd.positional],
                 arguments=[flag_to_command_input(named) for named in cmd.named],
             ),

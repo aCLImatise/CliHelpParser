@@ -1,4 +1,4 @@
-from acclimatise.parser import parse_help
+from acclimatise import parse_help
 
 
 def test_pisces(pisces_help):

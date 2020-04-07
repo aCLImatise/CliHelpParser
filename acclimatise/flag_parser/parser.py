@@ -28,6 +28,7 @@ class CliParser:
         self.description = (
             self.indented_desc
         )  # Optional(one_line_desc) + Optional(indented_desc)
+
         # A description that takes up one line
         # one_line_desc = SkipTo(LineEnd())
 
@@ -62,9 +63,9 @@ class CliParser:
             # Give the correct position to the positional arguments
             processed = []
             counter = 0
-            flags = toks[0]
+            flags = toks[0][0]
 
-            for (flag,) in flags:
+            for flag in flags:
                 if isinstance(flag, Positional):
                     flag.position = counter
                     counter += 1
@@ -73,13 +74,13 @@ class CliParser:
             return processed
 
         if parse_positionals:
-            self.flags = LineStart().leaveWhitespace() + customIndentedBlock(
-                self.flag ^ self.positional, indentStack=stack, indent=True, lax=True
-            ).setParseAction(visit_flags)
+            block_element = self.flag ^ self.positional
         else:
-            self.flags = LineStart().leaveWhitespace() + customIndentedBlock(
-                self.flag, indentStack=stack, indent=True, lax=True
-            ).setParseAction(visit_flags)
+            block_element = self.flag
+
+        self.flags = block_element_prefix + customIndentedBlock(
+            block_element, indentStack=stack, indent=True, lax=True
+        ).setParseAction(visit_flags)
 
         self.flag_section_header = Regex("(arguments|options):", flags=re.IGNORECASE)
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(

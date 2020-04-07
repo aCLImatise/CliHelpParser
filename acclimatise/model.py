@@ -7,7 +7,7 @@ import itertools
 import re
 import typing
 from abc import abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import InitVar, dataclass, field
 
 import spacy
 import wordsegment
@@ -131,38 +131,64 @@ class Command:
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
     """
 
-    def __init__(
-        self,
-        command: typing.List[str],
-        positional: typing.List["Positional"],
-        named: typing.List["Flag"],
-        **kwargs
-    ):
-        super(**kwargs)
+    def __post_init__(self):
+        # Store certain special flags in their own fields
+        if self.help_flag is None:
+            for flag in self.named:
+                if (
+                    "--help" in flag.synonyms
+                    or "-help" in flag.synonyms
+                    or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
+                ):
+                    self.help_flag = flag
+                    self.named.remove(flag)
 
-        self.command = command
-        self.named = []
+        if self.version_flag is None:
+            for flag in self.named:
+                if "--version" in flag.synonyms:
+                    self.version_flag = flag
+                    self.named.remove(flag)
 
-        # Put the help and usage flag into separate variables
-        for flag in named:
-            if (
-                "--help" in flag.synonyms
-                or "-help" in flag.synonyms
-                or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
-            ):
-                self.help_flag = flag
-            elif "--usage" in flag.synonyms:
-                self.usage_flag = flag
-            elif "--version" in flag.synonyms:  # or "-v" in flag.synonyms:
-                self.version_flag = flag
-            else:
-                self.named.append(flag)
-        self.positional = positional
+        if self.usage_flag is None:
+            for flag in self.named:
+                if "--usage" in flag.synonyms:
+                    self.usage_flag = flag
+                    self.named.remove(flag)
+
+    #
+    # def __init__(
+    #     self,
+    #     command: typing.List[str],
+    #     positional: typing.List["Positional"],
+    #     named: typing.List["Flag"],
+    #     **kwargs
+    # ):
+    #     super().__init__(**kwargs)
+    #
+    #     self.command = command
+    #     self.named = []
+    #
+    #     # Put the help and usage flag into separate variables
+    #     for flag in named:
+    #         if (
+    #             "--help" in flag.synonyms
+    #             or "-help" in flag.synonyms
+    #             or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
+    #         ):
+    #             self.help_flag = flag
+    #         elif "--usage" in flag.synonyms:
+    #             self.usage_flag = flag
+    #         elif "--version" in flag.synonyms:  # or "-v" in flag.synonyms:
+    #             self.version_flag = flag
+    #         else:
+    #             self.named.append(flag)
+    #     self.positional = positional
 
     positional: typing.List["Positional"]
     named: typing.List["Flag"]
     command: typing.List[str]
 
+    subcommands: typing.List["Command"] = field(default_factory=list)
     help_flag: typing.Optional["Flag"] = None
     usage_flag: typing.Optional["Flag"] = None
     version_flag: typing.Optional["Flag"] = None

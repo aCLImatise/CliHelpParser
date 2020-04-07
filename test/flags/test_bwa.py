@@ -2,9 +2,9 @@ import shutil
 from textwrap import dedent
 
 import pytest
+from acclimatise import execute_cmd, parse_help
 from acclimatise.flag_parser import elements
 from acclimatise.model import Flag, FlagSynonym, OptionalFlagArg
-from acclimatise.parser import execute_cmd
 
 
 def test_flag_arg(parser):
@@ -126,14 +126,17 @@ def test_complex_optionals(parser):
     assert results.args.names == ["FLOAT", "FLOAT", "INT", "INT"]
 
 
-@pytest.mark.skipif(not shutil.which("bwa"), reason="bwa is not installed")
-def test_bwa(parser):
+def test_bwa_root(bwa_help):
+    command = parse_help(["bwa"], bwa_help)
+    assert len(command.named) == 0
+    assert len(command.positional) == 14
+    assert command.positional[0].name == "index"
+    assert command.positional[-1].name == "bwt2sa"
+
+
+def test_bwa(parser, bwamem_help):
     # Parse help
-    help_text = execute_cmd(["bwa", "mem"])
-    results = list(parser.flags.scanString(help_text))
+    command = parse_help(["bwa", "mem"], text=bwamem_help)
 
-    # The bwa help has 3 sections
-    assert len(results) == 3
-
-    for tokens, start, end in results:
-        assert len(tokens) > 0
+    assert len(command.named) == 32
+    assert len(command.positional) == 3
