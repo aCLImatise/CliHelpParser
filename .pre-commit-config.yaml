@@ -10,6 +10,8 @@ repos:
           - "--force-grid-wrap=0"
           - "--use-parentheses"
           - "--line-width=88"
+          - "-p"
+          - "acclimatise"
 
   - repo: https://github.com/psf/black
     rev: stable
