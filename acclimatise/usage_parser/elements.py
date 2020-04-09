@@ -1,5 +1,7 @@
 import re
 
+from pyparsing import *
+
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
 from acclimatise.flag_parser.elements import flag_with_arg
 from acclimatise.model import (
@@ -11,7 +13,6 @@ from acclimatise.model import (
     SimpleFlagArg,
 )
 from acclimatise.usage_parser.model import UsageElement
-from pyparsing import *
 
 
 def delimited_item(open, el, close):
