@@ -171,10 +171,13 @@ The section that separates a flag from its description. This needs to be broad e
 formats of help outputs but not so broad that every single word starting with a dash will be matched as a flag
 """
 
-block_element_prefix = LineStart().leaveWhitespace()
-# block_element_prefix = (
-#         (LineStart().leaveWhitespace() ^ Literal(':')) + White(min=1)
-# ).setName('block_element_prefix').leaveWhitespace().suppress()
+# block_element_prefix = LineStart().leaveWhitespace()
+block_element_prefix = (
+    ((LineStart().leaveWhitespace() ^ Literal(":")) + White(min=1))
+    .setName("block_element_prefix")
+    .leaveWhitespace()
+    .suppress()
+)
 """
 Each element (e.g. flag) in a list of flags must either start with a colon or nothing
 

@@ -113,7 +113,7 @@ def execute_cmd(help_cmd: typing.List[str]) -> str:
     """
     try:
         proc = subprocess.run(
-            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=1
+            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3
         )
         return (proc.stdout or proc.stderr).decode("utf_8")
     except subprocess.TimeoutExpired:

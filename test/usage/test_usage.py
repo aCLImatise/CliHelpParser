@@ -1,5 +1,3 @@
-from test.util import process_help_section as p
-
 import pytest
 from acclimatise.model import Flag, SimpleFlagArg
 from acclimatise.usage_parser import parse_usage
@@ -63,8 +61,8 @@ def test_samtools_merge_optional_flag_arg():
     assert isinstance(els[0].args, SimpleFlagArg)
 
 
-def test_samtools_merge_full():
-    text = p(
+def test_samtools_merge_full(process):
+    text = process(
         """
     Usage: samtools merge [-nurlf] [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]
     """
@@ -90,11 +88,11 @@ def test_pisces_usage():
     assert command.positional[0].name == "dotnet"
 
 
-def test_trailing_text():
+def test_trailing_text(process):
     """
     Tests that the usage parser will not parse text after the usage section has ended
     """
-    text = p(
+    text = process(
         """
     usage: htseq-count [options] alignment_file gff_file
 

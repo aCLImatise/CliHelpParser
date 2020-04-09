@@ -1,4 +1,3 @@
-from test.util import process_help_section as process
 from textwrap import dedent
 
 from pkg_resources import resource_filename
