@@ -5,7 +5,7 @@ import re
 import subprocess
 from dataclasses import dataclass
 
-from acclimatise import cli_types, jinja, model
+from acclimatise import cli_types, model
 from acclimatise.converter import WrapperGenerator
 from acclimatise.model import Command
 from inflection import camelize
@@ -99,11 +99,6 @@ class WdlGenerator(WrapperGenerator):
         )
 
     def generate_wrapper(self, cmd: Command) -> str:
-        env = jinja.get_env()
-        env.filters["type_to_wdl"] = self.type_to_wdl
-        env.filters["choose_variable_name"] = self.choose_variable_name
-        env.filters["sanitize_str"] = self.sanitize_wdl_str
-
         name = camelize("_".join(cmd.command).replace("-", "_"))
 
         inputs = [
