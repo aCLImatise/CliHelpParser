@@ -75,34 +75,38 @@ def best_cmd(
 def explore_command(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
-) -> Command:
+    parent: typing.Optional[Command] = None,
+) -> typing.Optional[Command]:
     """
     Given a command to start with, builds a model of this command and all its subcommands (if they exist)
     """
     command = best_cmd(cmd, flags)
 
-    # Recursively call this function on positionals
-    for positional in command.positional:
-        subcommand = explore_command(cmd + [positional.name], flags=flags)
-
+    if parent:
         # This isn't a subcommand if it has no flags
-        if len(subcommand.positional) + len(subcommand.named) == 0:
-            return command
+        if len(command.positional) + len(command.named) == 0:
+            return None
 
         # This isn't a subcommand if it shares any positional with the parent command
-        for pos_a, pos_b in zip(command.positional, subcommand.positional):
+        for pos_a, pos_b in zip(parent.positional, command.positional):
             if pos_a == pos_b:
-                return command
+                return None
 
         # This isn't a subcommand if it shares any flags with the parent command
-        for flag_a, flag_b in zip(command.named, subcommand.named):
+        for flag_a, flag_b in zip(parent.named, command.named):
             if flag_a == flag_b:
-                return command
+                return None
 
-        command.subcommands.append(subcommand)
+    # Recursively call this function on positionals
+    for positional in command.positional:
+        subcommand = explore_command(
+            cmd + [positional.name], flags=flags, parent=command
+        )
+        if subcommand is not None:
+            command.subcommands.append(subcommand)
 
-    # If we had any subcommands then we probably don't have any positionals, or at least don't care about them
-    command.positional = []
+            # If we had any subcommands then we probably don't have any positionals, or at least don't care about them
+            command.positional = []
 
     return command
 

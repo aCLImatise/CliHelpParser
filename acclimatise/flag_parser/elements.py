@@ -44,6 +44,7 @@ def customIndentedBlock(
 
     def checkUnindent(s, l, t):
         if l >= len(s):
+            indentStack.pop()
             return
         curCol = col(l, s)
         if not (indentStack and curCol < indentStack[-1]):
@@ -160,7 +161,7 @@ flag_with_arg = (any_flag + Optional(arg_expression)).setParseAction(
 """e.g. `--max-count=NUM`"""
 
 # TODO: this should be smarter, accepting ' ' or '| ' or '|' etc
-synonym_delim = Word(" ,|", max=2).setParseAction(noop)
+synonym_delim = Word(" ,|", max=2).setParseAction(noop).leaveWhitespace()
 """
 The character used to separate synonyms of a flag. Depending on the help text this might be a comma, pipe or space
 """

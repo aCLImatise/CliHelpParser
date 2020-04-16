@@ -42,6 +42,12 @@ def bedtools_coverage_help():
         return fp.read()
 
 
+@pytest.fixture
+def podchecker_help():
+    with open(resource_filename(__name__, "test_data/podchecker.txt")) as fp:
+        return fp.read()
+
+
 @pytest.fixture()
 def process():
     def process_help_section(help):

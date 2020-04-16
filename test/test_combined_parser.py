@@ -16,3 +16,9 @@ def test_bwa(bwamem_help):
     command = parse_help(cmd=["bwa", "mem"], text=bwamem_help)
     assert len(command.named) == 32
     assert len(command.positional) == 3
+
+
+def test_podchecker(podchecker_help):
+    command = parse_help(cmd=["podchecker"], text=podchecker_help)
+    assert len(command.named) == 2
+    assert len(command.positional) == 1

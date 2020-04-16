@@ -1,0 +1,16 @@
+Usage:
+    podchecker [-help] [-man] [-(no)warnings] [file ...]
+
+Options and Arguments:
+    -help   Print a brief help message and exit.
+
+    -man    Print the manual page and exit.
+
+    -warnings -nowarnings
+            Turn on/off printing of warnings. Repeating -warnings increases
+            the warning level, i.e. more warnings are printed. Currently
+            increasing to level two causes flagging of unescaped "<,>"
+            characters.
+
+    file    The pathname of a POD file to syntax-check (defaults to standard
+            input).
