@@ -15,7 +15,7 @@ from acclimatise.usage_parser import parse_usage
 def parse_help(
     cmd: typing.Collection[str],
     text: str,
-    generated_from: list,
+    generated_from: list = [],
     parse_positionals=True,
     hash: str = None,
 ):
@@ -151,7 +151,7 @@ def execute_cmd(help_cmd: typing.List[str]) -> str:
     """
     try:
         proc = subprocess.run(
-            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3
+            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5
         )
         return (proc.stdout or proc.stderr).decode("utf_8")
     except subprocess.TimeoutExpired:
