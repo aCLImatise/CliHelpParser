@@ -188,6 +188,11 @@ class Command:
     named: typing.List["Flag"]
     command: typing.List[str]
 
+    generated_from: typing.List[str] = field(default_factory=list)
+    """
+    A list of flags that were appended to the command in order to generate this Command. e.g. ["--help"] or []
+    """
+
     hash: str = None
     """
     Murmur hash of the entire help page

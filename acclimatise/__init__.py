@@ -4,17 +4,21 @@ import typing
 
 from pyparsing import ParseBaseException
 
-import pyhash
 from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.flag_parser.parser import CliParser
+from acclimatise.hash import hasher
 from acclimatise.model import Command
 from acclimatise.usage_parser import parse_usage
 
-hasher = pyhash.murmur3_x86_128()
 
-
-def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
+def parse_help(
+    cmd: typing.Collection[str],
+    text: str,
+    generated_from: list,
+    parse_positionals=True,
+    hash: str = None,
+):
     help_command = CliParser(parse_positionals=parse_positionals).parse_command(
         name=cmd, cmd=text
     )
@@ -27,7 +31,9 @@ def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
             usage_command, field.name
         )
 
-    fields["hash"] = hasher(text)
+    # Use a pre-calculated hash, or calculate it ourselves if we don't have that
+    fields["hash"] = hash or hasher(text)
+    fields["generated_from"] = generated_from
     return Command(**fields)
 
     # Normally parsing the list of flags will provide a better command summary, but if it didn't give us anything,
@@ -54,12 +60,16 @@ def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
 def best_cmd(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
-) -> Command:
+    cache: typing.Mapping[int, Command] = {},
+) -> typing.List[Command]:
     """
     Determine the best Command instance for a given command line tool, by trying many
     different help flags, such as --help and -h
     :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
     :param flags: A list of help flags to try, e.g. ['--help', '-h']
+    :param cache: A dictionary mapping hashes of previous commands to the result of parsing those commands. This saves
+        repeating computation
+    :returns: A list of potential Commands, in sorted order (best first)
     """
     # For each help flag, run the command and then try to parse it
     commands = []
@@ -67,51 +77,72 @@ def best_cmd(
         help_cmd = cmd + flag
         try:
             final = execute_cmd(help_cmd)
-            commands.append(parse_help(cmd, final))
+
+            # Skip commands we've already parsed
+            mhash = hasher(final)
+            if mhash in cache:
+                commands.append(cache[mhash])
+                continue
+
+            commands.append(parse_help(cmd, final, hash=mhash, generated_from=flag))
         except (ParseBaseException, UnicodeDecodeError):
             # If parsing fails, this wasn't the right flag to use
             continue
 
-    return max(commands, key=lambda com: len(com.named) + len(com.positional))
+    return sorted(
+        commands, key=lambda com: len(com.named) + len(com.positional), reverse=True
+    )
 
 
 def explore_command(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
     parent: typing.Optional[Command] = None,
-) -> typing.Optional[Command]:
+    cache: typing.Mapping[int, Command] = {},
+) -> typing.Tuple[typing.Optional[Command], typing.Mapping[int, Command]]:
     """
     Given a command to start with, builds a model of this command and all its subcommands (if they exist)
+    :param cache: A dictionary mapping hashes of previous commands to the result of parsing those commands. This saves
+        repeating computation
+    :returns: A tuple of (command, cache), where command is the best command calculated, and cache is a dictionary to
+        use for caching future runs
     """
-    command = best_cmd(cmd, flags)
+    commands = best_cmd(cmd, flags, cache=cache)
+
+    cache = {cmd.hash: cmd for cmd in commands}
+
+    if len(commands) == 0:
+        return None, {}
+    command = commands[0]
 
     if parent:
         # This isn't a subcommand if it has no flags
         if len(command.positional) + len(command.named) == 0:
-            return None
+            return None, cache
 
         # This isn't a subcommand if it shares any positional with the parent command
         for pos_a, pos_b in zip(parent.positional, command.positional):
             if pos_a == pos_b:
-                return None
+                return None, cache
 
         # This isn't a subcommand if it shares any flags with the parent command
         for flag_a, flag_b in zip(parent.named, command.named):
             if flag_a == flag_b:
-                return None
+                return None, cache
 
     # Recursively call this function on positionals
     for positional in command.positional:
-        subcommand = explore_command(
+        subcommand, subcache = explore_command(
             cmd + [positional.name], flags=flags, parent=command
         )
+        cache.update(subcache)
         if subcommand is not None:
             command.subcommands.append(subcommand)
 
             # If we had any subcommands then we probably don't have any positionals, or at least don't care about them
             command.positional = []
 
-    return command
+    return command, cache
 
 
 def execute_cmd(help_cmd: typing.List[str]) -> str:
