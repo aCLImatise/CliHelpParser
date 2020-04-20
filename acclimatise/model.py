@@ -188,6 +188,11 @@ class Command:
     named: typing.List["Flag"]
     command: typing.List[str]
 
+    hash: str = None
+    """
+    Murmur hash of the entire help page
+    """
+
     subcommands: typing.List["Command"] = field(default_factory=list)
     help_flag: typing.Optional["Flag"] = None
     usage_flag: typing.Optional["Flag"] = None

@@ -4,11 +4,14 @@ import typing
 
 from pyparsing import ParseBaseException
 
+import pyhash
 from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import Command
 from acclimatise.usage_parser import parse_usage
+
+hasher = pyhash.murmur3_x86_128()
 
 
 def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
@@ -23,7 +26,9 @@ def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
         fields[field.name] = getattr(help_command, field.name) or getattr(
             usage_command, field.name
         )
-    command = Command(**fields)
+
+    fields["hash"] = hasher(text)
+    return Command(**fields)
 
     # Normally parsing the list of flags will provide a better command summary, but if it didn't give us anything,
     # fall back to the usage
@@ -44,8 +49,6 @@ def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
     # Then, by default we filter out unsupported positionals, to remove false positives
     # if only_supported_positionals:
     #     command.positional = [pos for pos in command.positional if pos.usage_supported]
-
-    return command
 
 
 def best_cmd(
