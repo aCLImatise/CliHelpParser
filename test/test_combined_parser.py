@@ -16,7 +16,6 @@ def test_bwa(bwamem_help):
     command = parse_help(cmd=["bwa", "mem"], text=bwamem_help)
     assert len(command.named) == 32
     assert len(command.positional) == 3
-    assert command.hash == 322580371769887544533645088963994633789
 
 
 def test_podchecker(podchecker_help):

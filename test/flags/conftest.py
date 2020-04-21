@@ -2,6 +2,6 @@ import pytest
 from acclimatise.flag_parser.parser import CliParser
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def parser():
     return CliParser()
