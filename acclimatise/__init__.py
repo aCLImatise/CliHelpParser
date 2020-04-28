@@ -51,21 +51,21 @@ def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
 def best_cmd(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
-    cwd: str = None,
+    run_kwargs: dict = {},
 ) -> Command:
     """
     Determine the best Command instance for a given command line tool, by trying many
     different help flags, such as --help and -h
     :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
     :param flags: A list of help flags to try, e.g. ['--help', '-h']
-    :param cwd: Directory in which to run the command
+    :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
     """
     # For each help flag, run the command and then try to parse it
     commands = []
     for flag in flags:
         help_cmd = cmd + flag
         try:
-            final = execute_cmd(help_cmd, cwd=cwd)
+            final = execute_cmd(help_cmd, **run_kwargs)
             commands.append(parse_help(cmd, final))
         except (ParseBaseException, UnicodeDecodeError):
             # If parsing fails, this wasn't the right flag to use
@@ -78,16 +78,16 @@ def explore_command(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
     parent: typing.Optional[Command] = None,
-    cwd: str = None,
+    run_kwargs: dict = {},
 ) -> typing.Optional[Command]:
     """
     Given a command to start with, builds a model of this command and all its subcommands (if they exist)
     :param cmd: Command line executable and arguments to explore
     :param flags: List of flags to append to cmd in order to look for help commands, e.g. "--help"
     :param parent: A parent Command to add this command to as a subcommand, if this command actually exists
-    :param cwd: Directory in which to run the command
+    :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
     """
-    command = best_cmd(cmd, flags, cwd=cwd)
+    command = best_cmd(cmd, flags, run_kwargs=run_kwargs)
 
     if parent:
         # This isn't a subcommand if it has no flags
@@ -107,7 +107,7 @@ def explore_command(
     # Recursively call this function on positionals
     for positional in command.positional:
         subcommand = explore_command(
-            cmd + [positional.name], flags=flags, parent=command, cwd=cwd
+            cmd + [positional.name], flags=flags, parent=command, run_kwargs=run_kwargs
         )
         if subcommand is not None:
             command.subcommands.append(subcommand)
@@ -118,14 +118,14 @@ def explore_command(
     return command
 
 
-def execute_cmd(help_cmd: typing.List[str], cwd: str = None) -> str:
+def execute_cmd(help_cmd: typing.List[str], **kwargs) -> str:
     """
     Execute a command defined by a list of arguments, and return the result as a string
     """
+    defaults = dict(stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
+    defaults.update(kwargs)
     try:
-        proc = subprocess.run(
-            help_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5, cwd=cwd
-        )
+        proc = subprocess.run(help_cmd, **defaults)
         return (proc.stdout or proc.stderr).decode("utf_8")
     except subprocess.TimeoutExpired:
         return ""
