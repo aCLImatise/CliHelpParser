@@ -1,9 +1,8 @@
 """
 Functions for generating WDL from the CLI data model
 """
-import re
-import subprocess
-from dataclasses import dataclass
+from pathlib import Path
+from typing import Generator, List
 
 from acclimatise import cli_types, model
 from acclimatise.converter import WrapperGenerator
@@ -66,74 +65,42 @@ class WdlGenerator(WrapperGenerator):
         else:
             return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
 
-    def formulate_command(self, cmd: Command) -> str:
-        args = subprocess.list2cmdline(cmd.command)
+    def generate_wrapper(
+        self, cmd: Command, out_dir: Path
+    ) -> Generator[Path, None, None]:
+        out_dir = Path(out_dir)
 
-        for flag in cmd.named:
-            args += " \\\n\t"
-            if isinstance(flag.args.get_type(), cli_types.CliBoolean):
-                args += '~{{true="{}" false="" {}}}'.format(
-                    flag.longest_synonym, self.choose_variable_name(flag)
-                )
-            else:
-                args += '~{{"{} " + {}}}'.format(
-                    flag.longest_synonym, self.choose_variable_name(flag)
-                )
+        for command in cmd.command_tree():
+            name = command.as_filename
+            path = (out_dir / name).with_suffix(".wdl")
+            task_name = camelize(name)
 
-        return args
-
-    @staticmethod
-    def sanitize_wdl_str(string: str):
-        return re.sub(
-            "\)",
-            "]",  # Replace left paren with a bracket
-            re.sub(
-                "\(",
-                "[",  # Replace right paren with a bracket
-                re.sub(
-                    '"',
-                    "'",  # Remote double quote string
-                    re.sub("[{}]", "", string),  # Remove braces
-                ),
-            ),
-        )
-
-    def generate_wrapper(self, cmd: Command) -> str:
-        name = camelize("_".join(cmd.command).replace("-", "_"))
-
-        inputs = [
-            Input(
-                data_type=self.type_to_wdl(pos.get_type(), optional=False),
-                name=pos.name_to_camel(),
-            )
-            for pos in cmd.named
-        ]
-        if not self.ignore_positionals:
-            inputs += [
+            inputs = [
                 Input(
-                    data_type=self.type_to_wdl(pos.get_type(), optional=True),
+                    data_type=self.type_to_wdl(pos.get_type(), optional=False),
                     name=pos.name_to_camel(),
                 )
-                for pos in cmd.positional
+                for pos in cmd.named
             ]
+            if not self.ignore_positionals:
+                inputs += [
+                    Input(
+                        data_type=self.type_to_wdl(pos.get_type(), optional=True),
+                        name=pos.name_to_camel(),
+                    )
+                    for pos in cmd.positional
+                ]
 
-        tool = Task(
-            name=name,
-            command=Task.Command(
-                command=" ".join(cmd.command),
-                inputs=[flag_to_command_input(pos) for pos in cmd.positional],
-                arguments=[flag_to_command_input(named) for named in cmd.named],
-            ),
-            version="1.0",
-            inputs=inputs,
-        )
+            tool = Task(
+                name=task_name,
+                command=Task.Command(
+                    command=" ".join(cmd.command),
+                    inputs=[flag_to_command_input(pos) for pos in cmd.positional],
+                    arguments=[flag_to_command_input(named) for named in cmd.named],
+                ),
+                version="1.0",
+                inputs=inputs,
+            )
 
-        return tool.get_string()
-
-        # return template.render(
-        #     taskname=name,
-        #     positional=cmd.positional,
-        #     named=cmd.named,
-        #     command=self.formulate_command(cmd),
-        #     generate_names=self.generate_names
-        # )
+            path.write_text(tool.get_string(), encoding="utf-8")
+            yield path

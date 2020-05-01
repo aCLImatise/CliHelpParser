@@ -1,5 +1,7 @@
 from abc import abstractmethod
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable, List
 
 from acclimatise.model import CliArgument, Command
 
@@ -34,9 +36,9 @@ class WrapperGenerator:
         pass
 
     @abstractmethod
-    def generate_wrapper(self, cmd: Command) -> str:
+    def generate_wrapper(self, cmd: Command, out_dir: Path) -> Iterable[Path]:
         """
-        Abstract method that defines the interface for converting a Command into a wrapper string
+        Convert the command into a list of tool wrapper files
         """
         pass
 

@@ -155,6 +155,22 @@ class Command:
                     self.usage_flag = flag
                     self.named.remove(flag)
 
+    @property
+    def as_filename(self) -> str:
+        """
+        Returns a sample filename that might be used to store this command (without a suffix)
+        """
+        return "_".join(self.command).replace("-", "_")
+
+    def command_tree(self) -> typing.Generator["Command", None, None]:
+        """
+        Returns a generator over the entire command tree. e.g. if this command has 2 subcommands, each with 2
+            subcommands, this will return a generator with 7 Commands
+        """
+        yield self
+        for command in self.subcommands:
+            yield from command.command_tree()
+
     #
     # def __init__(
     #     self,

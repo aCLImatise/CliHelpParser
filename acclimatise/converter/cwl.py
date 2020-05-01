@@ -1,5 +1,7 @@
 import tempfile
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Generator
 
 import cwlgen
 from acclimatise import cli_types
@@ -42,36 +44,42 @@ class CwlGenerator(WrapperGenerator):
         else:
             raise Exception(f"Invalid type {typ}!")
 
-    def generate_wrapper(self, cmd: Command) -> str:
-        cwl_tool = cwlgen.CommandLineTool(
-            tool_id=self.snake_case(cmd.command),
-            base_command=cmd.command,
-            cwl_version="v1.0",
-        )
+    def generate_wrapper(
+        self, cmd: Command, out_dir: Path
+    ) -> Generator[Path, None, None]:
+        for command in cmd.command_tree():
+            path = (out_dir / command.as_filename).with_suffix(".cwl")
 
-        if not self.ignore_positionals:
-            for pos in cmd.positional:
+            cwl_tool = cwlgen.CommandLineTool(
+                tool_id=self.snake_case(cmd.command),
+                base_command=cmd.command,
+                cwl_version="v1.0",
+            )
+
+            if not self.ignore_positionals:
+                for pos in cmd.positional:
+                    cwl_tool.inputs.append(
+                        cwlgen.CommandInputParameter(
+                            param_id=self.choose_variable_name(pos),
+                            param_type=self.to_cwl_type(pos.get_type()),
+                            input_binding=cwlgen.CommandLineBinding(
+                                position=pos.position
+                            ),
+                            doc=pos.description,
+                        )
+                    )
+
+            for flag in cmd.named:
                 cwl_tool.inputs.append(
                     cwlgen.CommandInputParameter(
-                        param_id=self.choose_variable_name(pos),
-                        param_type=self.to_cwl_type(pos.get_type()),
-                        input_binding=cwlgen.CommandLineBinding(position=pos.position),
-                        doc=pos.description,
+                        param_id=self.choose_variable_name(flag),
+                        param_type=self.to_cwl_type(flag.get_type()),
+                        input_binding=cwlgen.CommandLineBinding(
+                            prefix=flag.longest_synonym
+                        ),
+                        doc=flag.description,
                     )
                 )
 
-        for flag in cmd.named:
-            cwl_tool.inputs.append(
-                cwlgen.CommandInputParameter(
-                    param_id=self.choose_variable_name(flag),
-                    param_type=self.to_cwl_type(flag.get_type()),
-                    input_binding=cwlgen.CommandLineBinding(
-                        prefix=flag.longest_synonym
-                    ),
-                    doc=flag.description,
-                )
-            )
-
-        with tempfile.NamedTemporaryFile(mode="w+", encoding="utf-8") as temp:
-            cwl_tool.export(temp.name)
-            return temp.read()
+            cwl_tool.export(str(path))
+            yield path
