@@ -1,11 +1,12 @@
 import shutil
 import tempfile
 
+from WDL import parse_document
+
 import pytest
 from acclimatise import explore_command
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.flag_parser.parser import CliParser
-from WDL import parse_document
 
 
 @pytest.mark.skipif(

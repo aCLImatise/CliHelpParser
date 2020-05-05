@@ -1,81 +1,137 @@
 """
 Code relating to the command line interface to acclimatise
 """
-import argparse
-import subprocess
 import sys
-import typing
+from pathlib import Path
+from typing import Iterable, Tuple
 
-from pyparsing import ParseBaseException
+import click
+from acclimatise import WrapperGenerator, best_cmd, explore_command, parse_help
+from acclimatise.flag_parser.parser import CliParser
 
-from acclimatise import best_cmd, parse_help
-from acclimatise.converter import WrapperGenerator, cases
-from acclimatise.model import Command
+# Some common options
+opt_pos = click.option(
+    "--pos/--no-pos",
+    help=(
+        "Include (default) or don't include positional arguments, for example because the help formatting has some "
+        "misleading sections that look like positional arguments"
+    ),
+)
+opt_generate_names = click.option(
+    "--generate-names",
+    "-g",
+    is_flag=True,
+    help=(
+        "Rather than using the long flag to generate the argument name, generate them automatically using the "
+        "flag description. Generally helpful if there are no long flags, only short flags."
+    ),
+)
+opt_case = click.option(
+    "--case",
+    "-c",
+    type=click.Choice(WrapperGenerator.cases),
+    help=(
+        "Which case to use for variable names. If not set, defaults to the language defaults: snake_case for CWL"
+        " and snake_case for WDL"
+    ),
+    default="snake",
+)
+opt_cmd = click.argument("cmd", nargs=-1)
 
 
+@click.group()
 def main():
-    args = get_parser().parse_args()
+    pass
 
-    # Allow input of help text either by running the command, or using stdin
-    if args.stdin:
-        stdin = "".join(sys.stdin.readlines())
-        command = parse_help(args.cmd, stdin)
+
+@main.command(help="Run an executable and explore all subcommands")
+@opt_cmd
+@opt_pos
+@opt_case
+@opt_generate_names
+@click.option(
+    "--format",
+    "-f",
+    "formats",
+    type=click.Choice(["wdl", "cwl", "yml"]),
+    multiple=True,
+    default=("yml", "wdl", "cwl"),
+    help="The language in which to output the CLI wrapper",
+)
+@click.option(
+    "--out-dir",
+    "-o",
+    type=Path,
+    help="Directory in which to put the output files",
+    required=True,
+)
+@click.option(
+    "--help-flag",
+    "-f",
+    type=str,
+    help="Flag to append to the end of the command to make it output help text",
+)
+@click.option(
+    "--subcommands/--no-subcommands", default=True, help="Look for subcommands"
+)
+def explore(
+    cmd: Iterable[str],
+    out_dir: Path,
+    formats: Tuple[str],
+    subcommands: bool,
+    case: str,
+    generate_names: bool,
+    pos: bool,
+    help_flag: str,
+):
+    # Optionally parse subcommands
+    kwargs = {}
+    if help_flag is not None:
+        kwargs = {"flags": ([help_flag],)}
+    if subcommands:
+        command = explore_command(list(cmd), **kwargs)
     else:
-        command = best_cmd(args.cmd)
+        command = best_cmd(list(cmd), **kwargs)
 
-    converter_cls = WrapperGenerator.choose_converter(args.format)
+    for format in formats:
+        converter_cls = WrapperGenerator.choose_converter(format)
+        converter = converter_cls(
+            generate_names=generate_names, ignore_positionals=not pos, case=case,
+        )
+        converter.generate_tree(command, out_dir)
+
+
+@main.command(
+    help="Read a command help from stdin and output a tool definition to stdout"
+)
+@opt_cmd
+@opt_pos
+@opt_generate_names
+@opt_case
+@click.option(
+    "--format",
+    "-f",
+    type=click.Choice(["wdl", "cwl", "yml"]),
+    default="cwl",
+    help="The language in which to output the CLI wrapper",
+)
+def pipe(cmd, pos, generate_names, case, format):
+    stdin = "".join(sys.stdin.readlines())
+    command = parse_help(cmd, stdin)
+
+    converter_cls = WrapperGenerator.choose_converter(format)
     converter = converter_cls(
-        generate_names=args.generate_names,
-        ignore_positionals=args.no_pos,
-        case=args.case,
+        generate_names=generate_names, ignore_positionals=not pos, case=case,
     )
     output = converter.generate_wrapper(command)
     print(output)
 
 
-def get_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("cmd", nargs="+", help="The base command this tool uses")
-    parser.add_argument(
-        "-f",
-        "--format",
-        choices=["wdl", "cwl"],
-        required=True,
-        help="The language in which to output the CLI wrapper",
-    )
-    parser.add_argument(
-        "--no-pos",
-        action="store_true",
-        help=(
-            "Don't include positional arguments, for example because the help formatting has some "
-            "misleading sections that look like positional arguments"
-        ),
-    )
-    parser.add_argument(
-        "-g",
-        "--generate-names",
-        action="store_true",
-        help=(
-            "Rather than using the long flag to generate the argument name, generate them automatically using the "
-            "flag description. Generally helpful if there are no long flags, only short flags."
-        ),
-    )
-    parser.add_argument(
-        "-c",
-        "--case",
-        choices=cases,
-        help=(
-            "Which case to use for variable names. If not set, defaults to the language defaults: snake_case for CWL"
-            " and snake_case for WDL"
-        ),
-        default="snake",
-    )
-    parser.add_argument(
-        "--stdin",
-        help="Accept the help text from stdin instead of running the command",
-        action="store_true",
-    )
-    return parser
+@main.command(help="Output a representation of the internal grammar")
+@opt_pos
+def grammar(pos):
+    parser = CliParser(pos)
+    print(str(parser.flags))
 
 
 if __name__ == "__main__":

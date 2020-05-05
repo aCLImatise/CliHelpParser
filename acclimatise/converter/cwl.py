@@ -1,12 +1,29 @@
+import inspect
 import tempfile
 from dataclasses import dataclass
+from io import IOBase, StringIO, TextIOBase
 from pathlib import Path
 from typing import Generator
 
-import cwlgen
 from acclimatise import cli_types
 from acclimatise.converter import WrapperGenerator
 from acclimatise.model import Command
+from acclimatise.yaml import yaml
+from cwl_utils.parser_v1_1 import (
+    CommandInputParameter,
+    CommandLineBinding,
+    CommandLineTool,
+)
+
+
+def with_default_none(func, *args, **kwargs):
+    """
+    Calls a function, and inserts None for all arguments you didn't provide
+    """
+    spec = inspect.getfullargspec(func)
+    defaults = {arg: None for arg in spec.args}
+    defaults.pop("self", None)
+    return func(*args, **{**defaults, **kwargs})
 
 
 @dataclass
@@ -44,42 +61,55 @@ class CwlGenerator(WrapperGenerator):
         else:
             raise Exception(f"Invalid type {typ}!")
 
-    def generate_wrapper(
-        self, cmd: Command, out_dir: Path
-    ) -> Generator[Path, None, None]:
-        for command in cmd.command_tree():
-            path = (out_dir / command.as_filename).with_suffix(".cwl")
+    def command_to_tool(self, cmd: Command) -> CommandLineTool:
+        """
+        Outputs the CWL wrapper to the provided file
+        """
+        tool = with_default_none(
+            CommandLineTool,
+            id=cmd.as_filename + ".cwl",
+            baseCommand=list(cmd.command),
+            cwlVersion="v1.1",
+            inputs=[],
+            outputs=[],
+        )
 
-            cwl_tool = cwlgen.CommandLineTool(
-                tool_id=self.snake_case(cmd.command),
-                base_command=cmd.command,
-                cwl_version="v1.0",
-            )
-
-            if not self.ignore_positionals:
-                for pos in cmd.positional:
-                    cwl_tool.inputs.append(
-                        cwlgen.CommandInputParameter(
-                            param_id=self.choose_variable_name(pos),
-                            param_type=self.to_cwl_type(pos.get_type()),
-                            input_binding=cwlgen.CommandLineBinding(
-                                position=pos.position
-                            ),
-                            doc=pos.description,
-                        )
-                    )
-
-            for flag in cmd.named:
-                cwl_tool.inputs.append(
-                    cwlgen.CommandInputParameter(
-                        param_id=self.choose_variable_name(flag),
-                        param_type=self.to_cwl_type(flag.get_type()),
-                        input_binding=cwlgen.CommandLineBinding(
-                            prefix=flag.longest_synonym
+        if not self.ignore_positionals:
+            for pos in cmd.positional:
+                tool.inputs.append(
+                    with_default_none(
+                        CommandInputParameter,
+                        id=self.choose_variable_name(pos),
+                        type=self.to_cwl_type(pos.get_type()),
+                        inputBinding=with_default_none(
+                            CommandLineBinding, position=pos.position
                         ),
-                        doc=flag.description,
+                        doc=pos.description,
                     )
                 )
 
-            cwl_tool.export(str(path))
+        for flag in cmd.named:
+            tool.inputs.append(
+                with_default_none(
+                    CommandInputParameter,
+                    id=self.choose_variable_name(flag),
+                    type=self.to_cwl_type(flag.get_type()),
+                    inputBinding=with_default_none(
+                        CommandLineBinding, prefix=flag.longest_synonym
+                    ),
+                    doc=flag.description,
+                )
+            )
+        return tool
+
+    def generate_wrapper(self, cmd: Command) -> str:
+        io = StringIO()
+        yaml.dump(self.command_to_tool(cmd).save(), io)
+        return io.getvalue()
+
+    def generate_tree(self, cmd: Command, out_dir: Path) -> Generator[Path, None, None]:
+        for command in cmd.command_tree():
+            path = (out_dir / command.as_filename).with_suffix(".cwl")
+            with path.open("w") as fp:
+                yaml.dump(self.command_to_tool(command), fp)
             yield path

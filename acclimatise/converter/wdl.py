@@ -4,11 +4,12 @@ Functions for generating WDL from the CLI data model
 from pathlib import Path
 from typing import Generator, List
 
+from inflection import camelize
+from wdlgen import ArrayType, Input, PrimitiveType, Task, WdlType
+
 from acclimatise import cli_types, model
 from acclimatise.converter import WrapperGenerator
 from acclimatise.model import Command
-from inflection import camelize
-from wdlgen import ArrayType, Input, PrimitiveType, Task, WdlType
 
 
 def flag_to_command_input(flag: model.CliArgument) -> Task.Command.CommandInput:
@@ -65,42 +66,44 @@ class WdlGenerator(WrapperGenerator):
         else:
             return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
 
-    def generate_wrapper(
-        self, cmd: Command, out_dir: Path
-    ) -> Generator[Path, None, None]:
-        out_dir = Path(out_dir)
+    def generate_wrapper(self, cmd: Command) -> str:
+        name = cmd.as_filename
+        task_name = camelize(name)
 
+        inputs = [
+            Input(
+                data_type=self.type_to_wdl(pos.get_type(), optional=False),
+                name=pos.name_to_camel(),
+            )
+            for pos in cmd.named
+        ]
+        if not self.ignore_positionals:
+            inputs += [
+                Input(
+                    data_type=self.type_to_wdl(pos.get_type(), optional=True),
+                    name=pos.name_to_camel(),
+                )
+                for pos in cmd.positional
+            ]
+
+        tool = Task(
+            name=task_name,
+            command=Task.Command(
+                command=" ".join(cmd.command),
+                inputs=[flag_to_command_input(pos) for pos in cmd.positional],
+                arguments=[flag_to_command_input(named) for named in cmd.named],
+            ),
+            version="1.0",
+            inputs=inputs,
+        )
+
+        return tool.get_string()
+
+    def generate_tree(self, cmd: Command, out_dir: Path) -> Generator[Path, None, None]:
+        out_dir = Path(out_dir)
         for command in cmd.command_tree():
             name = command.as_filename
             path = (out_dir / name).with_suffix(".wdl")
-            task_name = camelize(name)
-
-            inputs = [
-                Input(
-                    data_type=self.type_to_wdl(pos.get_type(), optional=False),
-                    name=pos.name_to_camel(),
-                )
-                for pos in cmd.named
-            ]
-            if not self.ignore_positionals:
-                inputs += [
-                    Input(
-                        data_type=self.type_to_wdl(pos.get_type(), optional=True),
-                        name=pos.name_to_camel(),
-                    )
-                    for pos in cmd.positional
-                ]
-
-            tool = Task(
-                name=task_name,
-                command=Task.Command(
-                    command=" ".join(cmd.command),
-                    inputs=[flag_to_command_input(pos) for pos in cmd.positional],
-                    arguments=[flag_to_command_input(named) for named in cmd.named],
-                ),
-                version="1.0",
-                inputs=inputs,
-            )
-
-            path.write_text(tool.get_string(), encoding="utf-8")
+            wrapper = self.generate_wrapper(command)
+            path.write_text(wrapper, encoding="utf-8")
             yield path

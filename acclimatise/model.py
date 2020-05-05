@@ -11,10 +11,11 @@ from dataclasses import InitVar, dataclass, field
 
 import spacy
 import wordsegment
-from acclimatise import cli_types
-from acclimatise.yaml import yaml
 from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
+
+from acclimatise import cli_types
+from acclimatise.yaml import yaml
 
 
 @yaml_object(yaml)

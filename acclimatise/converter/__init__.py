@@ -5,8 +5,6 @@ from typing import Iterable, List
 
 from acclimatise.model import CliArgument, Command
 
-cases = ["snake", "camel"]
-
 
 @dataclass
 class WrapperGenerator:
@@ -14,6 +12,8 @@ class WrapperGenerator:
     Abstract base class for a class that converts a Command object into a string that defines a tool
     wrapper in a certain workflow language
     """
+
+    cases = ["snake", "camel"]
 
     @classmethod
     def choose_converter(cls, typ):
@@ -36,7 +36,14 @@ class WrapperGenerator:
         pass
 
     @abstractmethod
-    def generate_wrapper(self, cmd: Command, out_dir: Path) -> Iterable[Path]:
+    def generate_wrapper(self, cmd: Command) -> str:
+        """
+        Convert the command into a single string, ignoring subcommands
+        """
+        pass
+
+    @abstractmethod
+    def generate_tree(self, cmd: Command, out_dir: Path) -> Iterable[Path]:
         """
         Convert the command into a list of tool wrapper files
         """
