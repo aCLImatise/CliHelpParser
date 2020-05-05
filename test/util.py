@@ -3,11 +3,11 @@ from io import StringIO
 from pathlib import Path
 from textwrap import dedent
 
+import cwl_utils.parser_v1_1 as parser
+from cwltool.load_tool import fetch_document, resolve_and_validate_document
 from WDL import parse_document
 
-import cwl_utils.parser_v1_1 as parser
 from acclimatise.yaml import yaml
-from cwltool.load_tool import fetch_document, resolve_and_validate_document
 
 
 def validate_cwl(cwl: str):

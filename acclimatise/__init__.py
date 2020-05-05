@@ -1,7 +1,7 @@
-import dataclasses
 import subprocess
 import typing
 
+import dataclasses
 from pyparsing import ParseBaseException
 
 from acclimatise.converter import WrapperGenerator

@@ -1,7 +1,8 @@
 from abc import abstractmethod
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List
+
+from dataclasses import dataclass
 
 from acclimatise.model import CliArgument, Command
 

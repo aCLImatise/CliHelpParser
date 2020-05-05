@@ -2,6 +2,7 @@ import shutil
 from textwrap import dedent
 
 import pytest
+
 from acclimatise import execute_cmd, parse_help
 from acclimatise.flag_parser import elements
 from acclimatise.model import Flag, FlagSynonym, OptionalFlagArg

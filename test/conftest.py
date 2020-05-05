@@ -1,8 +1,8 @@
 from textwrap import dedent
 
+import pytest
 from pkg_resources import resource_filename
 
-import pytest
 from acclimatise.flag_parser.parser import CliParser
 
 

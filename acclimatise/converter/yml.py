@@ -1,6 +1,7 @@
-from dataclasses import dataclass
 from pathlib import Path
 from typing import List
+
+from dataclasses import dataclass
 
 from acclimatise.converter import WrapperGenerator
 from acclimatise.model import Command

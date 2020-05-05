@@ -3,8 +3,9 @@ Contains the objects that represent a "type" of data a flag argument might store
 """
 import functools
 import typing
-from dataclasses import dataclass
 from enum import Enum
+
+from dataclasses import dataclass
 
 
 @dataclass(unsafe_hash=True)

@@ -4,8 +4,9 @@ import traceback
 from pathlib import Path
 
 import pytest
-from acclimatise.cli import main
 from click.testing import CliRunner
+
+from acclimatise.cli import main
 
 from .util import validate_cwl, validate_wdl
 

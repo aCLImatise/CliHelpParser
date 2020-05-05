@@ -7,10 +7,10 @@ import itertools
 import re
 import typing
 from abc import abstractmethod
-from dataclasses import InitVar, dataclass, field
 
 import spacy
 import wordsegment
+from dataclasses import InitVar, dataclass, field
 from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 

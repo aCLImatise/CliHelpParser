@@ -1,19 +1,20 @@
 import inspect
 import tempfile
-from dataclasses import dataclass
 from io import IOBase, StringIO, TextIOBase
 from pathlib import Path
 from typing import Generator
 
-from acclimatise import cli_types
-from acclimatise.converter import WrapperGenerator
-from acclimatise.model import Command
-from acclimatise.yaml import yaml
 from cwl_utils.parser_v1_1 import (
     CommandInputParameter,
     CommandLineBinding,
     CommandLineTool,
 )
+from dataclasses import dataclass
+
+from acclimatise import cli_types
+from acclimatise.converter import WrapperGenerator
+from acclimatise.model import Command
+from acclimatise.yaml import yaml
 
 
 def with_default_none(func, *args, **kwargs):
