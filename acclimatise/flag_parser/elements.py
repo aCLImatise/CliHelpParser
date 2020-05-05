@@ -95,11 +95,11 @@ def visit_optional_args(s, lok, toks):
     if len(toks) == 1:
         return OptionalFlagArg(names=[toks[0]])
     else:
-        other = toks[3]
-        if isinstance(other, str):
-            return OptionalFlagArg(names=[toks[0], other])
-        elif isinstance(other, OptionalFlagArg):
-            return OptionalFlagArg(names=[toks[0]] + other.names)
+        first, _, sep, second, _ = toks
+        if isinstance(second, str):
+            return OptionalFlagArg(names=[first, second], separator=sep)
+        elif isinstance(second, OptionalFlagArg):
+            return OptionalFlagArg(names=[first] + second.names, separator=sep)
 
 
 optional_args <<= (arg + "[" + "," + (optional_args ^ arg) + "]").setParseAction(
@@ -114,7 +114,7 @@ When the flag has multiple arguments, some of which are optional, e.g.
 #     lambda s, loc, toks: SimpleFlagArg(toks[0]))
 simple_arg = Or(
     [
-        Word(initChars=alphas, bodyChars=alphanums + "-_."),
+        Word(initChars=alphanums, bodyChars=alphanums + "-_."),
         # Allow spaces in the argument name, but only if it's enclosed in angle brackets
         Literal("<").suppress()
         + Word(initChars=alphas, bodyChars=alphanums + "-_. ")

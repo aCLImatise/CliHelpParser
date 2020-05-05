@@ -414,6 +414,7 @@ class OptionalFlagArg(FlagArg):
     """
 
     names: list
+    separator: str
 
     def num_args(self) -> int:
         return len(self.names)

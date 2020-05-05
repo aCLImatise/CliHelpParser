@@ -104,3 +104,17 @@ def test_trailing_text(process):
     command = parse_usage(["htseq-count"], text)
     # We don't count either the command "htseq-count", or "[options]" as an argument, so there are only 2 positionals
     assert len(command.positional) == 2
+
+
+def test_bwt2sa():
+    text = """
+Usage: bwa bwt2sa [-i 32] <in.bwt> <out.sa>
+    """
+
+    command = parse_usage(["bwa", "bwt2sa"], text)
+
+    # in and out
+    assert len(command.positional) == 2
+
+    # -i
+    assert len(command.named) == 1

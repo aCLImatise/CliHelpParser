@@ -2,7 +2,7 @@
 Functions for generating WDL from the CLI data model
 """
 from pathlib import Path
-from typing import Generator, List
+from typing import Generator, Iterable, List
 
 from inflection import camelize
 from wdlgen import ArrayType, Input, PrimitiveType, Task, WdlType
@@ -25,6 +25,38 @@ def flag_to_command_input(flag: model.CliArgument) -> Task.Command.CommandInput:
         args.update(dict(optional=False, position=flag.position))
 
     return Task.Command.CommandInput(**args)
+
+
+def lowest_common_type(types: Iterable[cli_types.CliType]):
+    type_set = {type(t) for t in types}
+
+    if len(type_set) == 1:
+        # If there is only one type, use it
+        return type_set.pop()
+
+    if (
+        len(type_set) == 2
+        and cli_types.CliInteger in type_set
+        and cli_types.CliFloat in type_set
+    ):
+        # If they're all numeric, they can be represented as floats
+        return cli_types.CliFloat()
+
+    if {
+        cli_types.CliDir,
+        cli_types.CliDict,
+        cli_types.CliFile,
+        cli_types.CliTuple,
+        cli_types.CliList,
+    } & type_set:
+        # These complex types cannot be represented in a simpler way
+        raise Exception(
+            "There is no common type between {}".format(", ".join(type_set))
+        )
+
+    else:
+        # Most of the time, strings can be used to represent primitive types
+        return cli_types.CliString()
 
 
 class WdlGenerator(WrapperGenerator):
@@ -56,7 +88,12 @@ class WdlGenerator(WrapperGenerator):
                     )
                 )
             else:
-                raise Exception("WDL can't deal with hetrogenous array types")
+                return WdlType(
+                    ArrayType(
+                        cls.type_to_wdl(lowest_common_type(typ.values)),
+                        requires_multiple=not optional,
+                    )
+                )
         elif isinstance(typ, cli_types.CliList):
             return WdlType(
                 ArrayType(cls.type_to_wdl(typ.value), requires_multiple=not optional)

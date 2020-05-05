@@ -16,7 +16,7 @@ def test_htseq():
     cmd = explore_command(["htseq-count"])
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        wrappers = list(WdlGenerator().generate_wrapper(cmd, tmpdir))
+        wrappers = list(WdlGenerator().generate_tree(cmd, tmpdir))
 
         # htseq-count has no subcommands
         assert len(wrappers) == 1
@@ -33,7 +33,7 @@ def test_bwa():
     cmd = explore_command(["bwa"])
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        wrappers = list(WdlGenerator().generate_wrapper(cmd, tmpdir))
+        wrappers = list(WdlGenerator().generate_tree(cmd, tmpdir))
 
         # bwa has many subcommands
         assert len(wrappers) > 10
