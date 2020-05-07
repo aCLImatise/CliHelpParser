@@ -135,7 +135,7 @@ list_type_arg = (
 
 choice_type_arg = nestedExpr(
     opener="{", closer="}", content=delimitedList(cli_id, delim=",")
-).setParseAction(lambda s, loc, toks: ChoiceFlagArg(list(toks[0])))
+).setParseAction(lambda s, loc, toks: ChoiceFlagArg(set(toks[0])))
 """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
 

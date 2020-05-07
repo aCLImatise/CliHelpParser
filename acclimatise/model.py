@@ -463,7 +463,7 @@ class ChoiceFlagArg(FlagArg):
     When a flag accepts one option from a list of options, e.g. `-s {yes,no,reverse}`
     """
 
-    choices: typing.List[str]
+    choices: typing.Set[str]
 
     def get_type(self):
         e = enum.Enum(
