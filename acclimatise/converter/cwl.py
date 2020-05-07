@@ -112,5 +112,5 @@ class CwlGenerator(WrapperGenerator):
         for command in cmd.command_tree():
             path = (out_dir / command.as_filename).with_suffix(".cwl")
             with path.open("w") as fp:
-                yaml.dump(self.command_to_tool(command), fp)
+                yaml.dump(self.command_to_tool(command).save(), fp)
             yield path
