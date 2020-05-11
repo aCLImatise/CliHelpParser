@@ -150,7 +150,9 @@ def test_full_flags(parser):
 def test_choice(parser):
     flag = elements.flag_with_arg.parseString("--format {sam,bam}")[0]
     assert flag.name == "--format"
-    assert list(flag.argtype.choices) == ["sam", "bam"]
+
+    # Both sets should be the same
+    assert len(flag.argtype.choices & {"sam", "bam"}) == 2
 
 
 def test_noarg(parser):

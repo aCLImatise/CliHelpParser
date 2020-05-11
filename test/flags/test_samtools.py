@@ -6,6 +6,13 @@ from acclimatise import execute_cmd
 from acclimatise.flag_parser.parser import CliParser
 
 
+def test_samtools(parser, samtools_help):
+    # Parse the root samtools command
+    samtools = parser.parse_command(name=["samtools"], cmd=samtools_help)
+    assert len(samtools.named) == 0
+    assert len(samtools.positional) > 25
+
+
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
 def test_samtools_index(parser):
     # Parse help

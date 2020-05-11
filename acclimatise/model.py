@@ -467,7 +467,8 @@ class ChoiceFlagArg(FlagArg):
 
     def get_type(self):
         e = enum.Enum(
-            "".join([choice.capitalize() for choice in self.choices]), self.choices
+            "".join([choice.capitalize() for choice in self.choices]),
+            list(self.choices),
         )
         return cli_types.CliEnum(e)
 

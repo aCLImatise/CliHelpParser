@@ -6,9 +6,10 @@ from pkg_resources import resource_filename
 from acclimatise.flag_parser.parser import CliParser
 
 
-@pytest.fixture()
-def cwl_parser():
-    return cwltool.factory.Factory()
+@pytest.fixture
+def samtools_help():
+    with open(resource_filename(__name__, "test_data/samtools.txt")) as fp:
+        return fp.read()
 
 
 @pytest.fixture

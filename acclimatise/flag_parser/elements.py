@@ -79,7 +79,7 @@ cli_id = Word(initChars=alphas + "@", bodyChars=alphanums + "-_@")
 # """A short flag has only a single dash and single character, e.g. `-m`"""
 # long_flag = originalTextFor(Literal('--') + cli_id)
 # """A long flag has two dashes and any amount of characters, e.g. `--max-count`"""
-any_flag = originalTextFor("-" + Optional("-") + cli_id)
+any_flag = originalTextFor("-" + Optional("-") + cli_id).leaveWhitespace()
 """The flag is the part with the dashes, e.g. `-m` or `--max-count`"""
 
 flag_arg_sep = Or([Literal("="), Literal(" ")]).leaveWhitespace()
@@ -158,6 +158,7 @@ flag_with_arg = (any_flag + Optional(arg_expression)).setParseAction(
         FlagSynonym(name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
     )
 )
+flag_with_arg.skipWhitespace = True
 """e.g. `--max-count=NUM`"""
 
 # TODO: this should be smarter, accepting ' ' or '| ' or '|' etc

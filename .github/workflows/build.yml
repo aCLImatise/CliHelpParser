@@ -3,8 +3,26 @@ name:
 on: [push]
 
 jobs:
-  build:
+  conda:
+    # Run tests using conda, which gives us bioinformatics tools installed
     runs-on: ubuntu-latest
+    container: continuumio/miniconda3
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          source /root/.bashrc
+          conda env create -f environment.yml
+          conda activate aclimatise-test
+          pip install --upgrade pip wheel setuptools
+          pip install -e .[dev]
+          pytest
+        shell: bash
+
+  system python:
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8]

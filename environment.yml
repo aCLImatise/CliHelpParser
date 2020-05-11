@@ -1,9 +1,11 @@
-name: declivity-test
+name: aclimatise-test
 channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bwa # C program
-  - samtools # C program
-  - bedtools # C program
-  - htseq # Python example
+  - bwa
+  - samtools
+  - bedtools
+  - htseq
+  - singularity
+  - podchecker
