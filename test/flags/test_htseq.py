@@ -173,5 +173,5 @@ def test_full(parser):
     assert len(flag_sections) == 2
     # There are two positional arguments
     assert len(flag_sections[0]) == 2
-    # There are 15 flags
-    assert len(flag_sections[1]) == 15
+    # There are at least 15 flags
+    assert len(flag_sections[1]) >= 15

@@ -26,4 +26,4 @@ def test_singularity_pull():
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 1
     # There are two positional arguments
-    assert len(flag_sections[0]) == 5
+    assert len(flag_sections[0]) >= 5
