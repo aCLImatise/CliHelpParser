@@ -61,6 +61,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
       - name: Compile package
         run: |
           pip install -U wheel setuptools
