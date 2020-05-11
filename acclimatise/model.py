@@ -6,6 +6,7 @@ import enum
 import itertools
 import re
 import typing
+import unicodedata
 from abc import abstractmethod
 
 import spacy
@@ -54,7 +55,14 @@ class CliArgument:
         if len(wordsegment.WORDS) == 0:
             wordsegment.load()
 
-        dash_tokens = re.split("[-_]", self.full_name().lstrip("-"))
+        base = self.full_name().lstrip("-")
+
+        # Replace symbols with their unicode names
+        translated = re.sub(
+            "[\W\S]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
+        )
+
+        dash_tokens = re.split("[-_]", translated)
         segment_tokens = itertools.chain.from_iterable(
             [wordsegment.segment(w) for w in dash_tokens]
         )
