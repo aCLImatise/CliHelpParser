@@ -13,7 +13,17 @@ from acclimatise.model import Command
 from acclimatise.usage_parser import parse_usage
 
 
-def parse_help(cmd: typing.Collection[str], text: str, parse_positionals=True):
+def parse_help(
+    cmd: typing.Collection[str], text: str, parse_positionals=True
+) -> Command:
+    """
+    Parse a string of help text into a Command. Use this if you already have run the executable and extracted the
+    help text yourself
+
+    :param cmd: List of arguments used to generate this help text, e.g. ['bwa', 'mem']
+    :param text: The help text to parse
+    :param parse_positionals: If false, don't parse positional arguments
+    """
     help_command = CliParser(parse_positionals=parse_positionals).parse_command(
         name=cmd, cmd=text
     )
@@ -57,7 +67,10 @@ def best_cmd(
 ) -> Command:
     """
     Determine the best Command instance for a given command line tool, by trying many
-    different help flags, such as --help and -h
+    different help flags, such as --help and -h, then return the Command. Use this if you know the command you want to
+    parse, but you don't know which flags it responds to with help text. Unlike :py:func:`aclimatise.explore_command`,
+    this doesn't even attempt to parse subcommands.
+
     :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
     :param flags: A list of help flags to try, e.g. ['--help', '-h']
     :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
@@ -83,7 +96,10 @@ def explore_command(
     run_kwargs: dict = {},
 ) -> typing.Optional[Command]:
     """
-    Given a command to start with, builds a model of this command and all its subcommands (if they exist)
+    Given a command to start with, builds a model of this command and all its subcommands (if they exist).
+    Use this if you know the command you want to parse, you don't know which flags it responds to with help text, and
+    you want to include subcommands.
+
     :param cmd: Command line executable and arguments to explore
     :param flags: List of flags to append to cmd in order to look for help commands, e.g. "--help"
     :param parent: A parent Command to add this command to as a subcommand, if this command actually exists

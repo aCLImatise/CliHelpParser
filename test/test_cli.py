@@ -47,7 +47,7 @@ def test_explore_htseq(runner):
     with tempfile.TemporaryDirectory() as tempdir:
         result = runner.invoke(main, ["explore", "htseq-count", "--out-dir", tempdir])
         cli_worked(result)
-        assert len(list(Path(tempdir).iterdir())) == 1
+        assert len(list(Path(tempdir).iterdir())) == 3
 
 
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
