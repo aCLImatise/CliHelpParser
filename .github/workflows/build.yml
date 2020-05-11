@@ -49,6 +49,11 @@ jobs:
         run: |
           pytest
 
+      - uses: ammaraskar/sphinx-action@master
+        name: Test the documentation still builds
+        with:
+          docs-folder: "docs/"
+
   publish:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
     needs: [test_system, test_conda]
@@ -77,3 +82,15 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_password }}
+
+      - uses: ammaraskar/sphinx-action@master
+        name: Build the docs
+        with:
+          docs-folder: "docs/"
+
+      - name: Deploy docs
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs/_build/html

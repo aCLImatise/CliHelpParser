@@ -125,7 +125,10 @@ def explore_command(
     # Recursively call this function on positionals
     for positional in command.positional:
         subcommand = explore_command(
-            cmd + [positional.name], flags=flags, parent=command, run_kwargs=run_kwargs
+            cmd=cmd + [positional.name],
+            flags=flags,
+            parent=command,
+            run_kwargs=run_kwargs,
         )
         if subcommand is not None:
             command.subcommands.append(subcommand)

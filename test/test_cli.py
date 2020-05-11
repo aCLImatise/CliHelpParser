@@ -53,7 +53,9 @@ def test_explore_htseq(runner):
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
 def test_explore_samtools(runner):
     with tempfile.TemporaryDirectory() as tempdir:
-        result = runner.invoke(main, ["explore", "samtools", "--out-dir", tempdir])
+        result = runner.invoke(
+            main, ["explore", "samtools", "--help-flag", "--help", "--out-dir", tempdir]
+        )
         cli_worked(result)
         assert len(list(Path(tempdir).iterdir())) > 20
 
@@ -62,7 +64,7 @@ def test_explore_samtools(runner):
 def test_explore_samtools_no_subcommands(runner):
     with tempfile.TemporaryDirectory() as tempdir:
         result = runner.invoke(
-            main, ["explore", "samtools", "--no-subcommands", "--out-dir", tempdir]
+            main, ["explore", "samtools", "--no-subcommands", "--out-dir", tempdir,],
         )
         cli_worked(result)
         # Since we aren't looking at subcommands, there should be one file for each format
