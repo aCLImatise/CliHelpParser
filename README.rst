@@ -1,5 +1,7 @@
 Acclimatise
 ===========
+For the full documentation, refer to the `Github Pages Website
+<https://aclimatise.github.io/CliHelpParser/>`_.
 
 Acclimatise is a Python library and command-line utility for parsing the help output
 of a command-line tool and then outputting a description of the tool in a more
