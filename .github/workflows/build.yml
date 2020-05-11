@@ -3,14 +3,14 @@ name:
 on: [push]
 
 jobs:
-  conda:
+  test_conda:
     # Run tests using conda, which gives us bioinformatics tools installed
     runs-on: ubuntu-latest
     container: continuumio/miniconda3
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: Tests
         run: |
           source /root/.bashrc
           conda env create -f environment.yml
@@ -20,7 +20,7 @@ jobs:
           pytest
         shell: bash
 
-  system_python:
+  test_system:
     runs-on: ubuntu-latest
 
     strategy:
@@ -48,7 +48,7 @@ jobs:
 
   publish:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-    needs: [system_python, conda]
+    needs: [test_system, test_conda]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
