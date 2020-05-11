@@ -21,16 +21,98 @@ from acclimatise.yaml import yaml
 
 @yaml_object(yaml)
 @dataclass
+class Command:
+    """
+    Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
+    """
+
+    def __post_init__(self):
+        # Store certain special flags in their own fields
+        if self.help_flag is None:
+            for flag in self.named:
+                if (
+                    "--help" in flag.synonyms
+                    or "-help" in flag.synonyms
+                    or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
+                ):
+                    self.help_flag = flag
+                    self.named.remove(flag)
+
+        if self.version_flag is None:
+            for flag in self.named:
+                if "--version" in flag.synonyms:
+                    self.version_flag = flag
+                    self.named.remove(flag)
+
+        if self.usage_flag is None:
+            for flag in self.named:
+                if "--usage" in flag.synonyms:
+                    self.usage_flag = flag
+                    self.named.remove(flag)
+
+    @property
+    def as_filename(self) -> str:
+        """
+        Returns a sample filename that might be used to store this command (without a suffix)
+        """
+        return "_".join(self.command).replace("-", "_")
+
+    def command_tree(self) -> typing.Generator["Command", None, None]:
+        """
+        Returns a generator over the entire command tree. e.g. if this command has 2 subcommands, each with 2
+            subcommands, this will return a generator with 7 Commands
+        """
+        yield self
+        for command in self.subcommands:
+            yield from command.command_tree()
+
+    positional: typing.List["Positional"]
+    """
+    All positional arguments supported by this command
+    """
+
+    named: typing.List["Flag"]
+    """
+    All named arguments (flags) supported by this command
+    """
+
+    command: typing.List[str]
+    """
+    The command line used to invoke this command, e.g. ["bwa", "mem"]
+    """
+
+    subcommands: typing.List["Command"] = field(default_factory=list)
+    """
+    A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
+    """
+
+    help_flag: typing.Optional["Flag"] = None
+    """
+    If identified, this is the flag that returns help text
+    """
+
+    usage_flag: typing.Optional["Flag"] = None
+    """
+    If identified, this is the flag that returns usage examples
+    """
+
+    version_flag: typing.Optional["Flag"] = None
+    """
+    If identified, this is the flag that returns the version of the executable
+    """
+
+
+@yaml_object(yaml)
+@dataclass
 class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
     """
 
-    #: Description of the function of this argument
     description: str
-
-    #: Whether the existence of this argument is supported by it appearing in the usage
-    usage_supported: bool = field(default=False, init=False)
+    """
+    Description of the function of this argument
+    """
 
     @staticmethod
     def tokens_to_name(tokens: typing.List[tokens.Token]):
@@ -38,12 +120,16 @@ class CliArgument:
 
     @abstractmethod
     def full_name(self) -> str:
+        """
+        Return a human-readable representation of this argument
+        """
         pass
 
     @abstractmethod
     def get_type(self) -> cli_types.CliType:
         """
-        Return a type object indicating the type of data this argument holds. e.g. If it's an array type this will be a CliList.
+        Return a type object indicating the type of data this argument holds. e.g. If it's an array type this will be a
+        CliList.
         """
         pass
 
@@ -135,92 +221,6 @@ class CliArgument:
 
 @yaml_object(yaml)
 @dataclass
-class Command:
-    """
-    Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
-    """
-
-    def __post_init__(self):
-        # Store certain special flags in their own fields
-        if self.help_flag is None:
-            for flag in self.named:
-                if (
-                    "--help" in flag.synonyms
-                    or "-help" in flag.synonyms
-                    or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
-                ):
-                    self.help_flag = flag
-                    self.named.remove(flag)
-
-        if self.version_flag is None:
-            for flag in self.named:
-                if "--version" in flag.synonyms:
-                    self.version_flag = flag
-                    self.named.remove(flag)
-
-        if self.usage_flag is None:
-            for flag in self.named:
-                if "--usage" in flag.synonyms:
-                    self.usage_flag = flag
-                    self.named.remove(flag)
-
-    @property
-    def as_filename(self) -> str:
-        """
-        Returns a sample filename that might be used to store this command (without a suffix)
-        """
-        return "_".join(self.command).replace("-", "_")
-
-    def command_tree(self) -> typing.Generator["Command", None, None]:
-        """
-        Returns a generator over the entire command tree. e.g. if this command has 2 subcommands, each with 2
-            subcommands, this will return a generator with 7 Commands
-        """
-        yield self
-        for command in self.subcommands:
-            yield from command.command_tree()
-
-    #
-    # def __init__(
-    #     self,
-    #     command: typing.List[str],
-    #     positional: typing.List["Positional"],
-    #     named: typing.List["Flag"],
-    #     **kwargs
-    # ):
-    #     super().__init__(**kwargs)
-    #
-    #     self.command = command
-    #     self.named = []
-    #
-    #     # Put the help and usage flag into separate variables
-    #     for flag in named:
-    #         if (
-    #             "--help" in flag.synonyms
-    #             or "-help" in flag.synonyms
-    #             or ("-h" in flag.synonyms and isinstance(flag.args, EmptyFlagArg))
-    #         ):
-    #             self.help_flag = flag
-    #         elif "--usage" in flag.synonyms:
-    #             self.usage_flag = flag
-    #         elif "--version" in flag.synonyms:  # or "-v" in flag.synonyms:
-    #             self.version_flag = flag
-    #         else:
-    #             self.named.append(flag)
-    #     self.positional = positional
-
-    positional: typing.List["Positional"]
-    named: typing.List["Flag"]
-    command: typing.List[str]
-
-    subcommands: typing.List["Command"] = field(default_factory=list)
-    help_flag: typing.Optional["Flag"] = None
-    usage_flag: typing.Optional["Flag"] = None
-    version_flag: typing.Optional["Flag"] = None
-
-
-@yaml_object(yaml)
-@dataclass
 class Positional(CliArgument):
     """
     A positional command-line argument. This probably means that it is required, and has no arguments like flags do
@@ -233,9 +233,24 @@ class Positional(CliArgument):
         return self.name
 
     position: int
+    """
+    The position in the command line that this argument must occupy
+    """
+
     name: str
+    """
+    The name of this argument
+    """
+
     description: str
+    """
+    A description of the function of this argument
+    """
+
     optional: bool = False
+    """
+    If true, this argument is not required
+    """
 
     def get_type(self) -> cli_types.CliType:
         # Try the the flag name, then the description in that order
@@ -259,9 +274,24 @@ class Flag(CliArgument):
     """
 
     synonyms: typing.List[str]
+    """
+    A list of different ways to invoke this same option, e.g. ``-v`` and ``--verbose``
+    """
+
     description: typing.Optional[str]
+    """
+    A description of the function of this flag
+    """
+
     args: "FlagArg"
+    """
+    Describes the arguments to this flag, e.g. ``-n 1`` has a single numeric argument
+    """
+
     optional: bool = True
+    """
+    If true, this flag is not required (the default)
+    """
 
     def get_type(self) -> cli_types.CliType:
         # Try the argument name, then the flag name, then the description in that order
@@ -422,7 +452,14 @@ class OptionalFlagArg(FlagArg):
     """
 
     names: list
+    """
+    Names of each argument
+    """
+
     separator: str
+    """
+    Separator between each argument
+    """
 
     def num_args(self) -> int:
         return len(self.names)
@@ -439,6 +476,9 @@ class SimpleFlagArg(FlagArg):
     """
 
     name: str
+    """
+    Name of this argument
+    """
 
     def num_args(self) -> int:
         return 1
@@ -455,6 +495,9 @@ class RepeatFlagArg(FlagArg):
     """
 
     name: str
+    """
+    The name of this argument
+    """
 
     def num_args(self) -> int:
         return 1
@@ -472,6 +515,9 @@ class ChoiceFlagArg(FlagArg):
     """
 
     choices: typing.Set[str]
+    """
+    Set of possible choices that could be used for this argument
+    """
 
     def get_type(self):
         e = enum.Enum(
