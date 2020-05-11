@@ -49,10 +49,10 @@ jobs:
         run: |
           pytest
 
-      - uses: ammaraskar/sphinx-action@master
-        name: Test the documentation still builds
-        with:
-          docs-folder: "docs/"
+      - name: Test the documentation still builds
+        run: |
+          cd docs
+          make html
 
   publish:
     if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
@@ -83,10 +83,10 @@ jobs:
           user: __token__
           password: ${{ secrets.pypi_password }}
 
-      - uses: ammaraskar/sphinx-action@master
-        name: Build the docs
-        with:
-          docs-folder: "docs/"
+      - name: Test the documentation still builds
+        run: |
+          cd docs
+          make html
 
       - name: Deploy docs
         uses: JamesIves/github-pages-deploy-action@releases/v3
