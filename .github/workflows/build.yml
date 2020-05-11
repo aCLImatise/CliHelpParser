@@ -20,7 +20,7 @@ jobs:
           pytest
         shell: bash
 
-  system python:
+  system_python:
     runs-on: ubuntu-latest
 
     strategy:
