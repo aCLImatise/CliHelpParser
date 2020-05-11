@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to aCLImatise’s documentation! &#8212; aCLImatise 0.0.16 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Python API" href="api.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-aclimatise-s-documentation">
+<h1>Welcome to aCLImatise’s documentation!<a class="headerlink" href="#welcome-to-aclimatise-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Data Model</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="acclimatise">
+<h1>Acclimatise<a class="headerlink" href="#acclimatise" title="Permalink to this headline">¶</a></h1>
+<p>Acclimatise is a Python library and command-line utility for parsing the help output
+of a command-line tool and then outputting a description of the tool in a more
+structured format, for example a
+<a class="reference external" href="https://www.commonwl.org/v1.1/CommandLineTool.html">Common Workflow Language tool definition</a>.</p>
+<p>Currently Acclimatise supports both <a class="reference external" href="https://www.commonwl.org/">CWL</a> and
+<a class="reference external" href="https://openwdl.org/">WDL</a> outputs, but other formats will be considered in the future, especially pull
+requests to support them.</p>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>Lets say you want to create a CWL workflow containing the common Unix <code class="docutils literal notranslate"><span class="pre">wc</span></code> (word count)
+utility. Running <code class="docutils literal notranslate"><span class="pre">wc</span> <span class="pre">--help</span></code> returns:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Usage</span><span class="p">:</span> <span class="n">wc</span> <span class="p">[</span><span class="n">OPTION</span><span class="p">]</span><span class="o">...</span> <span class="p">[</span><span class="n">FILE</span><span class="p">]</span><span class="o">...</span>
+  <span class="ow">or</span><span class="p">:</span> <span class="n">wc</span> <span class="p">[</span><span class="n">OPTION</span><span class="p">]</span><span class="o">...</span> <span class="o">--</span><span class="n">files0</span><span class="o">-</span><span class="n">from</span><span class="o">=</span><span class="n">F</span>
+<span class="n">Print</span> <span class="n">newline</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="ow">and</span> <span class="n">byte</span> <span class="n">counts</span> <span class="k">for</span> <span class="n">each</span> <span class="n">FILE</span><span class="p">,</span> <span class="ow">and</span> <span class="n">a</span> <span class="n">total</span> <span class="n">line</span> <span class="k">if</span>
+<span class="n">more</span> <span class="n">than</span> <span class="n">one</span> <span class="n">FILE</span> <span class="ow">is</span> <span class="n">specified</span><span class="o">.</span>  <span class="n">A</span> <span class="n">word</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">non</span><span class="o">-</span><span class="n">zero</span><span class="o">-</span><span class="n">length</span> <span class="n">sequence</span> <span class="n">of</span>
+<span class="n">characters</span> <span class="n">delimited</span> <span class="n">by</span> <span class="n">white</span> <span class="n">space</span><span class="o">.</span>
+
+<span class="n">With</span> <span class="n">no</span> <span class="n">FILE</span><span class="p">,</span> <span class="ow">or</span> <span class="n">when</span> <span class="n">FILE</span> <span class="ow">is</span> <span class="o">-</span><span class="p">,</span> <span class="n">read</span> <span class="n">standard</span> <span class="nb">input</span><span class="o">.</span>
+
+<span class="n">The</span> <span class="n">options</span> <span class="n">below</span> <span class="n">may</span> <span class="n">be</span> <span class="n">used</span> <span class="n">to</span> <span class="n">select</span> <span class="n">which</span> <span class="n">counts</span> <span class="n">are</span> <span class="n">printed</span><span class="p">,</span> <span class="n">always</span> <span class="ow">in</span>
+<span class="n">the</span> <span class="n">following</span> <span class="n">order</span><span class="p">:</span> <span class="n">newline</span><span class="p">,</span> <span class="n">word</span><span class="p">,</span> <span class="n">character</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">maximum</span> <span class="n">line</span> <span class="n">length</span><span class="o">.</span>
+  <span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">--</span><span class="nb">bytes</span>            <span class="nb">print</span> <span class="n">the</span> <span class="n">byte</span> <span class="n">counts</span>
+  <span class="o">-</span><span class="n">m</span><span class="p">,</span> <span class="o">--</span><span class="n">chars</span>            <span class="nb">print</span> <span class="n">the</span> <span class="n">character</span> <span class="n">counts</span>
+  <span class="o">-</span><span class="n">l</span><span class="p">,</span> <span class="o">--</span><span class="n">lines</span>            <span class="nb">print</span> <span class="n">the</span> <span class="n">newline</span> <span class="n">counts</span>
+      <span class="o">--</span><span class="n">files0</span><span class="o">-</span><span class="n">from</span><span class="o">=</span><span class="n">F</span>    <span class="n">read</span> <span class="nb">input</span> <span class="kn">from</span> <span class="nn">the</span> <span class="n">files</span> <span class="n">specified</span> <span class="n">by</span>
+                           <span class="n">NUL</span><span class="o">-</span><span class="n">terminated</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">file</span> <span class="n">F</span><span class="p">;</span>
+                           <span class="n">If</span> <span class="n">F</span> <span class="ow">is</span> <span class="o">-</span> <span class="n">then</span> <span class="n">read</span> <span class="n">names</span> <span class="kn">from</span> <span class="nn">standard</span> <span class="nb">input</span>
+  <span class="o">-</span><span class="n">L</span><span class="p">,</span> <span class="o">--</span><span class="nb">max</span><span class="o">-</span><span class="n">line</span><span class="o">-</span><span class="n">length</span>  <span class="nb">print</span> <span class="n">the</span> <span class="n">maximum</span> <span class="n">display</span> <span class="n">width</span>
+  <span class="o">-</span><span class="n">w</span><span class="p">,</span> <span class="o">--</span><span class="n">words</span>            <span class="nb">print</span> <span class="n">the</span> <span class="n">word</span> <span class="n">counts</span>
+      <span class="o">--</span><span class="n">help</span> <span class="n">display</span> <span class="n">this</span> <span class="n">help</span> <span class="ow">and</span> <span class="n">exit</span>
+      <span class="o">--</span><span class="n">version</span> <span class="n">output</span> <span class="n">version</span> <span class="n">information</span> <span class="ow">and</span> <span class="n">exit</span>
+
+<span class="n">GNU</span> <span class="n">coreutils</span> <span class="n">online</span> <span class="n">help</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">gnu</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">coreutils</span><span class="o">/&gt;</span>
+<span class="n">Full</span> <span class="n">documentation</span> <span class="n">at</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">www</span><span class="o">.</span><span class="n">gnu</span><span class="o">.</span><span class="n">org</span><span class="o">/</span><span class="n">software</span><span class="o">/</span><span class="n">coreutils</span><span class="o">/</span><span class="n">wc</span><span class="o">&gt;</span>
+<span class="ow">or</span> <span class="n">available</span> <span class="n">locally</span> <span class="n">via</span><span class="p">:</span> <span class="n">info</span> <span class="s1">&#39;(coreutils) wc invocation&#39;</span>
+</pre></div>
+</div>
+<p>If you run <code class="docutils literal notranslate"><span class="pre">wc</span> <span class="pre">--help</span> <span class="pre">|</span> <span class="pre">acclimatise</span> <span class="pre">pipe</span> <span class="pre">-f</span> <span class="pre">wdl</span></code>, which means “convert the wc command into wdl”,
+you’ll get the following output:</p>
+<div class="highlight-wdl notranslate"><div class="highlight"><pre><span></span>version 1.0
+
+task Wc {
+  input {
+    Boolean bytesBytes
+    Boolean charsChars
+    Boolean linesLines
+    String filesFiles0From
+    Boolean maxMaxLineLength
+    Boolean wordsWords
+    String? orOr
+  }
+  command &lt;&lt;&lt;
+    wc \
+      ~{orOr} \
+      ~{true=&quot;--bytes&quot; false=&quot;&quot; bytesBytes} \
+      ~{true=&quot;--chars&quot; false=&quot;&quot; charsChars} \
+      ~{true=&quot;--lines&quot; false=&quot;&quot; linesLines} \
+      ~{if defined(filesFiles0From) then (&quot;--files0-from &quot; +  &#39;&quot;&#39; + filesFiles0From + &#39;&quot;&#39;) else &quot;&quot;} \
+      ~{true=&quot;--max-line-length&quot; false=&quot;&quot; maxMaxLineLength} \
+      ~{true=&quot;--words&quot; false=&quot;&quot; wordsWords}
+  &gt;&gt;&gt;
+}
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">aCLImatise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">Data Model</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="api.html" title="next chapter">Python API</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michael Milton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,603 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Data Model &#8212; aCLImatise 0.0.16 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Command Line Interface" href="cli.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-acclimatise.model">
+<span id="data-model"></span><h1>Data Model<a class="headerlink" href="#module-acclimatise.model" title="Permalink to this headline">¶</a></h1>
+<p>Contains the CLI data model</p>
+<dl class="py class">
+<dt id="acclimatise.model.ChoiceFlagArg">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">ChoiceFlagArg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">choices</span><span class="p">:</span> <span class="n">Set<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.ChoiceFlagArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.FlagArg</span></code></a></p>
+<p>When a flag accepts one option from a list of options, e.g. <cite>-s {yes,no,reverse}</cite></p>
+<dl class="py attribute">
+<dt id="acclimatise.model.ChoiceFlagArg.choices">
+<code class="sig-name descname">choices</code><em class="property">: typing.Set[str]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.ChoiceFlagArg.choices" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.ChoiceFlagArg.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.ChoiceFlagArg.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
+CliList.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.ChoiceFlagArg.num_args">
+<code class="sig-name descname">num_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#acclimatise.model.ChoiceFlagArg.num_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multiplicity of this argument</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.CliArgument">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">CliArgument</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">description</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.CliArgument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A generic parent class for both named and positional CLI arguments</p>
+<dl class="py attribute">
+<dt id="acclimatise.model.CliArgument.description">
+<code class="sig-name descname">description</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.CliArgument.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description of the function of this argument</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.full_name">
+<em class="property">abstract </em><code class="sig-name descname">full_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.full_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.generate_name">
+<code class="sig-name descname">generate_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.generate_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a 1-3 word variable name for this flag, by parsing the description</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.get_type">
+<em class="property">abstract </em><code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><a class="headerlink" href="#acclimatise.model.CliArgument.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a CliList.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.name_to_camel">
+<code class="sig-name descname">name_to_camel</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.name_to_camel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a representation of this argument in CamelCase</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.name_to_snake">
+<code class="sig-name descname">name_to_snake</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.name_to_snake" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a representation of this argument in snake case</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.name_to_words">
+<code class="sig-name descname">name_to_words</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Iterable<span class="p">[</span>str<span class="p">]</span><a class="headerlink" href="#acclimatise.model.CliArgument.name_to_words" title="Permalink to this definition">¶</a></dt>
+<dd><p>Splits this argument’s name into multiple words</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.CliArgument.tokens_to_name">
+<em class="property">static </em><code class="sig-name descname">tokens_to_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">tokens</span><span class="p">:</span> <span class="n">List<span class="p">[</span>spacy.tokens.token.Token<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.CliArgument.tokens_to_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.CliArgument.usage_supported">
+<code class="sig-name descname">usage_supported</code><em class="property">: bool</em><em class="property"> = False</em><a class="headerlink" href="#acclimatise.model.CliArgument.usage_supported" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether the existence of this argument is supported by it appearing in the usage</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.Command">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Command</code><span class="sig-paren">(</span><em class="sig-param">positional: List[Positional], named: List[Flag], command: List[str], subcommands: List[Command] = &lt;factory&gt;, help_flag: Optional[Flag] = None, usage_flag: Optional[Flag] = None, version_flag: Optional[Flag] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class representing an entire command or subcommand, e.g. <cite>bwa mem</cite> or <cite>grep</cite></p>
+<dl class="py method">
+<dt id="acclimatise.model.Command.as_filename">
+<em class="property">property </em><code class="sig-name descname">as_filename</code><a class="headerlink" href="#acclimatise.model.Command.as_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a sample filename that might be used to store this command (without a suffix)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.command">
+<code class="sig-name descname">command</code><em class="property">: typing.List[str]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.command" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Command.command_tree">
+<code class="sig-name descname">command_tree</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Generator[acclimatise.model.Command, None, None]<a class="headerlink" href="#acclimatise.model.Command.command_tree" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Returns a generator over the entire command tree. e.g. if this command has 2 subcommands, each with 2</dt><dd><p>subcommands, this will return a generator with 7 Commands</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.help_flag">
+<code class="sig-name descname">help_flag</code><em class="property">: Optional[Flag]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.help_flag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.named">
+<code class="sig-name descname">named</code><em class="property">: typing.List['Flag']</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.named" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.positional">
+<code class="sig-name descname">positional</code><em class="property">: typing.List['Positional']</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.positional" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.subcommands">
+<code class="sig-name descname">subcommands</code><em class="property">: typing.List['Command']</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.subcommands" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.usage_flag">
+<code class="sig-name descname">usage_flag</code><em class="property">: Optional[Flag]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.usage_flag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.version_flag">
+<code class="sig-name descname">version_flag</code><em class="property">: Optional[Flag]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.version_flag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.EmptyFlagArg">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">EmptyFlagArg</code><a class="headerlink" href="#acclimatise.model.EmptyFlagArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.FlagArg</span></code></a></p>
+<p>A flag that has no arguments, e.g. <cite>–quiet</cite> that is either present or not present</p>
+<dl class="py method">
+<dt id="acclimatise.model.EmptyFlagArg.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.EmptyFlagArg.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
+CliList.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.EmptyFlagArg.num_args">
+<code class="sig-name descname">num_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#acclimatise.model.EmptyFlagArg.num_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multiplicity of this argument</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.Flag">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Flag</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">description</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">synonyms</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">args</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg">acclimatise.model.FlagArg</a></span></em>, <em class="sig-param"><span class="n">optional</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Flag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.CliArgument" title="acclimatise.model.CliArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.CliArgument</span></code></a></p>
+<p>Represents one single flag, with all synonyms for it, and all arguments, e.g. <cite>-h, –help</cite></p>
+<dl class="py attribute">
+<dt id="acclimatise.model.Flag.args">
+<code class="sig-name descname">args</code><em class="property">: 'FlagArg'</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Flag.args" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Flag.description">
+<code class="sig-name descname">description</code><em class="property">: typing.Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Flag.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.from_synonyms">
+<em class="property">static </em><code class="sig-name descname">from_synonyms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">synonyms</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>FlagSynonym<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">description</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Flag.from_synonyms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a usable Flag object by combining the synonyms provided</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.full_name">
+<code class="sig-name descname">full_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.Flag.full_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getting the full name for a named flag is slightly harder, we need to find the longest synonym</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><a class="headerlink" href="#acclimatise.model.Flag.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a CliList.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.longest_synonym">
+<em class="property">property </em><code class="sig-name descname">longest_synonym</code><a class="headerlink" href="#acclimatise.model.Flag.longest_synonym" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the longest synonym this flag has. e.g. for <cite>-h, –help</cite>, it will return <cite>–help</cite></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Flag.optional">
+<code class="sig-name descname">optional</code><em class="property">: bool</em><em class="property"> = True</em><a class="headerlink" href="#acclimatise.model.Flag.optional" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.shortest_synonym">
+<em class="property">property </em><code class="sig-name descname">shortest_synonym</code><a class="headerlink" href="#acclimatise.model.Flag.shortest_synonym" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the shortest synonym this flag has. e.g. for <cite>-h, –help</cite>, it will return <cite>-h</cite></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Flag.synonyms">
+<code class="sig-name descname">synonyms</code><em class="property">: typing.List[str]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Flag.synonyms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.FlagArg">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">FlagArg</code><a class="headerlink" href="#acclimatise.model.FlagArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>The data model for the argument or arguments for a flag, for example a flag might have no arguments, it might have
+one argument, it might accept one option from a list of options, or it might accept an arbitrary number of inputs</p>
+<dl class="py method">
+<dt id="acclimatise.model.FlagArg.get_type">
+<em class="property">abstract </em><code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><a class="headerlink" href="#acclimatise.model.FlagArg.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
+CliList.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.FlagArg.num_args">
+<em class="property">abstract </em><code class="sig-name descname">num_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#acclimatise.model.FlagArg.num_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multiplicity of this argument</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.FlagSynonym">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">FlagSynonym</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">argtype</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg">acclimatise.model.FlagArg</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.FlagSynonym" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Internal class for storing the arguments for a single synonym</p>
+<dl class="py attribute">
+<dt id="acclimatise.model.FlagSynonym.argtype">
+<code class="sig-name descname">argtype</code><em class="property">: 'FlagArg'</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.FlagSynonym.argtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number and type of arguments that this flag takes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.FlagSynonym.capital">
+<em class="property">property </em><code class="sig-name descname">capital</code><a class="headerlink" href="#acclimatise.model.FlagSynonym.capital" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.FlagSynonym.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.FlagSynonym.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The entire flag string, e.g. “-n” or “–lines”</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.OptionalFlagArg">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">OptionalFlagArg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">names</span><span class="p">:</span> <span class="n">list</span></em>, <em class="sig-param"><span class="n">separator</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.OptionalFlagArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.FlagArg</span></code></a></p>
+<p>When the flag has multiple arguments, some of which are optional, e.g.
+-I FLOAT[,FLOAT[,INT[,INT]]]</p>
+<dl class="py method">
+<dt id="acclimatise.model.OptionalFlagArg.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.OptionalFlagArg.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
+CliList.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.OptionalFlagArg.names">
+<code class="sig-name descname">names</code><em class="property">: list</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.OptionalFlagArg.names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.OptionalFlagArg.num_args">
+<code class="sig-name descname">num_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#acclimatise.model.OptionalFlagArg.num_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multiplicity of this argument</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.OptionalFlagArg.separator">
+<code class="sig-name descname">separator</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.OptionalFlagArg.separator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.Positional">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Positional</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">description</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">position</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">optional</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Positional" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.CliArgument" title="acclimatise.model.CliArgument"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.CliArgument</span></code></a></p>
+<p>A positional command-line argument. This probably means that it is required, and has no arguments like flags do</p>
+<dl class="py attribute">
+<dt id="acclimatise.model.Positional.description">
+<code class="sig-name descname">description</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Positional.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Positional.full_name">
+<code class="sig-name descname">full_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.Positional.full_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getting the full name for a positional argument is easy - it’s just the parameter name</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Positional.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><a class="headerlink" href="#acclimatise.model.Positional.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a CliList.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Positional.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Positional.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Positional.optional">
+<code class="sig-name descname">optional</code><em class="property">: bool</em><em class="property"> = False</em><a class="headerlink" href="#acclimatise.model.Positional.optional" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Positional.position">
+<code class="sig-name descname">position</code><em class="property">: int</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Positional.position" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.RepeatFlagArg">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">RepeatFlagArg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.RepeatFlagArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.FlagArg</span></code></a></p>
+<p>When a flag accepts 1 or more arguments, e.g. <cite>–samout SAMOUTS [SAMOUTS …]</cite></p>
+<dl class="py method">
+<dt id="acclimatise.model.RepeatFlagArg.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.RepeatFlagArg.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
+CliList.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.RepeatFlagArg.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.RepeatFlagArg.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.RepeatFlagArg.num_args">
+<code class="sig-name descname">num_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#acclimatise.model.RepeatFlagArg.num_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multiplicity of this argument</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.model.SimpleFlagArg">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">SimpleFlagArg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.SimpleFlagArg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.model.FlagArg" title="acclimatise.model.FlagArg"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.FlagArg</span></code></a></p>
+<p>When a flag has one single argument, e.g. <cite>-e PATTERN</cite>, where PATTERN is the argument</p>
+<dl class="py method">
+<dt id="acclimatise.model.SimpleFlagArg.get_type">
+<code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.SimpleFlagArg.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
+CliList.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.SimpleFlagArg.name">
+<code class="sig-name descname">name</code><em class="property">: str</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.SimpleFlagArg.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.SimpleFlagArg.num_args">
+<code class="sig-name descname">num_args</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#acclimatise.model.SimpleFlagArg.num_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the multiplicity of this argument</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="acclimatise.model.infer_type">
+<code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">infer_type</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">string</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><span class="p">]</span><a class="headerlink" href="#acclimatise.model.infer_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads a string (argument description etc) to find hints about what type this argument might be. This is
+generally called by the get_type() methods</p>
+</dd></dl>
+
+<span class="target" id="module-acclimatise.cli_types"></span><p>Contains the objects that represent a “type” of data a flag argument might store</p>
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliBoolean">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliBoolean</code><a class="headerlink" href="#acclimatise.cli_types.CliBoolean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliDict">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliDict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a></span></em>, <em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<dl class="py attribute">
+<dt id="acclimatise.cli_types.CliDict.key">
+<code class="sig-name descname">key</code><em class="property">: CliType</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.cli_types.CliDict.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.cli_types.CliDict.value">
+<code class="sig-name descname">value</code><em class="property">: CliType</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.cli_types.CliDict.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliDir">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliDir</code><a class="headerlink" href="#acclimatise.cli_types.CliDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliEnum">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliEnum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enum</span><span class="p">:</span> <span class="n">enum.Enum</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliEnum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<dl class="py attribute">
+<dt id="acclimatise.cli_types.CliEnum.enum">
+<code class="sig-name descname">enum</code><em class="property">: Enum</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.cli_types.CliEnum.enum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliFile">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliFile</code><a class="headerlink" href="#acclimatise.cli_types.CliFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliFloat">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliFloat</code><a class="headerlink" href="#acclimatise.cli_types.CliFloat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliInteger">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliInteger</code><a class="headerlink" href="#acclimatise.cli_types.CliInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliList">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliList</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<dl class="py attribute">
+<dt id="acclimatise.cli_types.CliList.value">
+<code class="sig-name descname">value</code><em class="property">: CliType</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.cli_types.CliList.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliString">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliString</code><a class="headerlink" href="#acclimatise.cli_types.CliString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliTuple">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliTuple</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">values</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<dl class="py method">
+<dt id="acclimatise.cli_types.CliTuple.homogenous">
+<em class="property">property </em><code class="sig-name descname">homogenous</code><a class="headerlink" href="#acclimatise.cli_types.CliTuple.homogenous" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.cli_types.CliTuple.values">
+<code class="sig-name descname">values</code><em class="property">: typing.List[CliType]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.cli_types.CliTuple.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliType">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliType</code><a class="headerlink" href="#acclimatise.cli_types.CliType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="acclimatise.cli_types.CliType.representable">
+<em class="property">property </em><code class="sig-name descname">representable</code><a class="headerlink" href="#acclimatise.cli_types.CliType.representable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a set of types that this type could alternatively be represented as.
+Adds the class’s own type to the _representable set</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">aCLImatise</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Model</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="cli.html" title="previous chapter">Command Line Interface</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Michael Milton.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/model.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
