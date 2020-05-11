@@ -62,7 +62,7 @@ class CliArgument:
             "[\W\S\-_]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
         )
 
-        dash_tokens = re.split("[-_]", translated)
+        dash_tokens = re.split("[-_ ]", translated)
         segment_tokens = itertools.chain.from_iterable(
             [wordsegment.segment(w) for w in dash_tokens]
         )
