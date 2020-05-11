@@ -99,7 +99,7 @@ def explore(
         converter = converter_cls(
             generate_names=generate_names, ignore_positionals=not pos, case=case,
         )
-        converter.generate_tree(command, out_dir)
+        list(converter.generate_tree(command, out_dir))
 
 
 @main.command(
