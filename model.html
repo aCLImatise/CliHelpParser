@@ -14,6 +14,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Changelog" href="changes.html" />
     <link rel="prev" title="Command Line Interface" href="cli.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -118,12 +119,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="acclimatise.model.CliArgument.generate_name">
-<code class="sig-name descname">generate_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.generate_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a 1-3 word variable name for this flag, by parsing the description</p>
-</dd></dl>
-
-<dl class="py method">
 <dt id="acclimatise.model.CliArgument.get_type">
 <em class="property">abstract </em><code class="sig-name descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType">acclimatise.cli_types.CliType</a><a class="headerlink" href="#acclimatise.model.CliArgument.get_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a type object indicating the type of data this argument holds. e.g. If it’s an array type this will be a
@@ -131,21 +126,9 @@ CliList.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="acclimatise.model.CliArgument.name_to_camel">
-<code class="sig-name descname">name_to_camel</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.name_to_camel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a representation of this argument in CamelCase</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="acclimatise.model.CliArgument.name_to_snake">
-<code class="sig-name descname">name_to_snake</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.model.CliArgument.name_to_snake" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gets a representation of this argument in snake case</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="acclimatise.model.CliArgument.name_to_words">
-<code class="sig-name descname">name_to_words</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Iterable<span class="p">[</span>str<span class="p">]</span><a class="headerlink" href="#acclimatise.model.CliArgument.name_to_words" title="Permalink to this definition">¶</a></dt>
-<dd><p>Splits this argument’s name into multiple words</p>
+<dt id="acclimatise.model.CliArgument.variable_name">
+<em class="property">property </em><code class="sig-name descname">variable_name</code><a class="headerlink" href="#acclimatise.model.CliArgument.variable_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of words that should be used in a variable name for this argument</p>
 </dd></dl>
 
 </dd></dl>
@@ -250,6 +233,12 @@ CliList.</p>
 <dt id="acclimatise.model.Flag.synonyms">
 <code class="sig-name descname">synonyms</code><em class="property">: typing.List[str]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Flag.synonyms" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of different ways to invoke this same option, e.g. <code class="docutils literal notranslate"><span class="pre">-v</span></code> and <code class="docutils literal notranslate"><span class="pre">--verbose</span></code></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.variable_name">
+<em class="property">property </em><code class="sig-name descname">variable_name</code><a class="headerlink" href="#acclimatise.model.Flag.variable_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of words that should be used in a variable name for this argument</p>
 </dd></dl>
 
 </dd></dl>
@@ -570,6 +559,7 @@ Adds the class’s own type to the _representable set</p>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Changelog</a></li>
 </ul>
 
 <div class="relations">
@@ -577,6 +567,7 @@ Adds the class’s own type to the _representable set</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="cli.html" title="previous chapter">Command Line Interface</a></li>
+      <li>Next: <a href="changes.html" title="next chapter">Changelog</a></li>
   </ul></li>
 </ul>
 </div>
