@@ -1,5 +1,10 @@
 Changelog
 =========
+0.1.1 (2020-05-13)
+------------------
+* Make ``explore -o`` flag default to current working directory, for simplicity
+* Updated the readme
+* Add installation instructions
 
 0.1.0 (2020-05-13)
 ------------------
@@ -10,4 +15,3 @@ Changelog
 * Add comprehensive testing for CWL and WDL generation
 * Fix for variable names with symbols in them
 * Use regex library for faster and more concise regex
-
