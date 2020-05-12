@@ -64,7 +64,7 @@ def main():
     "-o",
     type=Path,
     help="Directory in which to put the output files",
-    required=True,
+    default=Path(),
 )
 @click.option(
     "--help-flag",

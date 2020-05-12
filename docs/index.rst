@@ -10,6 +10,7 @@ Welcome to aCLImatise's documentation!
    :maxdepth: 1
    :caption: Contents:
 
+   installation
    api
    cli
    model

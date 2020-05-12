@@ -47,31 +47,34 @@ utility. Running ``wc --help`` returns:
    Full documentation at: <http://www.gnu.org/software/coreutils/wc>
    or available locally via: info '(coreutils) wc invocation'
 
-If you run ``wc --help | acclimatise pipe -f wdl``\ , which means "convert the wc command into wdl",
-you'll get the following output:
+If you run ``acclimatise explore wc``, which means "parse the wc command and all subcommands",
+you'll end up with the following files in your current directory:
+
+* ``wc.cwl``
+* ``wc.wdl``
+* ``wc.yml``
+
+These are representations of the command ``wc`` in 3 different formats. If you look at ``wc.wdl``, you'll see that it
+contains a WDL-compatible tool definition for ``wc``:
 
 .. code-block:: wdl
-
-   version 1.0
-
-   task Wc {
-     input {
-       Boolean bytesBytes
-       Boolean charsChars
-       Boolean linesLines
-       String filesFiles0From
-       Boolean maxMaxLineLength
-       Boolean wordsWords
-       String? orOr
-     }
-     command <<<
-       wc \
-         ~{orOr} \
-         ~{true="--bytes" false="" bytesBytes} \
-         ~{true="--chars" false="" charsChars} \
-         ~{true="--lines" false="" linesLines} \
-         ~{if defined(filesFiles0From) then ("--files0-from " +  '"' + filesFiles0From + '"') else ""} \
-         ~{true="--max-line-length" false="" maxMaxLineLength} \
-         ~{true="--words" false="" wordsWords}
-     >>>
-   }
+    version 1.0
+    task Wc {
+      input {
+        Boolean bytes
+        Boolean chars
+        Boolean lines
+        String files__from
+        Boolean max_line_length
+        Boolean words
+      }
+      command <<<
+        wc \
+          ~{true="--bytes" false="" bytes} \
+          ~{true="--chars" false="" chars} \
+          ~{true="--lines" false="" lines} \
+          ~{if defined(files__from) then ("--files0-from " +  '"' + files__from + '"') else ""} \
+          ~{true="--max-line-length" false="" max_line_length} \
+          ~{true="--words" false="" words}
+      >>>
+    }
