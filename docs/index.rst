@@ -13,6 +13,7 @@ Welcome to aCLImatise's documentation!
    api
    cli
    model
+   changes
 
 .. include:: ../README.rst
 

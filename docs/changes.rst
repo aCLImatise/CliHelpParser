@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.1.0
------
+0.1.0 (2020-05-13)
+------------------
 * Fix the doubled variable names like ``bytesBytes``
 * Smarter POS-based algorithm for generating names from descriptions
 * Automatically choose a description based name when we have only short named flags like ``-n``
