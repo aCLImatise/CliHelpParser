@@ -9,4 +9,5 @@ Changelog
 * Add changelog
 * Add comprehensive testing for CWL and WDL generation
 * Fix for variable names with symbols in them
+* Use regex library for faster and more concise regex
 
