@@ -5,6 +5,7 @@ from typing import Iterable, List
 from dataclasses import dataclass
 
 from acclimatise.model import CliArgument, Command
+from acclimatise.name_generation import name_to_camel, name_to_snake
 
 
 @dataclass
@@ -55,12 +56,16 @@ class WrapperGenerator:
         Choose a name for this flag (e.g. the variable name when this is used to generate code), based on whether
         the user wants an auto generated one or not
         """
+        # Choose the best name if we're allowed to, otherwise always use the argument-based name
         if self.generate_names:
-            return flag.generate_name()
-        elif self.case == "snake":
-            return flag.name_to_snake()
+            toks = flag.variable_name
+        else:
+            toks = flag._name_from_name
+
+        if self.case == "snake":
+            return name_to_snake(toks)
         elif self.case == "camel":
-            return flag.name_to_camel()
+            return name_to_camel(toks)
 
     case: str = "snake"
     """
