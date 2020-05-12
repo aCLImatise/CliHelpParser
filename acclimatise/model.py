@@ -145,7 +145,7 @@ class CliArgument:
 
         # Replace symbols with their unicode names
         translated = re.sub(
-            "[\W\S\-_]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
+            "[^\w\s\-_]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
         )
 
         dash_tokens = re.split("[-_ ]", translated)
