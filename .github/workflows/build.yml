@@ -20,6 +20,7 @@ jobs:
           conda activate aclimatise-test
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
+          python -m spacy download en_core_web_sm
           pytest
         shell: bash
 
@@ -42,6 +43,7 @@ jobs:
         run: |
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
+          python -m spacy download en_core_web_sm
 
       - uses: pre-commit/action@v1.0.1
 
