@@ -4,7 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Changelog &#8212; aCLImatise 0.0.16 documentation</title>
+    <title>Installation &#8212; aCLImatise 0.0.16 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -14,7 +14,8 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Data Model" href="model.html" />
+    <link rel="next" title="Python API" href="api.html" />
+    <link rel="prev" title="Welcome to aCLImatise’s documentation!" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -31,28 +32,14 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="changelog">
-<h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="id1">
-<h2>0.1.1 (2020-05-13)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Make <code class="docutils literal notranslate"><span class="pre">explore</span> <span class="pre">-o</span></code> flag default to current working directory, for simplicity</p></li>
-<li><p>Updated the readme</p></li>
-<li><p>Add installation instructions</p></li>
-</ul>
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>To install <code class="docutils literal notranslate"><span class="pre">aCLImatise</span></code>, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install acclimatise
+python -m spacy download en  <span class="c1"># Install an internal language model</span>
+</pre></div>
 </div>
-<div class="section" id="id2">
-<h2>0.1.0 (2020-05-13)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Fix the doubled variable names like <code class="docutils literal notranslate"><span class="pre">bytesBytes</span></code></p></li>
-<li><p>Smarter POS-based algorithm for generating names from descriptions</p></li>
-<li><p>Automatically choose a description based name when we have only short named flags like <code class="docutils literal notranslate"><span class="pre">-n</span></code></p></li>
-<li><p>Add changelog</p></li>
-<li><p>Add comprehensive testing for CWL and WDL generation</p></li>
-<li><p>Fix for variable names with symbols in them</p></li>
-<li><p>Use regex library for faster and more concise regex</p></li>
-</ul>
-</div>
+<p>Now you can use either the <a class="reference internal" href="api.html"><span class="doc">Python API</span></a> or the <a class="reference internal" href="cli.html"><span class="doc">CLI</span></a>.</p>
 </div>
 
 
@@ -74,18 +61,19 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Data Model</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changes.html">Changelog</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="model.html" title="previous chapter">Data Model</a></li>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to aCLImatise’s documentation!</a></li>
+      <li>Next: <a href="api.html" title="next chapter">Python API</a></li>
   </ul></li>
 </ul>
 </div>
@@ -119,7 +107,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
-      <a href="_sources/changes.rst.txt"
+      <a href="_sources/installation.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

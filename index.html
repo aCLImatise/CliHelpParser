@@ -14,7 +14,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Python API" href="api.html" />
+    <link rel="next" title="Installation" href="installation.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -36,6 +36,7 @@
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Data Model</a></li>
@@ -83,33 +84,15 @@ utility. Running <code class="docutils literal notranslate"><span class="pre">wc
 <span class="ow">or</span> <span class="n">available</span> <span class="n">locally</span> <span class="n">via</span><span class="p">:</span> <span class="n">info</span> <span class="s1">&#39;(coreutils) wc invocation&#39;</span>
 </pre></div>
 </div>
-<p>If you run <code class="docutils literal notranslate"><span class="pre">wc</span> <span class="pre">--help</span> <span class="pre">|</span> <span class="pre">acclimatise</span> <span class="pre">pipe</span> <span class="pre">-f</span> <span class="pre">wdl</span></code>, which means “convert the wc command into wdl”,
-you’ll get the following output:</p>
-<div class="highlight-wdl notranslate"><div class="highlight"><pre><span></span>version 1.0
-
-task Wc {
-  input {
-    Boolean bytesBytes
-    Boolean charsChars
-    Boolean linesLines
-    String filesFiles0From
-    Boolean maxMaxLineLength
-    Boolean wordsWords
-    String? orOr
-  }
-  command &lt;&lt;&lt;
-    wc \
-      ~{orOr} \
-      ~{true=&quot;--bytes&quot; false=&quot;&quot; bytesBytes} \
-      ~{true=&quot;--chars&quot; false=&quot;&quot; charsChars} \
-      ~{true=&quot;--lines&quot; false=&quot;&quot; linesLines} \
-      ~{if defined(filesFiles0From) then (&quot;--files0-from &quot; +  &#39;&quot;&#39; + filesFiles0From + &#39;&quot;&#39;) else &quot;&quot;} \
-      ~{true=&quot;--max-line-length&quot; false=&quot;&quot; maxMaxLineLength} \
-      ~{true=&quot;--words&quot; false=&quot;&quot; wordsWords}
-  &gt;&gt;&gt;
-}
-</pre></div>
-</div>
+<p>If you run <code class="docutils literal notranslate"><span class="pre">acclimatise</span> <span class="pre">explore</span> <span class="pre">wc</span></code>, which means “parse the wc command and all subcommands”,
+you’ll end up with the following files in your current directory:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wc.cwl</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wc.wdl</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">wc.yml</span></code></p></li>
+</ul>
+<p>These are representations of the command <code class="docutils literal notranslate"><span class="pre">wc</span></code> in 3 different formats. If you look at <code class="docutils literal notranslate"><span class="pre">wc.wdl</span></code>, you’ll see that it
+contains a WDL-compatible tool definition for <code class="docutils literal notranslate"><span class="pre">wc</span></code>:</p>
 </div>
 </div>
 </div>
@@ -133,6 +116,7 @@ task Wc {
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">Python API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 <li class="toctree-l1"><a class="reference internal" href="model.html">Data Model</a></li>
@@ -143,7 +127,7 @@ task Wc {
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="api.html" title="next chapter">Python API</a></li>
+      <li>Next: <a href="installation.html" title="next chapter">Installation</a></li>
   </ul></li>
 </ul>
 </div>
