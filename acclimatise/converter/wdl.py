@@ -12,8 +12,10 @@ from acclimatise.converter import WrapperGenerator
 from acclimatise.model import Command
 
 
-def flag_to_command_input(flag: model.CliArgument) -> Task.Command.CommandInput:
-    args = dict(name=flag.name_to_camel())
+def flag_to_command_input(
+    flag: model.CliArgument, converter: WrapperGenerator
+) -> Task.Command.CommandInput:
+    args = dict(name=converter.choose_variable_name(flag))
 
     if isinstance(flag, model.Flag):
         args.update(dict(optional=True,))
@@ -110,7 +112,7 @@ class WdlGenerator(WrapperGenerator):
         inputs = [
             Input(
                 data_type=self.type_to_wdl(pos.get_type(), optional=False),
-                name=pos.name_to_camel(),
+                name=self.choose_variable_name(pos),
             )
             for pos in cmd.named
         ]
@@ -118,7 +120,7 @@ class WdlGenerator(WrapperGenerator):
             inputs += [
                 Input(
                     data_type=self.type_to_wdl(pos.get_type(), optional=True),
-                    name=pos.name_to_camel(),
+                    name=self.choose_variable_name(pos),
                 )
                 for pos in cmd.positional
             ]
@@ -127,8 +129,8 @@ class WdlGenerator(WrapperGenerator):
             name=task_name,
             command=Task.Command(
                 command=" ".join(cmd.command),
-                inputs=[flag_to_command_input(pos) for pos in cmd.positional],
-                arguments=[flag_to_command_input(named) for named in cmd.named],
+                inputs=[flag_to_command_input(pos, self) for pos in cmd.positional],
+                arguments=[flag_to_command_input(named, self) for named in cmd.named],
             ),
             version="1.0",
             inputs=inputs,

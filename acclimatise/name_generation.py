@@ -82,4 +82,4 @@ def generate_name(description: str) -> Iterable[str]:
         tokens.append(candidates[1][1])
 
     # Now sort the tokens back into their original positions
-    return [str(tok) for tok in sorted(tokens, key=lambda tok: tok.i)]
+    return [str(tok).lower() for tok in sorted(tokens, key=lambda tok: tok.i)]
