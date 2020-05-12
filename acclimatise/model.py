@@ -16,6 +16,7 @@ from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 
 from acclimatise import cli_types
+from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.yaml import yaml
 
 
@@ -133,90 +134,36 @@ class CliArgument:
         """
         pass
 
-    def name_to_words(self) -> typing.Iterable[str]:
+    @property
+    def _name_from_name(self) -> typing.Iterable[str]:
         """
         Splits this argument's name into multiple words
         """
-        # Load wordsegment the first time
-        if len(wordsegment.WORDS) == 0:
-            wordsegment.load()
+        return segment_string(self.full_name())
 
-        base = self.full_name().lstrip("-")
-
-        # Replace symbols with their unicode names
-        translated = re.sub(
-            "[^\w\s\-_]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
-        )
-
-        dash_tokens = re.split("[-_ ]", translated)
-        segment_tokens = itertools.chain.from_iterable(
-            [wordsegment.segment(w) for w in dash_tokens]
-        )
-        return segment_tokens
-
-    def name_to_camel(self) -> str:
-        """
-        Gets a representation of this argument in CamelCase
-        """
-        words = list(self.name_to_words())
-        cased = [words[0].lower()] + [segment.capitalize() for segment in words]
-        return "".join(cased)
-
-    def name_to_snake(self) -> str:
-        """
-        Gets a representation of this argument in snake case
-        """
-        words = self.name_to_words()
-        return "_".join([segment for segment in words])
-
-    def generate_name(self) -> str:
+    @property
+    def _name_from_description(self) -> typing.Iterable[str]:
         """
         Generate a 1-3 word variable name for this flag, by parsing the description
         """
-        try:
-            nlp = spacy.load("en")
-        except IOError:
-            nlp = None
+        return generate_name(self.description)
 
-        if nlp is None:
-            raise Exception(
-                "Spacy model doesn't exist! Install it with `python -m spacy download en`"
-            )
+    @property
+    def variable_name(self) -> typing.List[str]:
+        """
+        Returns a list of words that should be used in a variable name for this argument
+        """
+        nfn = list(self._name_from_name)
 
-        no_brackets = re.sub("[\[({].+[\])}]", "", self.description)
-        words = nlp(no_brackets)
-        # for chunk in words.noun_chunks:
-        #     if chunk.root.dep_ == 'ROOT':
-        #         return chunk.text
-        root = None
+        # Simple heuristic that determines when to generate a name from the name versus from the description.
+        # We prefer using the flag name, since it should by definition be a good variable name. However, if it's a short
+        # flag like "-p" or "-o", we basically have to use the description
+        if len(nfn) < 1 or len("".join(nfn)) == 1:
+            nfd = list(self._name_from_description)
+            if len(nfd) > 0:
+                return nfd
 
-        # Find the actual root
-        for word in words:
-            if (word.dep_ == "ROOT" or word.dep == "nsubj") and word.pos_ == "NOUN":
-                root = word
-
-        # If that isn't there, get the first noun
-        if root is None:
-            for word in words:
-                if word.pos_ == "NOUN":
-                    root = word
-
-        # If that isn't there, get the first word
-        if root is None:
-            return self.tokens_to_name(words)
-
-        subtree = list(root.subtree)
-        if len(subtree) < 4:
-            # If the whole subtree is a reasonable length, use that
-            return self.tokens_to_name(subtree)
-        else:
-            good_children = [tok for tok in subtree if tok.dep_ != "prep"]
-            if len(good_children) >= 1:
-                subtree = sorted([root, good_children[0]], key=lambda tok: tok.i)
-                # Otherwise, just add the first child token
-                return self.tokens_to_name(subtree)
-            else:
-                return self.tokens_to_name([root])
+        return nfn
 
 
 @yaml_object(yaml)
@@ -292,6 +239,36 @@ class Flag(CliArgument):
     """
     If true, this flag is not required (the default)
     """
+
+    @property
+    def variable_name(self) -> typing.List[str]:
+        """
+        Returns a list of words that should be used in a variable name for this argument
+        """
+        nfn = list(self._name_from_name)
+
+        # Here we can use the argument string as a third source of a name
+        if len(nfn) < 1 or len("".join(nfn)) == 1:
+            nfd = list(self._name_from_description)
+
+            if len(nfd) == 0:
+                nfa = list(self._name_from_arg)
+                if len(nfa) > 0 and len("".join(nfa)) > 0:
+                    return nfa
+            else:
+                return nfd
+
+        return nfn
+
+    @property
+    def _name_from_arg(self) -> typing.Iterable[str]:
+        """
+        Generate a 1-3 word variable name for this flag, by parsing the description
+        """
+        if self.args is not None and hasattr(self.args, "name"):
+            return segment_string(self.args.name)
+        else:
+            return []
 
     def get_type(self) -> cli_types.CliType:
         # Try the argument name, then the flag name, then the description in that order

@@ -114,10 +114,10 @@ When the flag has multiple arguments, some of which are optional, e.g.
 #     lambda s, loc, toks: SimpleFlagArg(toks[0]))
 simple_arg = Or(
     [
-        Word(initChars=alphanums, bodyChars=alphanums + "-_."),
+        Word(initChars=alphanums, bodyChars=alphanums + "-_./\\"),
         # Allow spaces in the argument name, but only if it's enclosed in angle brackets
         Literal("<").suppress()
-        + Word(initChars=alphas, bodyChars=alphanums + "-_. ")
+        + Word(initChars=alphas, bodyChars=alphanums + "-_./\\ ")
         + Literal(">").suppress(),
     ]
 ).setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))

@@ -37,7 +37,7 @@ opt_case = click.option(
     ),
     default="snake",
 )
-opt_cmd = click.argument("cmd", nargs=-1)
+opt_cmd = click.argument("cmd", nargs=-1, required=True)
 
 
 @click.group()

@@ -22,3 +22,12 @@ def test_podchecker(podchecker_help):
     command = parse_help(cmd=["podchecker"], text=podchecker_help)
     assert len(command.named) == 2
     assert len(command.positional) == 1
+
+
+def test_bwa_bwt2sa(bwa_bwt2sa_help):
+    """
+    This help output only provides usage data
+    """
+    command = parse_help(cmd=["bwa", "bwt2sa"], text=bwa_bwt2sa_help)
+    assert len(command.named) == 1
+    assert len(command.positional) == 2

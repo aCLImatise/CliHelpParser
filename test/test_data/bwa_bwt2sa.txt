@@ -1,0 +1,1 @@
+Usage: bwa bwt2sa [-i 32] <in.bwt> <out.sa>

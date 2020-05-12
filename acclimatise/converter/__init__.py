@@ -1,10 +1,11 @@
 from abc import abstractmethod
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Type
 
 from dataclasses import dataclass
 
 from acclimatise.model import CliArgument, Command
+from acclimatise.name_generation import name_to_camel, name_to_snake
 
 
 @dataclass
@@ -17,7 +18,7 @@ class WrapperGenerator:
     cases = ["snake", "camel"]
 
     @classmethod
-    def choose_converter(cls, typ):
+    def choose_converter(cls, typ) -> Type["WrapperGenerator"]:
         """
         Returns a converter subclass, given a converter type name
         :param type: The type of converter, e.g. 'cwl' or 'wdl'
@@ -55,19 +56,23 @@ class WrapperGenerator:
         Choose a name for this flag (e.g. the variable name when this is used to generate code), based on whether
         the user wants an auto generated one or not
         """
+        # Choose the best name if we're allowed to, otherwise always use the argument-based name
         if self.generate_names:
-            return flag.generate_name()
-        elif self.case == "snake":
-            return flag.name_to_snake()
+            toks = flag.variable_name
+        else:
+            toks = flag._name_from_name
+
+        if self.case == "snake":
+            return name_to_snake(toks)
         elif self.case == "camel":
-            return flag.name_to_camel()
+            return name_to_camel(toks)
 
     case: str = "snake"
     """
     Which case to use for variable names
     """
 
-    generate_names: bool = False
+    generate_names: bool = True
     """
     Rather than using the long flag to generate the argument name, generate them automatically using the
     flag description. Generally helpful if there are no long flags, only short flags.
