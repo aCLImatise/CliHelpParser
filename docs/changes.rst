@@ -1,0 +1,12 @@
+Changelog
+=========
+
+0.1.0
+-----
+* Fix the doubled variable names like ``bytesBytes``
+* Smarter POS-based algorithm for generating names from descriptions
+* Automatically choose a description based name when we have only short named flags like ``-n``
+* Add changelog
+* Add comprehensive testing for CWL and WDL generation
+* Fix for variable names with symbols in them
+

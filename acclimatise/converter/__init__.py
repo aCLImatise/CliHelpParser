@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Type
 
 from dataclasses import dataclass
 
@@ -18,7 +18,7 @@ class WrapperGenerator:
     cases = ["snake", "camel"]
 
     @classmethod
-    def choose_converter(cls, typ):
+    def choose_converter(cls, typ) -> Type["WrapperGenerator"]:
         """
         Returns a converter subclass, given a converter type name
         :param type: The type of converter, e.g. 'cwl' or 'wdl'
@@ -72,7 +72,7 @@ class WrapperGenerator:
     Which case to use for variable names
     """
 
-    generate_names: bool = False
+    generate_names: bool = True
     """
     Rather than using the long flag to generate the argument name, generate them automatically using the
     flag description. Generally helpful if there are no long flags, only short flags.

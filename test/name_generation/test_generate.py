@@ -66,3 +66,24 @@ def test_bedtools_coverage_g():
     assert len(name) < 5
     assert "genome" in name
     assert "file" in name
+
+
+def test_symbol():
+    """
+    Check that symbols are correctly removed from the output
+    """
+    name = list(generate_name("/genome@ #file$"))
+    assert len(name) < 5
+    assert "genome" in name
+    assert "file" in name
+
+
+def test_hyphens():
+    name = list(generate_name("penalty for 5'- and 3'-end clipping [5,5]"))
+    assert len(name) < 5
+    assert "penalty" in name
+
+    for word in name:
+        assert "-" not in word
+        assert "[" not in word
+        assert "," not in word

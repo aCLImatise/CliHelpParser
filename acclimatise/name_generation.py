@@ -1,7 +1,32 @@
-import re
+import itertools
+import unicodedata
 from typing import Iterable, List
 
 import spacy
+import wordsegment
+
+import regex as re
+
+
+def sanitize_symbols(text):
+    """
+    Remove any non-word symbols
+    """
+    return re.sub("[^[:alpha:]-_., ]", "", text)
+
+
+def sanitize_token(text):
+    """
+    Remove any non-word symbols
+    """
+    return re.sub("[^[:alpha:]]", "", text)
+
+
+def replace_hyphens(text):
+    """
+    Remove any non-word symbols
+    """
+    return re.sub("-", "_", text)
 
 
 def should_ignore(token):
@@ -42,6 +67,31 @@ def name_to_snake(words: Iterable[str]) -> str:
     return "_".join([word.lower() for word in words])
 
 
+def segment_string(text: str):
+    """
+    Divides one larger word into segments
+    :param text:
+    :return:
+    """
+
+    # Load wordsegment the first time
+    if len(wordsegment.WORDS) == 0:
+        wordsegment.load()
+
+    base = text.lstrip("-")
+
+    # Replace symbols with their unicode names
+    translated = re.sub(
+        "[^\w\s\-_]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
+    )
+
+    dash_tokens = re.split("[-_ ]", translated)
+    segment_tokens = itertools.chain.from_iterable(
+        [wordsegment.segment(w) for w in dash_tokens]
+    )
+    return [sanitize_token(tok) for tok in segment_tokens]
+
+
 def generate_name(description: str) -> Iterable[str]:
     """
     Given one or more sentences, attempt to parse out a concise (2-4 word) variable name
@@ -54,11 +104,15 @@ def generate_name(description: str) -> Iterable[str]:
         )
 
     # Remove all delimited text
-    no_brackets = remove_delims(description)
+    sanitized = sanitize_symbols(remove_delims(replace_hyphens(description)))
 
     # Parse the sentence
-    doc = nlp(no_brackets)
-    sentence = list(doc.sents)[0]
+    doc = nlp(sanitized)
+    sentences = list(doc.sents)
+    if len(sentences) == 0:
+        return []
+
+    sentence = sentences[0]
     root = sentence.root
 
     # Add the second most important word after the root
@@ -82,4 +136,7 @@ def generate_name(description: str) -> Iterable[str]:
         tokens.append(candidates[1][1])
 
     # Now sort the tokens back into their original positions
-    return [str(tok).lower() for tok in sorted(tokens, key=lambda tok: tok.i)]
+    return [
+        sanitize_token(str(tok)).lower()
+        for tok in sorted(tokens, key=lambda tok: tok.i)
+    ]

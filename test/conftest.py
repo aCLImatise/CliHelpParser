@@ -37,6 +37,12 @@ def bwa_help():
 
 
 @pytest.fixture
+def bwa_bwt2sa_help():
+    with open(resource_filename(__name__, "test_data/bwa_bwt2sa.txt")) as fp:
+        return fp.read()
+
+
+@pytest.fixture
 def bedtools_help():
     with open(resource_filename(__name__, "test_data/bedtools.txt")) as fp:
         return fp.read()
