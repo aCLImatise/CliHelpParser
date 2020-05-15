@@ -1,6 +1,7 @@
 """
 Functions for generating WDL from the CLI data model
 """
+from os import PathLike
 from pathlib import Path
 from typing import Generator, Iterable, List
 
@@ -138,7 +139,10 @@ class WdlGenerator(WrapperGenerator):
 
         return tool.get_string()
 
-    def generate_tree(self, cmd: Command, out_dir: Path) -> Generator[Path, None, None]:
+    def generate_tree(
+        self, cmd: Command, out_dir: PathLike
+    ) -> Generator[Path, None, None]:
+        out_dir = Path(out_dir)
         for cmd in cmd.command_tree():
             path = (out_dir / cmd.as_filename).with_suffix(".wdl")
             wrapper = self.generate_wrapper(cmd)

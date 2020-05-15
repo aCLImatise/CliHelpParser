@@ -1,5 +1,7 @@
+from io import StringIO
+from os import PathLike
 from pathlib import Path
-from typing import List
+from typing import Generator, List
 
 from dataclasses import dataclass
 
@@ -19,11 +21,16 @@ class YmlGenerator(WrapperGenerator):
         return "yml"
 
     def generate_wrapper(self, cmd: Command) -> str:
-        return yaml.dump(cmd)
+        buffer = StringIO()
+        yaml.dump(cmd, buffer)
+        return buffer.getvalue()
 
-    def generate_tree(self, cmd: Command, out_dir: Path) -> Generator[Path, None, None]:
+    def generate_tree(
+        self, cmd: Command, out_dir: PathLike
+    ) -> Generator[Path, None, None]:
+        out_dir = Path(out_dir)
         for cmd in cmd.command_tree():
             path = (out_dir / cmd.as_filename).with_suffix(".yml")
-            wrapper = self.generate_wrapper(cmd)
-            path.write_text(wrapper, encoding="utf-8")
+            with path.open("w") as fp:
+                yaml.dump(cmd, fp)
             yield path
