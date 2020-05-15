@@ -67,7 +67,11 @@ def best_cmd(
             # If parsing fails, this wasn't the right flag to use
             continue
 
-    return max(commands, key=lambda com: len(com.named) + len(com.positional))
+    # Sort by flags primarily, and if they're equal, return the command with the longest help text
+    return max(
+        commands,
+        key=lambda com: (len(com.named) + len(com.positional), len(com.help_text)),
+    )
 
 
 def explore_command(
