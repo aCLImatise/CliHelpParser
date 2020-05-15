@@ -38,7 +38,7 @@
 <h2>Command<a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="acclimatise.model.Command">
-<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Command</code><span class="sig-paren">(</span><em class="sig-param">positional: List[Positional], named: List[Flag], command: List[str], subcommands: List[Command] = &lt;factory&gt;, help_flag: Optional[Flag] = None, usage_flag: Optional[Flag] = None, version_flag: Optional[Flag] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Command" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Command</code><span class="sig-paren">(</span><em class="sig-param">positional: List[Positional], named: List[Flag], command: List[str], subcommands: List[Command] = &lt;factory&gt;, help_flag: Optional[Flag] = None, usage_flag: Optional[Flag] = None, version_flag: Optional[Flag] = None, help_text: Optional[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing an entire command or subcommand, e.g. <cite>bwa mem</cite> or <cite>grep</cite></p>
 <dl class="py method">
 <dt id="acclimatise.model.Command.as_filename">
@@ -65,6 +65,12 @@
 <dt id="acclimatise.model.Command.help_flag">
 <code class="sig-name descname">help_flag</code><em class="property">: Optional[Flag]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.help_flag" title="Permalink to this definition">¶</a></dt>
 <dd><p>If identified, this is the flag that returns help text</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.help_text">
+<code class="sig-name descname">help_text</code><em class="property">: Optional[str]</em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.help_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optionally, the entire help text that was used to generate this Command</p>
 </dd></dl>
 
 <dl class="py attribute">
