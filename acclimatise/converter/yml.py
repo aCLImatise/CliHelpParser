@@ -21,8 +21,9 @@ class YmlGenerator(WrapperGenerator):
     def generate_wrapper(self, cmd: Command) -> str:
         return yaml.dump(cmd)
 
-    def generate_tree(self, cmd: Command, out_dir: Path) -> List[Path]:
-        path = (out_dir / cmd.as_filename).with_suffix(".yml")
-        with path.open("w") as fp:
-            yaml.dump(cmd, fp)
-        return [path]
+    def generate_tree(self, cmd: Command, out_dir: Path) -> Generator[Path, None, None]:
+        for cmd in cmd.command_tree():
+            path = (out_dir / cmd.as_filename).with_suffix(".yml")
+            wrapper = self.generate_wrapper(cmd)
+            path.write_text(wrapper, encoding="utf-8")
+            yield path

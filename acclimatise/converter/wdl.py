@@ -139,10 +139,8 @@ class WdlGenerator(WrapperGenerator):
         return tool.get_string()
 
     def generate_tree(self, cmd: Command, out_dir: Path) -> Generator[Path, None, None]:
-        out_dir = Path(out_dir)
-        for command in cmd.command_tree():
-            name = command.as_filename
-            path = (out_dir / name).with_suffix(".wdl")
-            wrapper = self.generate_wrapper(command)
+        for cmd in cmd.command_tree():
+            path = (out_dir / cmd.as_filename).with_suffix(".wdl")
+            wrapper = self.generate_wrapper(cmd)
             path.write_text(wrapper, encoding="utf-8")
             yield path
