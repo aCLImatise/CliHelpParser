@@ -102,6 +102,11 @@ class Command:
     If identified, this is the flag that returns the version of the executable
     """
 
+    help_text: typing.Optional[str] = None
+    """
+    Optionally, the entire help text that was used to generate this Command
+    """
+
 
 @yaml_object(yaml)
 @dataclass

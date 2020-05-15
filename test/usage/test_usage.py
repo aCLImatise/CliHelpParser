@@ -84,9 +84,9 @@ def test_pisces_usage():
     text = "USAGE: dotnet Pisces.dll -bam <bam path> -g <genome path>"
     command = parse_usage(["pisces"], text)
     assert len(command.named) == 2
+    assert len(command.positional) == 0
     assert command.named[0].longest_synonym == "-bam"
     assert command.named[1].longest_synonym == "-g"
-    assert command.positional[0].name == "dotnet"
 
 
 def test_trailing_text(process):

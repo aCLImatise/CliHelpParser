@@ -18,6 +18,13 @@ def test_explore_bwa():
     assert len(mem.named) >= 30
 
 
+@pytest.mark.skipif(not shutil.which("bwa"), reason="bwa is not installed")
+def test_explore_bwa_bwtupdate():
+    command = explore_command(["bwa", "bwtupdate"])
+    assert len(command.subcommands) == 0
+    assert len(command.positional) == 1
+
+
 @pytest.mark.skipif(
     not shutil.which("podchecker"), reason="podchecker is not installed"
 )

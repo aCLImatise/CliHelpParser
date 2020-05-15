@@ -30,34 +30,15 @@ def parse_help(
     usage_command = parse_usage(cmd, text)
 
     # Combine the two commands by picking from the help_command where possible, otherwise falling back on the usage
-    fields = {}
+    fields = {"help_text": text}
     for field in dataclasses.fields(Command):
-        fields[field.name] = getattr(help_command, field.name) or getattr(
-            usage_command, field.name
+        fields[field.name] = (
+            fields.get(field.name)
+            or getattr(help_command, field.name)
+            or getattr(usage_command, field.name)
         )
-    command = Command(**fields)
 
-    # Normally parsing the list of flags will provide a better command summary, but if it didn't give us anything,
-    # fall back to the usage
-    # if len(help_command.positional) + len(help_command.named) == 0:
-    #     command = usage_command
-    # else:
-    #     command = help_command
-
-    # However, even if we aren't referring to the usage for the whole command, we can cross-check to ensure we're
-    # using some correct arguments
-    # if len(usage_command.positional) != len(help_command.positional):
-    #     command.positional = usage_command.positional
-    # confirmed = {pos.name for pos in usage_command.positional}
-    # for positional in command.positional:
-    #     if positional.name in confirmed:
-    #         positional.usage_supported = True
-
-    # Then, by default we filter out unsupported positionals, to remove false positives
-    # if only_supported_positionals:
-    #     command.positional = [pos for pos in command.positional if pos.usage_supported]
-
-    return command
+    return Command(**fields)
 
 
 def best_cmd(
@@ -108,6 +89,11 @@ def explore_command(
     command = best_cmd(cmd, flags, run_kwargs=run_kwargs)
 
     if parent:
+
+        # This isn't a subcommand if it has the same input text as the parent
+        if command.help_text and command.help_text == parent.help_text:
+            return None
+
         # This isn't a subcommand if it has no flags
         if len(command.positional) + len(command.named) == 0:
             return None

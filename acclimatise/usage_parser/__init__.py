@@ -1,7 +1,18 @@
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
+from pathlib import Path
+
 from acclimatise.usage_parser.model import UsageElement
 
 from .elements import *
+
+
+def normalise_cline(tokens):
+    """
+    Normalise a command line string, such as ["dotnet", "Pisces.dll"], converting it to ["dotnet", "pisces"]
+    :param tokens:
+    :return:
+    """
+    return [Path(el.lower()).stem for el in tokens]
 
 
 def parse_usage(cmd, text):
@@ -16,17 +27,15 @@ def parse_usage(cmd, text):
     flags = [tok for tok in toks if isinstance(tok, Flag)]
 
     # Remove an "options" argument which is just a proxy for other flags
-    positional = [pos for pos in positional if pos.text != "options"]
-
+    positional = [pos for pos in positional if pos.text.lower() != "options"]
     # The usage often starts with a re-iteration of the command name itself. Remove this if present
-    truncate = 0
-    for i, arg in enumerate(cmd):
-        pos = positional[i]
-        if arg == pos.text:
-            truncate = i + 1
-        else:
-            break
-    positional = positional[truncate:]
+    for i in range(len(positional)):
+        # For each positional argument, if the entire cmd string is present, slice away this and everything before it
+        end = i + len(cmd)
+        if end <= len(positional) and normalise_cline(
+            [pos.text for pos in positional[i:end]]
+        ) == normalise_cline(cmd):
+            positional = positional[end:]
 
     if not any([tok for tok in positional if tok.variable]):
         # If the usage didn't explicitly mark anything as a variable using < > brackets, we have to assume that

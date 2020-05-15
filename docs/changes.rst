@@ -1,5 +1,18 @@
 Changelog
 =========
+0.1.3 (2020-05-15)
+------------------
+* ``Command`` types now contain a ``help_text`` field which records the string that was used to generate them. This
+should enable efficient re-parsing, and can also be displayed downstream by BaseCamp
+* Rewrite tests into a parametrized, consolidated end-to-end test
+* Fix "OPTIONS" being considered a positional argument, when really it's a placeholder for flags
+* Remove positional arguments that precede the main command, so `dotnet Pisces.dll` will be removed from the entire
+command
+
+0.1.2 (2020-05-15)
+------------------
+* Generating YAML output now produces one file for each subcommand, to match other converters
+
 0.1.1 (2020-05-13)
 ------------------
 * Make ``explore -o`` flag default to current working directory, for simplicity
