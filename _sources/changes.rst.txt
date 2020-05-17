@@ -1,5 +1,9 @@
 Changelog
 =========
+0.1.4 (2020-05-)
+------------------
+* Choose best command using length of help text, if everything else is equal
+
 0.1.3 (2020-05-15)
 ------------------
 * ``Command`` types now contain a ``help_text`` field which records the string that was used to generate them. This
