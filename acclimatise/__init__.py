@@ -70,7 +70,10 @@ def best_cmd(
     # Sort by flags primarily, and if they're equal, return the command with the longest help text
     return max(
         commands,
-        key=lambda com: (len(com.named) + len(com.positional), len(com.help_text)),
+        key=lambda com: (
+            len(com.named) + len(com.positional),
+            len(com.help_text) if com.help_text else 0,
+        ),
     )
 
 

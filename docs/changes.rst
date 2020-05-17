@@ -1,5 +1,10 @@
 Changelog
 =========
+0.1.5 (2020-05-18)
+------------------
+* Bugfix for when we have no help text
+* Add a test for a program that we know fails
+
 0.1.4 (2020-05-18)
 ------------------
 * Choose best command using length of help text, if everything else is equal

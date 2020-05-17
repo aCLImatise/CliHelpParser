@@ -5,6 +5,14 @@ import pytest
 from acclimatise import explore_command
 
 
+@pytest.mark.skipif(not shutil.which("false"), reason="false is not installed")
+def test_explore_false():
+    # This is basically a check that a program that itself crashes, won't crash aCLImatise
+    command = explore_command(["false"])
+    assert len(command.subcommands) == 0
+    assert len(command.positional) == 0
+
+
 @pytest.mark.skipif(not shutil.which("bwa"), reason="bwa is not installed")
 def test_explore_bwa():
     command = explore_command(["bwa"])
