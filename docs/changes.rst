@@ -1,6 +1,6 @@
 Changelog
 =========
-0.1.4 (2020-05-)
+0.1.4 (2020-05-18)
 ------------------
 * Choose best command using length of help text, if everything else is equal
 
