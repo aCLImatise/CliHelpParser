@@ -12,7 +12,7 @@ setup(
         "miniwdl",
         "wordsegment",
         "inflection",
-        "illusional.wdlgen~=0.2",
+        "illusional.wdlgen==0.2.10",
         "ruamel.yaml==0.16.5",
         "click",
         "cwltool",
@@ -21,5 +21,7 @@ setup(
     ],
     python_requires=">=3.6",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},
-    extras_require={"dev": ["pytest", "pre-commit", "Sphinx", "sphinx-click"],},
+    extras_require={
+        "dev": ["pytest", "pre-commit", "Sphinx", "sphinx-click", "pytest-parallel"],
+    },
 )

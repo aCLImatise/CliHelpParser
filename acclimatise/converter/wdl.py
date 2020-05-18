@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Generator, Iterable, List
 
 from inflection import camelize
-from wdlgen import ArrayType, Input, PrimitiveType, Task, WdlType
+from wdlgen import ArrayType, Input, ParameterMeta, PrimitiveType, Task, WdlType
 
 from acclimatise import cli_types, model
 from acclimatise.converter import WrapperGenerator
@@ -19,7 +19,7 @@ def flag_to_command_input(
     args = dict(name=converter.choose_variable_name(flag))
 
     if isinstance(flag, model.Flag):
-        args.update(dict(optional=True,))
+        args.update(dict(optional=flag.optional))
         if isinstance(flag.args, model.EmptyFlagArg):
             args.update(dict(true=flag.longest_synonym, false=""))
         else:
@@ -106,13 +106,10 @@ class WdlGenerator(WrapperGenerator):
         else:
             return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
 
-    def generate_wrapper(self, cmd: Command) -> str:
-        name = cmd.as_filename
-        task_name = camelize(name)
-
+    def make_inputs(self, cmd: Command) -> List[Input]:
         inputs = [
             Input(
-                data_type=self.type_to_wdl(pos.get_type(), optional=False),
+                data_type=self.type_to_wdl(pos.get_type(), optional=pos.optional),
                 name=self.choose_variable_name(pos),
             )
             for pos in cmd.named
@@ -120,21 +117,43 @@ class WdlGenerator(WrapperGenerator):
         if not self.ignore_positionals:
             inputs += [
                 Input(
-                    data_type=self.type_to_wdl(pos.get_type(), optional=True),
+                    data_type=self.type_to_wdl(pos.get_type(), optional=pos.optional),
                     name=self.choose_variable_name(pos),
                 )
                 for pos in cmd.positional
             ]
+        return inputs
 
+    def make_command(self, cmd: Command) -> Task.Command:
+        return Task.Command(
+            command=" ".join(cmd.command),
+            inputs=[flag_to_command_input(pos, self) for pos in cmd.positional]
+            if not self.ignore_positionals
+            else [],
+            arguments=[flag_to_command_input(named, self) for named in cmd.named],
+        )
+
+    def make_parameter_meta(self, cmd: Command) -> ParameterMeta:
+        params = {}
+        for named in cmd.named:
+            params[self.choose_variable_name(named)] = named.description
+        if not self.ignore_positionals:
+            for pos in cmd.positional:
+                params[self.choose_variable_name(pos)] = pos.description
+
+        return ParameterMeta(**params)
+
+    def make_task_name(self, cmd: Command) -> str:
+        name = cmd.as_filename
+        return camelize(name)
+
+    def generate_wrapper(self, cmd: Command) -> str:
         tool = Task(
-            name=task_name,
-            command=Task.Command(
-                command=" ".join(cmd.command),
-                inputs=[flag_to_command_input(pos, self) for pos in cmd.positional],
-                arguments=[flag_to_command_input(named, self) for named in cmd.named],
-            ),
+            name=self.make_task_name(cmd),
+            command=self.make_command(cmd),
             version="1.0",
-            inputs=inputs,
+            inputs=self.make_inputs(cmd),
+            parameter_meta=self.make_parameter_meta(cmd),
         )
 
         return tool.get_string()
