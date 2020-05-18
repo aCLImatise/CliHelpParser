@@ -107,7 +107,7 @@ def convert_validate(cmd: Command, lang: str = None):
             convert_validate(cmd, lang)
 
 
-def validate_cwl(cwl: str, cmd: Command):
+def validate_cwl(cwl: str, cmd: Command = None):
     parsed = yaml.load(cwl)
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -117,7 +117,7 @@ def validate_cwl(cwl: str, cmd: Command):
         resolve_and_validate_document(loading_context, workflowobj, uri)
 
 
-def validate_wdl(wdl: str, cmd: Command):
+def validate_wdl(wdl: str, cmd: Command = None):
     doc = parse_document(wdl)
 
     # Check that the generated WDL has the correct parameter meta fields
@@ -127,7 +127,7 @@ def validate_wdl(wdl: str, cmd: Command):
         ) + len(cmd.positional)
 
 
-def validate_yml(yml: str, cmd: Command):
+def validate_yml(yml: str, cmd: Command = None):
     stream = StringIO(yml)
     yaml.load(stream)
 
