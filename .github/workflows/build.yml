@@ -21,7 +21,8 @@ jobs:
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
           python -m spacy download en
-          pytest
+          # 2 workers since the default runner has 2 CPUs
+          pytest --workers 2
         shell: bash
 
   test_system:
@@ -49,7 +50,8 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest
+          # 2 workers since the default runner has 2 CPUs
+          pytest --workers 2
 
       - name: Test the documentation still builds
         run: |
