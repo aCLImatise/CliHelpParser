@@ -5,11 +5,11 @@ import pytest
 
 from acclimatise import explore_command
 
-from .util import all_tests, convert_validate, validators
+from .util import HelpText, all_tests, convert_validate, validators
 
 
 @pytest.mark.parametrize("test", all_tests)
-def test_explore(test):
+def test_explore(test: HelpText):
     """
     A comprehensive end-to-end test that tests the parser and converters, after exploring a given command
     """
@@ -19,7 +19,7 @@ def test_explore(test):
     # Check we parsed correctly
     command = explore_command(test.cmd)
     assert len(command.subcommands) == test.subcommands
-    assert len(command.positional) == test.positionals
+    assert len(command.positional) == test.positional
     assert len(command.named) == test.named
 
     # Check this can be converted properly to all formats

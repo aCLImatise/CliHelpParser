@@ -3,29 +3,36 @@ Functions for generating WDL from the CLI data model
 """
 from os import PathLike
 from pathlib import Path
-from typing import Generator, Iterable, List
+from typing import Generator, Iterable, List, Tuple
 
 from inflection import camelize
 from wdlgen import ArrayType, Input, ParameterMeta, PrimitiveType, Task, WdlType
 
 from acclimatise import cli_types, model
-from acclimatise.converter import WrapperGenerator
-from acclimatise.model import Command
+from acclimatise.converter import NamedArgument, WrapperGenerator
+from acclimatise.model import CliArgument, Command, Flag, Positional
+
+
+def escape_wdl_str(text):
+    """
+    Escape literal quotes in a Python string, to become suitable for WDL
+    """
+    return text.replace('"', '\\"')
 
 
 def flag_to_command_input(
-    flag: model.CliArgument, converter: WrapperGenerator
+    named_flag: NamedArgument, converter: WrapperGenerator
 ) -> Task.Command.CommandInput:
-    args = dict(name=converter.choose_variable_name(flag))
+    args = dict(name=named_flag.name)
 
-    if isinstance(flag, model.Flag):
-        args.update(dict(optional=flag.optional))
-        if isinstance(flag.args, model.EmptyFlagArg):
-            args.update(dict(true=flag.longest_synonym, false=""))
+    if isinstance(named_flag.arg, model.Flag):
+        args.update(dict(optional=named_flag.arg.optional))
+        if isinstance(named_flag.arg.args, model.EmptyFlagArg):
+            args.update(dict(true=named_flag.arg.longest_synonym, false=""))
         else:
-            args.update(dict(prefix=flag.longest_synonym,))
-    elif isinstance(flag, model.Positional):
-        args.update(dict(optional=False, position=flag.position))
+            args.update(dict(prefix=named_flag.arg.longest_synonym,))
+    elif isinstance(named_flag, model.Positional):
+        args.update(dict(optional=False, position=named_flag.position))
 
     return Task.Command.CommandInput(**args)
 
@@ -106,40 +113,37 @@ class WdlGenerator(WrapperGenerator):
         else:
             return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
 
-    def make_inputs(self, cmd: Command) -> List[Input]:
-        inputs = [
-            Input(
-                data_type=self.type_to_wdl(pos.get_type(), optional=pos.optional),
-                name=self.choose_variable_name(pos),
-            )
-            for pos in cmd.named
-        ]
-        if not self.ignore_positionals:
-            inputs += [
-                Input(
-                    data_type=self.type_to_wdl(pos.get_type(), optional=pos.optional),
-                    name=self.choose_variable_name(pos),
-                )
-                for pos in cmd.positional
-            ]
-        return inputs
+    def make_inputs(self, named: Iterable[NamedArgument]) -> List[Input]:
 
-    def make_command(self, cmd: Command) -> Task.Command:
+        return [
+            Input(
+                data_type=self.type_to_wdl(
+                    named_arg.arg.get_type(), optional=named_arg.arg.optional
+                ),
+                name=named_arg.name,
+            )
+            for named_arg in named
+        ]
+
+    def make_command(self, cmd: Command, inputs: List[NamedArgument]) -> Task.Command:
         return Task.Command(
             command=" ".join(cmd.command),
-            inputs=[flag_to_command_input(pos, self) for pos in cmd.positional]
-            if not self.ignore_positionals
-            else [],
-            arguments=[flag_to_command_input(named, self) for named in cmd.named],
+            inputs=[
+                flag_to_command_input(input, self)
+                for input in inputs
+                if isinstance(input.arg, Positional)
+            ],
+            arguments=[
+                flag_to_command_input(input, self)
+                for input in inputs
+                if isinstance(input.arg, Flag)
+            ],
         )
 
-    def make_parameter_meta(self, cmd: Command) -> ParameterMeta:
+    def make_parameter_meta(self, named: Iterable[NamedArgument]) -> ParameterMeta:
         params = {}
-        for named in cmd.named:
-            params[self.choose_variable_name(named)] = named.description
-        if not self.ignore_positionals:
-            for pos in cmd.positional:
-                params[self.choose_variable_name(pos)] = pos.description
+        for named_arg in named:
+            params[named_arg.name] = escape_wdl_str(named_arg.arg.description)
 
         return ParameterMeta(**params)
 
@@ -148,12 +152,17 @@ class WdlGenerator(WrapperGenerator):
         return camelize(name)
 
     def generate_wrapper(self, cmd: Command) -> str:
+        inputs: List[CliArgument] = [*cmd.named] + (
+            [] if self.ignore_positionals else [*cmd.positional]
+        )
+        names = self.choose_variable_names(inputs)
+
         tool = Task(
             name=self.make_task_name(cmd),
-            command=self.make_command(cmd),
+            command=self.make_command(cmd, names),
             version="1.0",
-            inputs=self.make_inputs(cmd),
-            parameter_meta=self.make_parameter_meta(cmd),
+            inputs=self.make_inputs(names),
+            parameter_meta=self.make_parameter_meta(names),
         )
 
         return tool.get_string()

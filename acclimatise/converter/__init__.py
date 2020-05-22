@@ -1,11 +1,23 @@
 from abc import abstractmethod
+from itertools import groupby
 from pathlib import Path
 from typing import Iterable, List, Type
 
 from dataclasses import dataclass
 
 from acclimatise.model import CliArgument, Command
-from acclimatise.name_generation import name_to_camel, name_to_snake
+from acclimatise.name_generation import (
+    generate_name,
+    generate_names,
+    name_to_camel,
+    name_to_snake,
+)
+
+
+@dataclass
+class NamedArgument:
+    arg: CliArgument
+    name: str
 
 
 @dataclass
@@ -51,21 +63,54 @@ class WrapperGenerator:
         """
         pass
 
-    def choose_variable_name(self, flag: CliArgument) -> str:
+    def words_to_name(self, words: Iterable[str]):
+        """
+        Converts a list of tokens, such as ["a", "variable", "name"] to a language-appropriate name, such as
+        "aVariableName"
+        """
+        if self.case == "snake":
+            return name_to_snake(words)
+        elif self.case == "camel":
+            return name_to_camel(words)
+
+    def choose_variable_name(
+        self, flag: CliArgument, min: int = None, max: int = None
+    ) -> str:
         """
         Choose a name for this flag (e.g. the variable name when this is used to generate code), based on whether
         the user wants an auto generated one or not
         """
+        raise DeprecationWarning("Use choose_variables_names() instead")
         # Choose the best name if we're allowed to, otherwise always use the argument-based name
         if self.generate_names:
-            toks = flag.variable_name
+            toks = flag.variable_name(min=min, max=max)
         else:
-            toks = flag._name_from_name
+            toks = flag._name_from_name()
 
-        if self.case == "snake":
-            return name_to_snake(toks)
-        elif self.case == "camel":
-            return name_to_camel(toks)
+        return self.words_to_name(toks)
+
+    def choose_variable_names(self, flags: List[CliArgument]) -> List[NamedArgument]:
+        """
+        Choose names for a list of flags. This needs to be done in one go because there is a risk of duplicate
+        variable names otherwise
+        """
+
+        if self.generate_names:
+            # If we are allowed to generate names, generate the whole batch, and then choose the best method of
+            # name generation on a case-by-case basis
+            names = generate_names([flag.description for flag in flags])
+            return [
+                NamedArgument(
+                    name=self.words_to_name(flag.variable_name(name)), arg=flag
+                )
+                for name, flag in zip(names, flags)
+            ]
+        else:
+            # If we aren't allowed to generate names, always use the flag name as the variable name
+            return [
+                NamedArgument(name=self.words_to_name(flag._name_from_name()), arg=flag)
+                for flag in flags
+            ]
 
     case: str = "snake"
     """

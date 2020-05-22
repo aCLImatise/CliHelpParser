@@ -20,6 +20,14 @@ from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.yaml import yaml
 
 
+def useless_name(name: typing.List[str]):
+    """
+    Returns true if this name (sequence of strings) shouldn't be used as a variable name because it's too short and
+    uninformative
+    """
+    return len(name) < 1 or len("".join(name)) <= 1
+
+
 @yaml_object(yaml)
 @dataclass
 class Command:
@@ -58,6 +66,20 @@ class Command:
         """
         return "_".join(self.command).replace("-", "_")
 
+    @property
+    def depth(self) -> int:
+        """
+        Returns the "depth" of this command, aka how many ancestors it has. An orphan command has depth 0, a subcommand
+        has depth 1, a sub-sub-command has depth 2 etc
+        """
+        cmd = self
+        depth = 0
+        while cmd.parent is not None:
+            cmd = cmd.parent
+            depth += 1
+
+        return depth
+
     def command_tree(self) -> typing.Generator["Command", None, None]:
         """
         Returns a generator over the entire command tree. e.g. if this command has 2 subcommands, each with 2
@@ -80,6 +102,11 @@ class Command:
     command: typing.List[str]
     """
     The command line used to invoke this command, e.g. ["bwa", "mem"]
+    """
+
+    parent: typing.Optional["Command"] = None
+    """
+    The parent command, if this is a subcommand
     """
 
     subcommands: typing.List["Command"] = field(default_factory=list)
@@ -139,33 +166,31 @@ class CliArgument:
         """
         pass
 
-    @property
     def _name_from_name(self) -> typing.Iterable[str]:
         """
         Splits this argument's name into multiple words
         """
         return segment_string(self.full_name())
 
-    @property
-    def _name_from_description(self) -> typing.Iterable[str]:
-        """
-        Generate a 1-3 word variable name for this flag, by parsing the description
-        """
-        return generate_name(self.description)
+    # def _name_from_description(self, min:int = None, max:int=None) -> typing.Iterable[str]:
+    #     """
+    #     Generate a 1-3 word variable name for this flag, by parsing the description
+    #     """
+    #     return generate_name(self.description, min=min, max=max)
 
-    @property
-    def variable_name(self) -> typing.List[str]:
+    def variable_name(self, description_name: typing.List[str]) -> typing.List[str]:
         """
         Returns a list of words that should be used in a variable name for this argument
+        :param description_name: A name for this variable, generated from a description
         """
-        nfn = list(self._name_from_name)
+        nfn = list(self._name_from_name())
 
         # Simple heuristic that determines when to generate a name from the name versus from the description.
         # We prefer using the flag name, since it should by definition be a good variable name. However, if it's a short
         # flag like "-p" or "-o", we basically have to use the description
-        if len(nfn) < 1 or len("".join(nfn)) == 1:
-            nfd = list(self._name_from_description)
-            if len(nfd) > 0:
+        if useless_name(nfn):
+            nfd = list(description_name)
+            if not useless_name(nfd):
                 return nfd
 
         return nfn
@@ -245,25 +270,20 @@ class Flag(CliArgument):
     If true, this flag is not required (the default)
     """
 
-    @property
-    def variable_name(self) -> typing.List[str]:
+    def variable_name(self, description_name: typing.List[str]) -> typing.List[str]:
         """
         Returns a list of words that should be used in a variable name for this argument
         """
-        nfn = list(self._name_from_name)
+        # The super method returns the best name from the flag name or the description. If neither is sufficient, use
+        # the argument to generate a name
+        best = super().variable_name(description_name)
 
-        # Here we can use the argument string as a third source of a name
-        if len(nfn) < 1 or len("".join(nfn)) == 1:
-            nfd = list(self._name_from_description)
+        if useless_name(best):
+            nfa = list(self._name_from_arg)
+            if not useless_name(nfa):
+                return nfa
 
-            if len(nfd) == 0:
-                nfa = list(self._name_from_arg)
-                if len(nfa) > 0 and len("".join(nfa)) > 0:
-                    return nfa
-            else:
-                return nfd
-
-        return nfn
+        return best
 
     @property
     def _name_from_arg(self) -> typing.Iterable[str]:

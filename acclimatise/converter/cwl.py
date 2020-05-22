@@ -3,7 +3,7 @@ import tempfile
 from io import IOBase, StringIO, TextIOBase
 from os import PathLike
 from pathlib import Path
-from typing import Generator
+from typing import Generator, List
 
 from cwl_utils.parser_v1_1 import (
     CommandInputParameter,
@@ -13,8 +13,8 @@ from cwl_utils.parser_v1_1 import (
 from dataclasses import dataclass
 
 from acclimatise import cli_types
-from acclimatise.converter import WrapperGenerator
-from acclimatise.model import Command
+from acclimatise.converter import NamedArgument, WrapperGenerator
+from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.yaml import yaml
 
 
@@ -67,6 +67,11 @@ class CwlGenerator(WrapperGenerator):
         """
         Outputs the CWL wrapper to the provided file
         """
+        inputs: List[CliArgument] = [*cmd.named] + (
+            [] if self.ignore_positionals else [*cmd.positional]
+        )
+        names = self.choose_variable_names(inputs)
+
         tool = with_default_none(
             CommandLineTool,
             id=cmd.as_filename + ".cwl",
@@ -76,30 +81,22 @@ class CwlGenerator(WrapperGenerator):
             outputs=[],
         )
 
-        if not self.ignore_positionals:
-            for pos in cmd.positional:
-                tool.inputs.append(
-                    with_default_none(
-                        CommandInputParameter,
-                        id=self.choose_variable_name(pos),
-                        type=self.to_cwl_type(pos.get_type()),
-                        inputBinding=with_default_none(
-                            CommandLineBinding, position=pos.position
-                        ),
-                        doc=pos.description,
-                    )
-                )
-
-        for flag in cmd.named:
+        for arg in names:
             tool.inputs.append(
                 with_default_none(
                     CommandInputParameter,
-                    id=self.choose_variable_name(flag),
-                    type=self.to_cwl_type(flag.get_type()),
+                    id=arg.name,
+                    type=self.to_cwl_type(arg.arg.get_type()),
                     inputBinding=with_default_none(
-                        CommandLineBinding, prefix=flag.longest_synonym
+                        CommandLineBinding,
+                        position=arg.arg.position
+                        if isinstance(arg.arg, Positional)
+                        else None,
+                        prefix=arg.arg.longest_synonym
+                        if isinstance(arg.arg, Flag)
+                        else None,
                     ),
-                    doc=flag.description,
+                    doc=arg.arg.description,
                 )
             )
         return tool
@@ -115,6 +112,7 @@ class CwlGenerator(WrapperGenerator):
         out_dir = Path(out_dir)
         for command in cmd.command_tree():
             path = (out_dir / command.as_filename).with_suffix(".cwl")
+            map = self.command_to_tool(command).save(base_url=str(path))
             with path.open("w") as fp:
-                yaml.dump(self.command_to_tool(command).save(), fp)
+                yaml.dump(map, fp)
             yield path

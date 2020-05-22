@@ -89,6 +89,20 @@ all_tests = [
         named=0,
         subcommands=28,
     ),
+    HelpText(
+        path="test_data/dinosaur.txt",
+        cmd=["dinosaur"],
+        positional=0,
+        named=24,
+        subcommands=0,
+    ),
+    HelpText(
+        path="test_data/mauve.txt",
+        cmd=["mauveAligner"],
+        positional=2,
+        named=30,
+        subcommands=0,
+    ),
 ]
 
 

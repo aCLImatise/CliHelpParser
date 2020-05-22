@@ -77,6 +77,39 @@ def best_cmd(
     )
 
 
+def is_subcommand(command: Command, parent: Command, max_depth: int = 5) -> bool:
+    """
+    Returns true if command is a valid subcommand, relative to its parent
+    """
+    # There is a risk of infinite loops in the explorer, so we want to limit the depth
+    if command.depth > max_depth:
+        return False
+
+    # Recursively call this on all ancestors
+    if parent.parent is not None and not is_subcommand(command, parent.parent):
+        return False
+
+    # This isn't a subcommand if it has the same input text as the parent
+    if command.help_text and command.help_text == parent.help_text:
+        return False
+
+    # This isn't a subcommand if it has no flags
+    if len(command.positional) + len(command.named) == 0:
+        return False
+
+    # This isn't a subcommand if it shares any positional with the parent command
+    for pos_a, pos_b in zip(parent.positional, command.positional):
+        if pos_a == pos_b:
+            return False
+
+    # This isn't a subcommand if it shares any flags with the parent command
+    for flag_a, flag_b in zip(parent.named, command.named):
+        if flag_a == flag_b:
+            return False
+
+    return True
+
+
 def explore_command(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
@@ -95,25 +128,12 @@ def explore_command(
     """
     command = best_cmd(cmd, flags, run_kwargs=run_kwargs)
 
+    # Check if this is a valid subcommand
     if parent:
-
-        # This isn't a subcommand if it has the same input text as the parent
-        if command.help_text and command.help_text == parent.help_text:
+        if is_subcommand(command, parent):
+            command.parent = parent
+        else:
             return None
-
-        # This isn't a subcommand if it has no flags
-        if len(command.positional) + len(command.named) == 0:
-            return None
-
-        # This isn't a subcommand if it shares any positional with the parent command
-        for pos_a, pos_b in zip(parent.positional, command.positional):
-            if pos_a == pos_b:
-                return None
-
-        # This isn't a subcommand if it shares any flags with the parent command
-        for flag_a, flag_b in zip(parent.named, command.named):
-            if flag_a == flag_b:
-                return None
 
     # Recursively call this function on positionals
     for positional in command.positional:

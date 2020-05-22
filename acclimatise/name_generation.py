@@ -1,11 +1,30 @@
 import itertools
 import unicodedata
-from typing import Iterable, List
+from collections import Counter, defaultdict
+from itertools import groupby
+from typing import Generator, Iterable, List, Optional, Set
 
 import spacy
 import wordsegment
 
 import regex as re
+
+
+def duplicate_keys(l: list) -> Set[int]:
+    """
+    Identifies the indexes of duplicates in a given list
+    """
+    ret = set()
+    for entry, indices in groupby(
+        sorted(enumerate(l), key=lambda x: x[1]), key=lambda x: x[1]
+    ):
+        indices = list(indices)
+        if len(indices) > 1 and len("".join(entry)) > 0:
+            # The keys we still need to iterate on are those with duplicate commands, but if the names are empty
+            # strings, we should stop iterating and try another method
+            for index in indices:
+                ret.add(index[0])
+    return ret
 
 
 def sanitize_symbols(text):
@@ -44,8 +63,22 @@ def distance_to_root(token, root):
         return dist
 
 
+def token_priority(token):
+    """
+    Returns a priority (where lowest means highest priority) of tokens
+    """
+    if token.pos_ not in {"NOUN", "NUM", "PRON", "PROPN", "VERB", "ADJ", "ADV"}:
+        return 100 + token.idx
+    else:
+        return token.idx
+    # if should_ignore(token):
+    #     return 100 + distance_to_root(token, root)
+    # else:
+    #     return distance_to_root(token, root)
+
+
 def remove_delims(text):
-    for delims in (("\[", "\]"), ("\(", "\)"), ("{", "}"), ("'", "'"), ('"', '"')):
+    for delims in (("\[", "\]"), ("{", "}"), ("'", "'"), ('"', '"')):
         text = re.sub("{}.+{}".format(*delims), "", text)
 
     return text
@@ -92,9 +125,44 @@ def segment_string(text: str):
     return [sanitize_token(tok) for tok in segment_tokens]
 
 
-def generate_name(description: str) -> Iterable[str]:
+def generate_names(descriptions: List[str]) -> List[List[str]]:
     """
-    Given one or more sentences, attempt to parse out a concise (2-4 word) variable name
+    Given a list of flag descriptions, iterates until it generates a set of unique names for each flag
+    """
+    #: A set of indices of flags that still need to be named
+    todo = set(range(len(descriptions)))
+    generators = [generate_name(desc) for desc in descriptions]
+    #: A list of flag names, in the same order as the input list
+    ret = [[]] * len(descriptions)
+
+    # Iterate until everything is done, at most 5 more times
+    for i in range(5):
+        if i > 5:
+            raise Exception("Variable names failed to converge")
+
+        # Update the outputs using each generator
+        for j in todo:
+            ret[j] = next(generators[j])
+
+        # Clean up old generators
+        new_todo = duplicate_keys(ret)
+        for j in todo - new_todo:
+            generators[j] = None
+        todo = new_todo
+
+        # Finish once every variable name is unique
+        if len(todo) == 0:
+            break
+
+    return ret
+
+
+def generate_name(description: str) -> Generator[List[str], None, None]:
+    """
+    Given one or more sentences, attempt to parse out a concise (2-4 word) variable name. This is a generator, and each
+    time you access it, it will return a slightly longer word, this is to help prevent collisions with other variable
+    names
+    :param description: One or more sentences of text to parse into a variable name
     """
     try:
         nlp = spacy.load("en")
@@ -108,35 +176,21 @@ def generate_name(description: str) -> Iterable[str]:
 
     # Parse the sentence
     doc = nlp(sanitized)
-    sentences = list(doc.sents)
-    if len(sentences) == 0:
+
+    tokens = [tok for sent in doc.sents for tok in sent]
+    if len(tokens) == 0:
         return []
 
-    sentence = sentences[0]
-    root = sentence.root
+    # All tokens, sorted in order of importance
+    candidates = sorted(tokens, key=lambda token: token_priority(token))
 
-    # Add the second most important word after the root
-    candidates = sorted(
-        [
-            (distance_to_root(tok, root), tok)
-            for tok in sentence
-            if not should_ignore(tok) and root != tok
+    max = 2
+    while True:
+        # Each time through the loop, we increase the number of candidates we use
+        tokens = candidates[:max]
+        max += 1
+        # Now sort the tokens back into their original positions
+        yield [
+            sanitize_token(str(tok)).lower()
+            for tok in sorted(tokens, key=lambda tok: tok.i)
         ]
-    )
-    tokens = [root] if len(candidates) == 0 else [root, candidates[0][1]]
-
-    # Add any adjectives/adverbs that describe either word
-    for tok in tokens:
-        for child in tok.children:
-            if child.pos_ in {"ADV", "ADJ"}:
-                tokens.append(child)
-
-    # If we still don't have 3 tokens, add the 3rd most important
-    if len(tokens) < 3 and len(candidates) >= 2:
-        tokens.append(candidates[1][1])
-
-    # Now sort the tokens back into their original positions
-    return [
-        sanitize_token(str(tok)).lower()
-        for tok in sorted(tokens, key=lambda tok: tok.i)
-    ]
