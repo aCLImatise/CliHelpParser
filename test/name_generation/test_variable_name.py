@@ -1,4 +1,7 @@
-from acclimatise.model import EmptyFlagArg, Flag, SimpleFlagArg
+"""
+Tests for the variable_name() method
+"""
+from acclimatise.model import EmptyFlagArg, Flag, Positional, SimpleFlagArg
 
 
 def test_bwt2sa_i():

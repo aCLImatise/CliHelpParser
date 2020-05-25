@@ -1,5 +1,23 @@
 Changelog
 =========
+0.2.0 (2020-05-25)
+------------------
+Features
+********
+* Add ``parameter_meta`` (parameter documentation) generation back into WDL definitions
+* Add :py:meth:`acclimatise.model.Command.depth`, and :py:attribute:`acclimatise.model.Command.parent` to :py:class:`acclimatise.model.Command` to facilitate the traversal of the command tree
+* Add ``dinosaur`` and ``mauveAligner`` as test cases in ``test/test_data``
+* Convert tests into a series of test case objects that can be used to parameterize each test function
+* Add the option to parallelize tests using pytest-parallel
+* Better conversion of symbols to variable names, for example "/" is now "slash" rather than "solidus"
+
+Fixes
+*****
+* Avoid variable naming collisions using a generator-based iteration method in ``acclimatise.name_generation.generate_names``
+* Keep a global ``spacy`` instance to minimize memory footprint. This is available in :py:module:`acclimatise.nlp`
+* Fix infinite loops in explore, e.g. tools like ``dinosaur`` and ``mauve`` by adding more advanced subcommand detection in ``acclimatise.is_subcommand``
+* Make cmd optional for validators
+
 0.1.5 (2020-05-18)
 ------------------
 * Bugfix for when we have no help text

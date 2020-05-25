@@ -18,6 +18,8 @@ setup(
         "cwltool",
         "cwl-utils",
         "regex",
+        "num2words",
+        "word2number",
     ],
     python_requires=">=3.6",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},

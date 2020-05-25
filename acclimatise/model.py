@@ -18,14 +18,26 @@ from spacy import tokens
 from acclimatise import cli_types
 from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.yaml import yaml
+from word2number import w2n
 
 
 def useless_name(name: typing.List[str]):
     """
     Returns true if this name (sequence of strings) shouldn't be used as a variable name because it's too short and
-    uninformative
+    uninformative. This includes an entirely numeric name, which is almost never what you want
     """
-    return len(name) < 1 or len("".join(name)) <= 1
+    joined = "".join(name)
+    if len(name) < 1 or len(joined) <= 1 or joined.isnumeric():
+        return True
+
+    # Numeric names are not useful
+    try:
+        if all([w2n.word_to_num(tok) is not None for tok in name]):
+            return True
+    except Exception:
+        pass
+
+    return False
 
 
 @yaml_object(yaml)
@@ -178,7 +190,9 @@ class CliArgument:
     #     """
     #     return generate_name(self.description, min=min, max=max)
 
-    def variable_name(self, description_name: typing.List[str]) -> typing.List[str]:
+    def variable_name(
+        self, description_name: typing.List[str] = []
+    ) -> typing.List[str]:
         """
         Returns a list of words that should be used in a variable name for this argument
         :param description_name: A name for this variable, generated from a description

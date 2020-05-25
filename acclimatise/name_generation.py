@@ -8,6 +8,7 @@ from spacy.tokens import Token
 
 import regex as re
 from acclimatise.nlp import nlp, wordsegment
+from num2words import num2words
 
 
 def duplicate_keys(l: list) -> Set[int]:
@@ -106,6 +107,26 @@ def name_to_snake(words: Iterable[str]) -> str:
     return "_".join([word.lower() for word in words])
 
 
+def human_readable_translate(symbol: str):
+
+    # First, if the symbol is in this small curated list, use that
+    lookup = {".": "dot", ",": "comma", "/": "slash", "\\": "backslash", "@": "at"}
+    if symbol in lookup:
+        return lookup[symbol]
+
+    # Second, if the symbol is a number, convert it to natural English
+    try:
+        return num2words(symbol, ordinal=False, lang="en", to="cardinal")
+    except Exception:
+        # If it's not a number, ignore the error
+        pass
+
+    # Finally, if neither of those worked, ask unicode what it should be called
+    # This isn't ideal because unicodedata calls "/" a "SOLIDUS" and "@" it calls "commercial at", which is rather
+    # awkward
+    return unicodedata.name(symbol[0]).lower()
+
+
 def segment_string(text: str):
     """
     Divides one larger word into segments
@@ -117,7 +138,7 @@ def segment_string(text: str):
 
     # Replace symbols with their unicode names
     translated = re.sub(
-        "[^\w\s\-_]", lambda symbol: unicodedata.name(symbol[0]).lower(), base
+        "[^[:alpha:]\s\-_]", lambda match: human_readable_translate(match.group()), base
     )
 
     dash_tokens = re.split("[-_ ]", translated)
