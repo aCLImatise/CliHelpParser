@@ -4,10 +4,10 @@ from collections import Counter, defaultdict
 from itertools import groupby
 from typing import Generator, Iterable, List, Optional, Set
 
-import spacy
-import wordsegment
+from spacy.tokens import Token
 
 import regex as re
+from acclimatise.nlp import nlp, wordsegment
 
 
 def duplicate_keys(l: list) -> Set[int]:
@@ -63,14 +63,20 @@ def distance_to_root(token, root):
         return dist
 
 
-def token_priority(token):
+def token_priority(token: Token, current: List[Token]) -> int:
     """
     Returns a priority (where lowest means highest priority) of tokens
+    :param token: The token to prioritise
+    :param current: The current list of tokens in the name
     """
     if token.pos_ not in {"NOUN", "NUM", "PRON", "PROPN", "VERB", "ADJ", "ADV"}:
-        return 100 + token.idx
+        return 1000 + token.idx
     else:
-        return token.idx
+        if token.dep_ != "HEAD" and token.head not in current:
+            # If this is, say, an adjective but the noun it's attached to isn't in the list, massively penalise this
+            return 500 + token.idx
+        else:
+            return token.idx
     # if should_ignore(token):
     #     return 100 + distance_to_root(token, root)
     # else:
@@ -78,7 +84,7 @@ def token_priority(token):
 
 
 def remove_delims(text):
-    for delims in (("\[", "\]"), ("{", "}"), ("'", "'"), ('"', '"')):
+    for delims in (("\\[", "\\]"), ("{", "}"), ("'", "'"), ('"', '"')):
         text = re.sub("{}.+{}".format(*delims), "", text)
 
     return text
@@ -107,10 +113,6 @@ def segment_string(text: str):
     :return:
     """
 
-    # Load wordsegment the first time
-    if len(wordsegment.WORDS) == 0:
-        wordsegment.load()
-
     base = text.lstrip("-")
 
     # Replace symbols with their unicode names
@@ -125,15 +127,18 @@ def segment_string(text: str):
     return [sanitize_token(tok) for tok in segment_tokens]
 
 
-def generate_names(descriptions: List[str]) -> List[List[str]]:
+def generate_names(descriptions: List[str], length: int = 3) -> List[List[str]]:
     """
     Given a list of flag descriptions, iterates until it generates a set of unique names for each flag
+    :param length: See :py:func:`generate_name`
     """
     #: A set of indices of flags that still need to be named
     todo = set(range(len(descriptions)))
-    generators = [generate_name(desc) for desc in descriptions]
+    generators = [generate_name(desc, length=length) for desc in descriptions]
     #: A list of flag names, in the same order as the input list
     ret = [[]] * len(descriptions)
+    #: A set of generators that are exhausted, meaning we can't iterate on them
+    empty = set()
 
     # Iterate until everything is done, at most 5 more times
     for i in range(5):
@@ -142,10 +147,16 @@ def generate_names(descriptions: List[str]) -> List[List[str]]:
 
         # Update the outputs using each generator
         for j in todo:
-            ret[j] = next(generators[j])
+            try:
+                # If we are able to add more characters, do so
+                name = next(generators[j])
+                ret[j] = name
+            except StopIteration:
+                # If we can't, exclude it from further calculations
+                empty.add(j)
 
         # Clean up old generators
-        new_todo = duplicate_keys(ret)
+        new_todo = duplicate_keys(ret) - empty
         for j in todo - new_todo:
             generators[j] = None
         todo = new_todo
@@ -157,19 +168,15 @@ def generate_names(descriptions: List[str]) -> List[List[str]]:
     return ret
 
 
-def generate_name(description: str) -> Generator[List[str], None, None]:
+def generate_name(
+    description: str, length: int = 3
+) -> Generator[List[str], None, None]:
     """
     Given one or more sentences, attempt to parse out a concise (2-4 word) variable name. This is a generator, and each
     time you access it, it will return a slightly longer word, this is to help prevent collisions with other variable
     names
     :param description: One or more sentences of text to parse into a variable name
     """
-    try:
-        nlp = spacy.load("en")
-    except IOError:
-        raise Exception(
-            "Spacy model doesn't exist! Install it with `python -m spacy download en`"
-        )
 
     # Remove all delimited text
     sanitized = sanitize_symbols(remove_delims(replace_hyphens(description)))
@@ -177,20 +184,30 @@ def generate_name(description: str) -> Generator[List[str], None, None]:
     # Parse the sentence
     doc = nlp(sanitized)
 
-    tokens = [tok for sent in doc.sents for tok in sent]
-    if len(tokens) == 0:
+    candidates = [tok for sent in doc.sents for tok in sent]
+    if len(candidates) == 0:
         return []
 
-    # All tokens, sorted in order of importance
-    candidates = sorted(tokens, key=lambda token: token_priority(token))
-
-    max = 2
+    tokens = []
+    max = length
     while True:
+
+        # All tokens, sorted in order of importance
+        candidates = sorted(
+            candidates, key=lambda token: token_priority(token, tokens), reverse=True
+        )
+
         # Each time through the loop, we increase the number of candidates we use
-        tokens = candidates[:max]
-        max += 1
-        # Now sort the tokens back into their original positions
-        yield [
-            sanitize_token(str(tok)).lower()
-            for tok in sorted(tokens, key=lambda tok: tok.i)
-        ]
+        if candidates:
+            tokens.append(candidates.pop())
+
+        # Iterate until we have N tokens, then yield the word. Then if the generator is called again, increase N by
+        # 1 and continue
+
+        if len(tokens) >= max or len(candidates) == 0:
+            max += 1
+            # Now sort the tokens back into their original positions
+            yield [
+                sanitize_token(str(tok)).lower()
+                for tok in sorted(tokens, key=lambda tok: tok.i)
+            ]

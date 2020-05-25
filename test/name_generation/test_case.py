@@ -21,16 +21,16 @@ def test_camel_short(camel_gen):
     flag = Flag(
         synonyms=["-t"], description="number of threads [1]", args=EmptyFlagArg()
     )
-    name = camel_gen.choose_variable_name(flag)
-    assert name == "numberThreads"
+    names = camel_gen.choose_variable_names([flag], length=3)
+    assert names[0].name == "numberOfThreads"
 
 
 def test_snake_short(snake_gen):
     flag = Flag(
         synonyms=["-t"], description="number of threads [1]", args=EmptyFlagArg()
     )
-    name = snake_gen.choose_variable_name(flag)
-    assert name == "number_threads"
+    names = snake_gen.choose_variable_names([flag], length=2)
+    assert names[0].name == "number_threads"
 
 
 def test_camel_long(camel_gen):
@@ -39,8 +39,8 @@ def test_camel_long(camel_gen):
         description="number of threads [1]",
         args=EmptyFlagArg(),
     )
-    name = camel_gen.choose_variable_name(flag)
-    assert name == "genomeFolders"
+    names = camel_gen.choose_variable_names([flag], length=2)
+    assert names[0].name == "genomeFolders"
 
 
 def test_snake_long(snake_gen):
@@ -49,5 +49,5 @@ def test_snake_long(snake_gen):
         description="number of threads [1]",
         args=EmptyFlagArg(),
     )
-    name = snake_gen.choose_variable_name(flag)
-    assert name == "genome_folders"
+    names = snake_gen.choose_variable_names([flag], length=2)
+    assert names[0].name == "genome_folders"

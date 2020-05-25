@@ -14,7 +14,7 @@ def test_name_to_words_symbol():
         args=EmptyFlagArg(),
     )
 
-    assert list(arg._name_from_name) == ["commercial", "at"]
+    assert list(arg._name_from_name()) == ["commercial", "at"]
 
 
 def test_name_to_words():
@@ -23,4 +23,4 @@ def test_name_to_words():
     """
     arg = Flag(synonyms=["--genomepaths"], description="", args=EmptyFlagArg(),)
 
-    assert list(arg._name_from_name) == ["genome", "paths"]
+    assert list(arg._name_from_name()) == ["genome", "paths"]

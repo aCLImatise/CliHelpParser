@@ -270,7 +270,9 @@ class Flag(CliArgument):
     If true, this flag is not required (the default)
     """
 
-    def variable_name(self, description_name: typing.List[str]) -> typing.List[str]:
+    def variable_name(
+        self, description_name: typing.List[str] = []
+    ) -> typing.List[str]:
         """
         Returns a list of words that should be used in a variable name for this argument
         """

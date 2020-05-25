@@ -89,16 +89,19 @@ class WrapperGenerator:
 
         return self.words_to_name(toks)
 
-    def choose_variable_names(self, flags: List[CliArgument]) -> List[NamedArgument]:
+    def choose_variable_names(
+        self, flags: List[CliArgument], length: int = 3
+    ) -> List[NamedArgument]:
         """
         Choose names for a list of flags. This needs to be done in one go because there is a risk of duplicate
         variable names otherwise
+        :param length: See :py:func:`acclimatise.name_generation.generate_name`
         """
 
         if self.generate_names:
             # If we are allowed to generate names, generate the whole batch, and then choose the best method of
             # name generation on a case-by-case basis
-            names = generate_names([flag.description for flag in flags])
+            names = generate_names([flag.description for flag in flags], length=length)
             return [
                 NamedArgument(
                     name=self.words_to_name(flag.variable_name(name)), arg=flag

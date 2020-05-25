@@ -22,7 +22,8 @@ jobs:
           pip install -e .[dev]
           python -m spacy download en
           # 2 workers since the default runner has 2 CPUs
-          pytest --workers 2
+          #pytest --workers 2
+          pytest
         shell: bash
 
   test_system:
