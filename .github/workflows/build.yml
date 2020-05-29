@@ -23,7 +23,7 @@ jobs:
           python -m spacy download en
           # 2 workers since the default runner has 2 CPUs
           #pytest --workers 2
-          pytest
+          pytest --log-cli-level=INFO
         shell: bash
 
   test_system:
