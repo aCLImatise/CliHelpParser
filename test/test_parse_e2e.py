@@ -4,12 +4,19 @@ from itertools import product
 import pytest
 from pkg_resources import resource_filename
 
-from acclimatise import WrapperGenerator, parse_help
+from acclimatise import parse_help
 
-from .util import HelpText, all_tests, convert_validate, validate_cwl, validate_wdl
+from .util import (
+    HelpText,
+    all_ids,
+    all_tests,
+    convert_validate,
+    validate_cwl,
+    validate_wdl,
+)
 
 
-@pytest.mark.parametrize("test", all_tests)
+@pytest.mark.parametrize("test", all_tests, ids=all_ids)
 def test_all(test: HelpText):
     """
     A comprehensive end-to-end test that tests the parser and converters, using the test data files
@@ -28,4 +35,4 @@ def test_all(test: HelpText):
     assert cmd.help_text == help_text
 
     # Check the converters work
-    convert_validate(cmd)
+    convert_validate(cmd, explore=False)

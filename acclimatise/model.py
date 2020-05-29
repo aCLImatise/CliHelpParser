@@ -146,6 +146,11 @@ class Command:
     Optionally, the entire help text that was used to generate this Command
     """
 
+    generated_using: typing.Optional[str] = None
+    """
+    Optionally, the flag that was used to generate this command. Often this will be the same as the help_flag
+    """
+
 
 @yaml_object(yaml)
 @dataclass

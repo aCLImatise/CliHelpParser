@@ -1,3 +1,4 @@
+import logging
 import tempfile
 from io import StringIO
 from pathlib import Path
@@ -13,6 +14,8 @@ from WDL import parse_document
 from acclimatise import Command, WrapperGenerator
 from acclimatise.yaml import yaml
 
+logging.getLogger("cwltool").setLevel(30)
+
 
 @dataclass
 class HelpText:
@@ -24,71 +27,91 @@ class HelpText:
 
 
 all_tests = [
-    HelpText(
-        path="test_data/bedtools.txt",
-        cmd=["bedtools"],
-        positional=0,
-        named=1,
-        subcommands=43,
+    pytest.param(
+        HelpText(
+            path="test_data/bedtools_coverage.txt",
+            cmd=["bedtools", "coverage"],
+            positional=0,
+            named=18,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/bedtools_coverage.txt",
-        cmd=["bedtools", "coverage"],
-        positional=0,
-        named=18,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/bwa_mem.txt",
+            cmd=["bwa", "mem"],
+            positional=3,
+            named=32,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/bwa.txt", cmd=["bwa"], named=0, positional=0, subcommands=14
+    pytest.param(
+        HelpText(
+            path="test_data/bwa_bwt2sa.txt",
+            cmd=["bwa", "bwt2sa"],
+            named=1,
+            positional=2,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/bwa_mem.txt",
-        cmd=["bwa", "mem"],
-        positional=3,
-        named=32,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/bwa_bwtupdate.txt",
+            cmd=["bwa", "bwtupdate"],
+            named=0,
+            positional=1,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/bwa_bwt2sa.txt",
-        cmd=["bwa", "bwt2sa"],
-        named=1,
-        positional=2,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/htseq_count.txt",
+            cmd=["htseq-count"],
+            named=14,
+            positional=2,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/bwa_bwtupdate.txt",
-        cmd=["bwa", "bwtupdate"],
-        named=0,
-        positional=1,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/bedtools.txt",
+            cmd=["bedtools"],
+            positional=0,
+            named=1,
+            subcommands=43,
+        ),
     ),
-    HelpText(
-        path="test_data/htseq_count.txt",
-        cmd=["htseq-count"],
-        named=14,
-        positional=2,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/pisces.txt",
+            cmd=["pisces"],
+            named=57,
+            positional=0,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/pisces.txt",
-        cmd=["pisces"],
-        named=57,
-        positional=0,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/podchecker.txt",
+            cmd=["podchecker"],
+            named=2,
+            positional=1,
+            subcommands=0,
+        ),
     ),
-    HelpText(
-        path="test_data/podchecker.txt",
-        cmd=["podchecker"],
-        named=2,
-        positional=1,
-        subcommands=0,
+    pytest.param(
+        HelpText(
+            path="test_data/bwa.txt", cmd=["bwa"], named=0, positional=0, subcommands=14
+        ),
     ),
-    HelpText(
-        path="test_data/samtools.txt",
-        cmd=["samtools"],
-        positional=0,
-        named=0,
-        subcommands=28,
+    pytest.param(
+        HelpText(
+            path="test_data/samtools.txt",
+            cmd=["samtools"],
+            positional=0,
+            named=0,
+            subcommands=28,
+        ),
     ),
     # These last two are really strange, maybe I'll support them eventually
     pytest.param(
@@ -113,8 +136,10 @@ all_tests = [
     ),
 ]
 
+all_ids = [" ".join(case.values[0].cmd) for case in all_tests]
 
-def convert_validate(cmd: Command, lang: str = None):
+
+def convert_validate(cmd: Command, lang: str = None, explore=True):
     """
     Converts the command into one or all formats, and then validates that they worked
     """
@@ -123,13 +148,13 @@ def convert_validate(cmd: Command, lang: str = None):
         with tempfile.TemporaryDirectory() as tempd:
             for path in conv.generate_tree(cmd, tempd):
                 content = path.read_text()
-                validators[lang](content, cmd)
+                validators[lang](content, cmd, explore=explore)
     else:
         for lang in ("cwl", "wdl", "yml"):
             convert_validate(cmd, lang)
 
 
-def validate_cwl(cwl: str, cmd: Command = None):
+def validate_cwl(cwl: str, cmd: Command = None, explore: bool = True):
     parsed = yaml.load(cwl)
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
@@ -139,12 +164,17 @@ def validate_cwl(cwl: str, cmd: Command = None):
         resolve_and_validate_document(loading_context, workflowobj, uri)
 
 
-def validate_wdl(wdl: str, cmd: Command = None):
+def validate_wdl(wdl: str, cmd: Command = None, explore=True):
+    """
+    :param explore: If true, we're in explore mode, and we should ignore subcommands
+    """
     doc = parse_document(wdl)
+    task = doc.tasks[0]
 
+    # task.inputs might be None
+    cmd_input_names = {inp.name for inp in task.inputs or []}
     # Verify that every parameter has been documented
-    cmd_input_names = {inp.name for inp in doc.tasks[0].inputs}
-    wdl_input_names = {meta for meta in doc.tasks[0].parameter_meta.keys()}
+    wdl_input_names = {meta for meta in task.parameter_meta.keys()}
     assert cmd_input_names == wdl_input_names
 
     # wdl_input_descriptions = {meta for meta in doc.tasks[0].parameter_meta.values()}
@@ -153,12 +183,14 @@ def validate_wdl(wdl: str, cmd: Command = None):
 
     # Check that the generated WDL has the correct parameter meta fields
     if cmd:
-        assert len(doc.tasks[0].parameter_meta) == len(cmd.subcommands) + len(
-            cmd.named
-        ) + len(cmd.positional)
+        target = len(cmd.named) + len(cmd.positional)
+        # If we're not in explore mode, subcommands will be parsed as inputs
+        if not explore:
+            target += len(cmd.subcommands)
+        assert len(task.parameter_meta) == target
 
 
-def validate_yml(yml: str, cmd: Command = None):
+def validate_yml(yml: str, cmd: Command = None, explore=True):
     stream = StringIO(yml)
     yaml.load(stream)
 

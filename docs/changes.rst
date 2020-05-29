@@ -10,6 +10,16 @@ Features
 * Convert tests into a series of test case objects that can be used to parameterize each test function
 * Add the option to parallelize tests using pytest-parallel
 * Better conversion of symbols to variable names, for example "/" is now "slash" rather than "solidus"
+* Add logging to the high level functions like ``explore_command``, using the ``acclimatise`` logger. This should make
+tracking errors and progress a tad easier.
+* By default, re-use the best help command from the parent on the child. For example if we determine that
+``samtools --help`` is the most accurate help command for ``samtools``, then we use ``samtools sort --help`` without
+having to test out every possible flag here
+* Add ``generated_using`` field to the ``Command`` class, which tracks the flag used to generate it
+
+Changes
+*******
+* Set the default command depth to 3
 
 Fixes
 *****
@@ -17,6 +27,8 @@ Fixes
 * Keep a global ``spacy`` instance to minimize memory footprint. This is available in :py:module:`acclimatise.nlp`
 * Fix infinite loops in explore, e.g. tools like ``dinosaur`` and ``mauve`` by adding more advanced subcommand detection in ``acclimatise.is_subcommand``
 * Make cmd optional for validators
+* Always run commands in a pseudo-TTY so that commands like ``samtools`` will output help
+* Various other fixes
 
 0.1.5 (2020-05-18)
 ------------------
