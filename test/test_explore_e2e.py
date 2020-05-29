@@ -40,7 +40,3 @@ def test_explore_bwa():
     assert len(mem.positional) == 3
     assert len(mem.subcommands) == 0
     assert len(mem.named) >= 30
-
-
-def test_samtools_sort():
-    execute_cmd(["samtools", "sort"])
