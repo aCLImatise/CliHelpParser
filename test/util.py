@@ -1,4 +1,5 @@
 import logging
+import shutil
 import tempfile
 from io import StringIO
 from pathlib import Path
@@ -15,6 +16,15 @@ from acclimatise import Command, WrapperGenerator
 from acclimatise.yaml import yaml
 
 logging.getLogger("cwltool").setLevel(30)
+
+
+def skip_not_installed(executable):
+    """
+    Returns a pytest decorator to skip the test if the given executable is not in the path
+    """
+    return pytest.mark.skipif(
+        not shutil.which(executable), reason="{} is not installed".format(executable)
+    )
 
 
 @dataclass

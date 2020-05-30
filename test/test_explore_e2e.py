@@ -5,7 +5,7 @@ import pytest
 
 from acclimatise import execute_cmd, explore_command
 
-from .util import HelpText, all_ids, all_tests, convert_validate
+from .util import HelpText, all_ids, all_tests, convert_validate, skip_not_installed
 
 
 @pytest.mark.parametrize("test", all_tests, ids=all_ids)
@@ -26,6 +26,12 @@ def test_explore(test: HelpText):
 
     # Check this can be converted properly to all formats
     convert_validate(command, explore=True)
+
+
+@skip_not_installed("dinosaur")
+@pytest.mark.timeout(30)
+def test_explore_dinosaur():
+    command = explore_command(["dinosaur"], max_depth=2)
 
 
 @pytest.mark.skipif(not shutil.which("bwa"), reason="bwa is not installed")
