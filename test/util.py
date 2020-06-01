@@ -77,7 +77,7 @@ all_tests = [
         HelpText(
             path="test_data/htseq_count.txt",
             cmd=["htseq-count"],
-            named=14,
+            named=20,
             positional=2,
             subcommands=0,
         ),

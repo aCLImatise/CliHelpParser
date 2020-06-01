@@ -7,6 +7,6 @@ dependencies:
   - bwa==0.7.17
   - samtools=1.7
   - bedtools==2.26.0
-  - htseq==0.11.0
+  - htseq==0.12.4
   - dinosaur==1.1.3
   - pisces==5.2.9.122

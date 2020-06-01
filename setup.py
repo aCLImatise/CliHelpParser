@@ -8,7 +8,6 @@ setup(
         "jinja2",
         "spacy",
         "cwlgen",
-        "dataclasses",
         "miniwdl",
         "wordsegment",
         "inflection",

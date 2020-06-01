@@ -20,6 +20,7 @@ having to test out every possible flag here
 Changes
 *******
 * Set the default command depth to 3
+* ``aCLImatise`` now only supports Python >= 3.7.5, due to `this bug <https://bugs.python.org/issue37424>`_
 
 Fixes
 *****
