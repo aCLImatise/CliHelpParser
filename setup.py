@@ -23,13 +23,6 @@ setup(
     python_requires=">=3.7.5",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},
     extras_require={
-        "dev": [
-            "pytest",
-            "pre-commit",
-            "Sphinx",
-            "sphinx-click",
-            "pytest-parallel",
-            "pytest-timeout",
-        ],
+        "dev": ["pytest", "pre-commit", "Sphinx", "sphinx-click", "pytest-timeout",],
     },
 )

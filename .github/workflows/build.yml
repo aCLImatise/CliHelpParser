@@ -21,8 +21,6 @@ jobs:
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
           python -m spacy download en
-          # 2 workers since the default runner has 2 CPUs
-          #pytest --workers 2
           pytest --log-cli-level=INFO
         shell: bash
 
@@ -51,8 +49,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          # 2 workers since the default runner has 2 CPUs
-          pytest --workers 2
+          pytest
 
       - name: Test the documentation still builds
         run: |
