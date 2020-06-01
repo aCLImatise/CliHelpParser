@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
+  - python>=3.7.5
   - bwa==0.7.17
   - samtools=1.7
   - bedtools==2.26.0

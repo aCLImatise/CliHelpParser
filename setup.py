@@ -21,7 +21,7 @@ setup(
         "num2words",
         "word2number",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7.5",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},
     extras_require={
         "dev": [

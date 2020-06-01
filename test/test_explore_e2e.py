@@ -31,6 +31,11 @@ def test_explore(test: HelpText):
 @skip_not_installed("dinosaur")
 @pytest.mark.timeout(30)
 def test_explore_dinosaur():
+    """
+    Python has an issue with killing process trees, whereby the subprocess runs another subprocess.
+    This tests that dinosaur
+    :return:
+    """
     command = explore_command(["dinosaur"], max_depth=2)
 
 
