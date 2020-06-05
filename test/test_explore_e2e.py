@@ -24,7 +24,10 @@ def test_explore(test: HelpText):
     if not shutil.which(test.cmd[0]):
         pytest.skip("{} is not installed".format(test.cmd[0]))
 
-    ensure_conda()
+    try:
+        ensure_conda()
+    except:
+        pytest.skip("Not in a conda environment")
 
     # For speed's sake, only explore to depth 2
     command = explore_command(test.cmd, max_depth=2)

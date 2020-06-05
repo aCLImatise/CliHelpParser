@@ -21,7 +21,7 @@ jobs:
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
           python -m spacy download en
-          pytest --log-cli-level=INFO
+          pytest --tb=native
         shell: bash
 
   test_system:
@@ -49,7 +49,7 @@ jobs:
 
       - name: Test with pytest
         run: |
-          pytest
+          pytest --tb=native
 
       - name: Test the documentation still builds
         run: |
