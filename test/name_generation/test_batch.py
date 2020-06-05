@@ -5,7 +5,6 @@ import pytest
 from pkg_resources import resource_filename
 
 from acclimatise import WrapperGenerator, parse_help
-from acclimatise.name_generation import generate_names
 
 from ..util import HelpText, all_tests, convert_validate, validate_cwl, validate_wdl
 
@@ -20,4 +19,4 @@ def test_all(test: HelpText):
 
     cmd = parse_help(test.cmd, help_text)
 
-    generate_names([arg.description for arg in [*cmd.positional, *cmd.named]])
+    WrapperGenerator().choose_variable_names([*cmd.positional, *cmd.named])

@@ -73,7 +73,7 @@ def customIndentedBlock(
     return smExpr.setName("custom indented block")
 
 
-cli_id = Word(initChars=alphas + "@", bodyChars=alphanums + "-_@")
+cli_id = Word(initChars=alphanums + "@", bodyChars=alphanums + "-_@")
 
 # short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
 # """A short flag has only a single dash and single character, e.g. `-m`"""
@@ -112,26 +112,36 @@ When the flag has multiple arguments, some of which are optional, e.g.
 
 # simple_arg = arg.copy().setParseAction(
 #     lambda s, loc, toks: SimpleFlagArg(toks[0]))
-simple_arg = Or(
-    [
-        Word(initChars=alphanums, bodyChars=alphanums + "-_./\\"),
-        # Allow spaces in the argument name, but only if it's enclosed in angle brackets
-        Literal("<").suppress()
-        + Word(initChars=alphas, bodyChars=alphanums + "-_./\\ ")
-        + Literal(">").suppress(),
-    ]
-).setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
+simple_arg = (
+    (
+        Or(
+            [
+                Word(initChars=alphanums, bodyChars=alphanums + "-_./\\"),
+                # Allow spaces in the argument name, but only if it's enclosed in angle brackets
+                Literal("<").suppress()
+                + Word(initChars=alphas, bodyChars=alphanums + "-_./\\ ")
+                + Literal(">").suppress(),
+            ]
+        )
+    )
+    .leaveWhitespace()
+    .setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
+)
 
+repeated_segment = (
+    ZeroOrMore(arg) + Literal(".")[2, 3].suppress() + Optional(arg)
+).setParseAction(
+    lambda s, loc, toks: RepeatFlagArg(toks[-1] or toks[0])
+)  # Either ".." or "..."
 list_type_arg = (
-    arg
-    + Literal(" ")
-    + Literal("[")
-    + matchPreviousLiteral(arg)
-    + Optional(Literal(" "))
-    + Literal("...")
-    + Literal("]")
-).setParseAction(lambda s, loc, toks: RepeatFlagArg(toks[0]))
-"""When the argument is an array of values, e.g. when the help says `--samout SAMOUTS [SAMOUTS ...]`"""
+    (arg + repeated_segment)
+    ^ (arg + Literal("[").suppress() + repeated_segment + Literal("]").suppress())
+).setParseAction(lambda s, loc, toks: toks[1])
+"""
+    When the argument is an array of values, e.g. when the help says `--samout SAMOUTS [SAMOUTS ...]` or 
+    `-i FILE1 FILE2 .. FILEn`
+
+"""
 
 choice_type_arg = nestedExpr(
     opener="{", closer="}", content=delimitedList(cli_id, delim=",")
@@ -146,11 +156,12 @@ def noop(s, loc, toks):
 arg_expression = (
     (
         flag_arg_sep.suppress()
-        + (list_type_arg ^ choice_type_arg ^ optional_args ^ simple_arg)
+        + (list_type_arg | choice_type_arg | optional_args | simple_arg)
     )
-    .leaveWhitespace()
+    # .leaveWhitespace()
     .setParseAction(lambda s, loc, toks: toks[0])
 )
+arg_expression.skipWhitespace = False
 """An argument with separator, e.g. `=FILE`"""
 
 flag_with_arg = (any_flag + Optional(arg_expression)).setParseAction(

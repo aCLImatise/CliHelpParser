@@ -11,10 +11,32 @@ from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.converter.yml import YmlGenerator
 from acclimatise.flag_parser.parser import CliParser
-from acclimatise.model import Command
+from acclimatise.model import Command, Flag
 from acclimatise.usage_parser import parse_usage
 
 logger = logging.getLogger("acclimatise")
+
+
+def _combine_flags(
+    flag_lists: typing.Iterable[typing.Iterable[Flag]],
+) -> typing.Iterable[Flag]:
+    """
+    Combines the flags from several sources, choosing the first one preferentially
+    """
+    lookup = {}
+
+    # Build a list of flags, but only ever choose the first instance of a synonym
+    for flags in flag_lists:
+        for flag in flags:
+            for synonym in flag.synonyms:
+                stripped = synonym.lstrip("-")
+                if stripped not in lookup:
+                    lookup[stripped] = flag
+
+    # Now, make them unique by description
+    unique = {flag.longest_synonym: flag for flag in lookup.values()}
+
+    return list(unique.values())
 
 
 def parse_help(
@@ -34,7 +56,13 @@ def parse_help(
     usage_command = parse_usage(cmd, text)
 
     # Combine the two commands by picking from the help_command where possible, otherwise falling back on the usage
-    fields = {"help_text": text}
+    fields = dict(
+        help_text=text,
+        # Use the help command's positionals preferentially, but fall back to usage
+        positional=help_command.positional or usage_command.positional,
+        # Combine the flags from both help and usage
+        named=list(_combine_flags([help_command.named, usage_command.named])),
+    )
     for field in dataclasses.fields(Command):
         fields[field.name] = (
             fields.get(field.name)
@@ -47,7 +75,7 @@ def parse_help(
 
 def best_cmd(
     cmd: typing.List[str],
-    flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
+    flags: typing.Iterable[str] = (["--help"], ["-h"], [], ["--usage"]),
     run_kwargs: dict = {},
 ) -> Command:
     """
@@ -57,7 +85,8 @@ def best_cmd(
     this doesn't even attempt to parse subcommands.
 
     :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
-    :param flags: A list of help flags to try, e.g. ['--help', '-h']
+    :param flags: A list of help flags to try, e.g. ['--help', '-h'], in order how which one you would prefer to use.
+    Generally [] aka no flags should be last
     :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
     """
     # For each help flag, run the command and then try to parse it
@@ -75,15 +104,21 @@ def best_cmd(
             # If parsing fails, this wasn't the right flag to use
             continue
 
-    # Sort by flags primarily, and if they're equal, return the command with the longest help text
+    # Sort by flags primarily, and if they're equal, return the command with the longest help text, and if they're equal
+    # return the command with the most help flags. This helps ensure we get ["bedtools", "--help"] instead of
+    # ["bedtools"]
     best = max(
         commands,
         key=lambda com: (
             len(com.named) + len(com.positional),
-            len(com.help_text) if com.help_text else 0,
+            # len(com.help_text) if com.help_text else 0,
         ),
     )
-    logger.info("The best help flag seems to be {}".format(" ".join(best.command)))
+    logger.info(
+        "The best help flag seems to be {}".format(
+            " ".join(best.command + best.generated_using)
+        )
+    )
     return best
 
 
@@ -118,11 +153,11 @@ def is_subcommand(command: Command, parent: Command) -> bool:
 
 def explore_command(
     cmd: typing.List[str],
-    flags: typing.Iterable[str] = ([], ["-h"], ["--help"], ["--usage"]),
+    flags: typing.Iterable[str] = (["--help"], ["-h"], [], ["--usage"]),
     parent: typing.Optional[Command] = None,
     run_kwargs: dict = {},
     max_depth: int = 3,
-    try_subcommand_flags=False,
+    try_subcommand_flags=True,
 ) -> typing.Optional[Command]:
     """
     Given a command to start with, builds a model of this command and all its subcommands (if they exist).
@@ -130,11 +165,13 @@ def explore_command(
     you want to include subcommands.
 
     :param cmd: Command line executable and arguments to explore
-    :param flags: List of flags to append to cmd in order to look for help commands, e.g. "--help"
+    :param flags: A list of help flags to try, e.g. ['--help', '-h'], in order how which one you would prefer to use.
+    Generally [] aka no flags should be last
     :param parent: A parent Command to add this command to as a subcommand, if this command actually exists
     :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
-    :param try_subcommand_flags: If true, try all the ``flags`` on each subcommand. If False, the default, we choose
-    the best help flag on the parent command and then use that same one on each child
+    :param try_subcommand_flags: If true, try all the ``flags`` on each subcommand. If False, we choose
+    the best help flag on the parent command and then use that same one on each child. Generally True is recommended
+    since some tools (such as bedtools) use different help flags for subcommands
     """
     logger.info("Exploring {}".format(" ".join(cmd)))
     command = best_cmd(cmd, flags, run_kwargs=run_kwargs)

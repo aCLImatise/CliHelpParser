@@ -10,13 +10,13 @@ import unicodedata
 from abc import abstractmethod
 
 import spacy
-import wordsegment
 from dataclasses import InitVar, dataclass, field
 from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 
 from acclimatise import cli_types
 from acclimatise.name_generation import generate_name, segment_string
+from acclimatise.nlp import wordsegment
 from acclimatise.yaml import yaml
 from word2number import w2n
 
@@ -153,7 +153,7 @@ class Command:
 
 
 @yaml_object(yaml)
-@dataclass
+@dataclass(unsafe_hash=True)
 class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
@@ -164,9 +164,9 @@ class CliArgument:
     Description of the function of this argument
     """
 
-    @staticmethod
-    def tokens_to_name(tokens: typing.List[tokens.Token]):
-        return re.sub("[^\w]", "", "".join([tok.text.capitalize() for tok in tokens]))
+    @abstractmethod
+    def argument_name(self) -> typing.List[str]:
+        return []
 
     @abstractmethod
     def full_name(self) -> str:
@@ -182,37 +182,6 @@ class CliArgument:
         CliList.
         """
         pass
-
-    def _name_from_name(self) -> typing.Iterable[str]:
-        """
-        Splits this argument's name into multiple words
-        """
-        return segment_string(self.full_name())
-
-    # def _name_from_description(self, min:int = None, max:int=None) -> typing.Iterable[str]:
-    #     """
-    #     Generate a 1-3 word variable name for this flag, by parsing the description
-    #     """
-    #     return generate_name(self.description, min=min, max=max)
-
-    def variable_name(
-        self, description_name: typing.List[str] = []
-    ) -> typing.List[str]:
-        """
-        Returns a list of words that should be used in a variable name for this argument
-        :param description_name: A name for this variable, generated from a description
-        """
-        nfn = list(self._name_from_name())
-
-        # Simple heuristic that determines when to generate a name from the name versus from the description.
-        # We prefer using the flag name, since it should by definition be a good variable name. However, if it's a short
-        # flag like "-p" or "-o", we basically have to use the description
-        if useless_name(nfn):
-            nfd = list(description_name)
-            if not useless_name(nfd):
-                return nfd
-
-        return nfn
 
 
 @yaml_object(yaml)
@@ -263,7 +232,7 @@ class Positional(CliArgument):
 
 
 @yaml_object(yaml)
-@dataclass
+@dataclass(unsafe_hash=True)
 class Flag(CliArgument):
     """
     Represents one single flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
@@ -288,6 +257,9 @@ class Flag(CliArgument):
     """
     If true, this flag is not required (the default)
     """
+
+    def argument_text(self) -> typing.List[str]:
+        return self.args.text()
 
     def variable_name(
         self, description_name: typing.List[str] = []
@@ -436,6 +408,12 @@ class FlagArg(abc.ABC):
     one argument, it might accept one option from a list of options, or it might accept an arbitrary number of inputs
     """
 
+    def text(self) -> typing.List[str]:
+        """
+        Returns the text of the argument, e.g. for name generation purposes
+        """
+        return []
+
     @abc.abstractmethod
     def get_type(self) -> cli_types.CliType:
         """
@@ -484,6 +462,13 @@ class OptionalFlagArg(FlagArg):
     Separator between each argument
     """
 
+    def text(self) -> typing.List[str]:
+        return list(
+            itertools.chain.from_iterable(
+                [wordsegment.segment(name) for name in self.names]
+            )
+        )
+
     def num_args(self) -> int:
         return len(self.names)
 
@@ -502,6 +487,9 @@ class SimpleFlagArg(FlagArg):
     """
     Name of this argument
     """
+
+    def text(self) -> typing.List[str]:
+        return list(wordsegment.segment(self.name))
 
     def num_args(self) -> int:
         return 1
@@ -522,6 +510,9 @@ class RepeatFlagArg(FlagArg):
     The name of this argument
     """
 
+    def text(self) -> typing.List[str]:
+        return list(wordsegment.segment(self.name))
+
     def num_args(self) -> int:
         return 1
 
@@ -541,6 +532,13 @@ class ChoiceFlagArg(FlagArg):
     """
     Set of possible choices that could be used for this argument
     """
+
+    def text(self) -> typing.List[str]:
+        return list(
+            itertools.chain.from_iterable(
+                [wordsegment.segment(name) for name in self.choices]
+            )
+        )
 
     def get_type(self):
         e = enum.Enum(

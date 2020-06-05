@@ -1,3 +1,4 @@
+import os
 import shutil
 import tempfile
 
@@ -5,7 +6,14 @@ import pytest
 
 from acclimatise import execute_cmd, explore_command
 
-from .util import HelpText, all_ids, all_tests, convert_validate, skip_not_installed
+from .util import (
+    HelpText,
+    all_ids,
+    all_tests,
+    convert_validate,
+    ensure_conda,
+    skip_not_installed,
+)
 
 
 @pytest.mark.parametrize("test", all_tests, ids=all_ids)
@@ -15,6 +23,8 @@ def test_explore(test: HelpText):
     """
     if not shutil.which(test.cmd[0]):
         pytest.skip("{} is not installed".format(test.cmd[0]))
+
+    ensure_conda()
 
     # For speed's sake, only explore to depth 2
     command = explore_command(test.cmd, max_depth=2)

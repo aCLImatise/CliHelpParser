@@ -7,16 +7,6 @@ from acclimatise.converter import WrapperGenerator
 from acclimatise.model import EmptyFlagArg, Flag
 
 
-@pytest.fixture()
-def snake_gen():
-    return WrapperGenerator(case="snake", generate_names=True)
-
-
-@pytest.fixture()
-def camel_gen():
-    return WrapperGenerator(case="camel", generate_names=True)
-
-
 def test_camel_short(camel_gen):
     flag = Flag(
         synonyms=["-t"], description="number of threads [1]", args=EmptyFlagArg()
@@ -30,7 +20,8 @@ def test_snake_short(snake_gen):
         synonyms=["-t"], description="number of threads [1]", args=EmptyFlagArg()
     )
     names = snake_gen.choose_variable_names([flag], length=2)
-    assert names[0].name == "number_threads"
+    assert "number" in names[0].name
+    assert "threads" in names[0].name
 
 
 def test_camel_long(camel_gen):

@@ -1,6 +1,7 @@
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
 from pathlib import Path
 
+from acclimatise.flag_parser.elements import customIndentedBlock
 from acclimatise.usage_parser.model import UsageElement
 
 from .elements import *

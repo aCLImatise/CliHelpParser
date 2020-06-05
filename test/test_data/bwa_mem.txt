@@ -25,7 +25,7 @@ Scoring options:
        -L INT[,INT]  penalty for 5'- and 3'-end clipping [5,5]
        -U INT        penalty for an unpaired read pair [17]
 
-       -x STR        read type. Setting -x changes multiple parameters unless overriden [null]
+       -x STR        read type. Setting -x changes multiple parameters unless overridden [null]
                      pacbio: -k17 -W40 -r10 -A1 -B1 -O1 -E1 -L0  (PacBio reads to ref)
                      ont2d: -k14 -W20 -r10 -A1 -B1 -O1 -E1 -L0  (Oxford Nanopore 2D-reads to ref)
                      intractg: -B9 -O16 -L5  (intra-species contigs to ref)
@@ -35,9 +35,13 @@ Input/output options:
        -p            smart pairing (ignoring in2.fq)
        -R STR        read group header line such as '@RG\tID:foo\tSM:bar' [null]
        -H STR/FILE   insert STR to header if it starts with @; or insert lines in FILE [null]
+       -o FILE       sam file to output results to [stdout]
        -j            treat ALT contigs as part of the primary assembly (i.e. ignore <idxbase>.alt file)
+       -5            for split alignment, take the alignment with the smallest coordinate as primary
+       -q            don't modify mapQ of supplementary alignments
+       -K INT        process INT input bases in each batch regardless of nThreads (for reproducibility) []
 
-       -v INT        verbose level: 1=error, 2=warning, 3=message, 4+=debugging [3]
+       -v INT        verbosity level: 1=error, 2=warning, 3=message, 4+=debugging [3]
        -T INT        minimum score to output [30]
        -h INT[,INT]  if there are <INT hits with score >80% of the max score, output all in XA [5,200]
        -a            output all alignments for SE or unpaired PE

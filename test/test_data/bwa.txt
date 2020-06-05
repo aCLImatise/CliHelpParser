@@ -1,3 +1,4 @@
+
 Program: bwa (alignment via Burrows-Wheeler transformation)
 Version: 0.7.17-r1188
 Contact: Heng Li <lh3@sanger.ac.uk>

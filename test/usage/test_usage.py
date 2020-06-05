@@ -1,6 +1,11 @@
 import pytest
 
-from acclimatise.model import Flag, SimpleFlagArg
+from acclimatise.flag_parser.elements import (
+    arg_expression,
+    flag_with_arg,
+    list_type_arg,
+)
+from acclimatise.model import Flag, RepeatFlagArg, SimpleFlagArg
 from acclimatise.usage_parser import parse_usage
 from acclimatise.usage_parser.elements import (  # short_flag_list,
     stack,
@@ -119,3 +124,37 @@ Usage: bwa bwt2sa [-i 32] <in.bwt> <out.sa>
 
     # -i
     assert len(command.named) == 1
+
+
+def test_bedtools_multiinter_flag_arg():
+    text = " FILE1 FILE2 .. FILEn"
+    arg = arg_expression.parseString(text)[0]
+    assert isinstance(arg, RepeatFlagArg)
+    assert arg.name == "FILEn"
+
+
+def test_bedtools_multiinter_flag():
+    text = "-i FILE1 FILE2 .. FILEn"
+    arg = flag_with_arg.parseString(text)[0]
+    assert isinstance(arg.argtype, RepeatFlagArg)
+    assert arg.name == "-i"
+
+
+def test_bedtools_multiinter():
+    text = """
+Summary: Identifies common intervals among multiple
+	 BED/GFF/VCF files.
+
+Usage:   bedtools multiinter [OPTIONS] -i FILE1 FILE2 .. FILEn
+	 Requires that each interval file is sorted by chrom/start. 
+
+Options: 
+	-cluster	Invoke Ryan Layers's clustering algorithm.
+    """
+
+    command = parse_usage(["bedtools", "multiinter"], text)
+
+    assert len(command.positional) == 0
+    assert len(command.named) == 1
+    assert command.named[0].longest_synonym == "-i"
+    assert isinstance(command.named[0].args, RepeatFlagArg)

@@ -127,6 +127,21 @@ def test_complex_optionals(parser):
     assert results.args.names == ["FLOAT", "FLOAT", "INT", "INT"]
 
 
+def test_bwa_skipping(parser):
+    s = """
+Input/output options:
+
+       -p            smart pairing (ignoring in2.fq)
+       -R STR        read group header line such as '@RG\tID:foo\tSM:bar' [null]
+       -H STR/FILE   insert STR to header if it starts with @; or insert lines in FILE [null]
+       -o FILE       sam file to output results to [stdout]
+       -j            treat ALT contigs as part of the primary assembly (i.e. ignore <idxbase>.alt file)
+       -5            for split alignment, take the alignment with the smallest coordinate as primary
+     """
+    cmd = parser.parse_command(cmd=s, name=["bwa", "mem"])
+    assert len(cmd.named) == 6
+
+
 def test_bwa_root(bwa_help):
     command = parse_help(["bwa"], bwa_help)
     assert len(command.named) == 0
@@ -139,5 +154,5 @@ def test_bwa(parser, bwamem_help):
     # Parse help
     command = parse_help(["bwa", "mem"], text=bwamem_help)
 
-    assert len(command.named) == 32
+    assert len(command.named) == 36
     assert len(command.positional) == 3

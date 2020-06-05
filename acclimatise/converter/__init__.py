@@ -1,14 +1,16 @@
 from abc import abstractmethod
-from itertools import groupby
+from itertools import groupby, zip_longest
 from pathlib import Path
 from typing import Iterable, List, Type
 
 from dataclasses import dataclass
 
-from acclimatise.model import CliArgument, Command
+from acclimatise.model import CliArgument, Command, Flag
 from acclimatise.name_generation import (
+    choose_unique_name,
     generate_name,
-    generate_names,
+    generate_names_nlp,
+    generate_names_segment,
     name_to_camel,
     name_to_snake,
 )
@@ -73,22 +75,6 @@ class WrapperGenerator:
         elif self.case == "camel":
             return name_to_camel(words)
 
-    def choose_variable_name(
-        self, flag: CliArgument, min: int = None, max: int = None
-    ) -> str:
-        """
-        Choose a name for this flag (e.g. the variable name when this is used to generate code), based on whether
-        the user wants an auto generated one or not
-        """
-        raise DeprecationWarning("Use choose_variables_names() instead")
-        # Choose the best name if we're allowed to, otherwise always use the argument-based name
-        if self.generate_names:
-            toks = flag.variable_name(min=min, max=max)
-        else:
-            toks = flag._name_from_name()
-
-        return self.words_to_name(toks)
-
     def choose_variable_names(
         self, flags: List[CliArgument], length: int = 3
     ) -> List[NamedArgument]:
@@ -97,23 +83,21 @@ class WrapperGenerator:
         variable names otherwise
         :param length: See :py:func:`acclimatise.name_generation.generate_name`
         """
+        options = list(
+            zip_longest(
+                generate_names_segment([flag.full_name() for flag in flags]),
+                generate_names_nlp([flag.description for flag in flags]),
+                [flag.argument_name() for flag in flags if isinstance(flag, Flag)],
+                fillvalue=[],
+            )
+        )
 
-        if self.generate_names:
-            # If we are allowed to generate names, generate the whole batch, and then choose the best method of
-            # name generation on a case-by-case basis
-            names = generate_names([flag.description for flag in flags], length=length)
-            return [
-                NamedArgument(
-                    name=self.words_to_name(flag.variable_name(name)), arg=flag
-                )
-                for name, flag in zip(names, flags)
-            ]
-        else:
-            # If we aren't allowed to generate names, always use the flag name as the variable name
-            return [
-                NamedArgument(name=self.words_to_name(flag._name_from_name()), arg=flag)
-                for flag in flags
-            ]
+        return [
+            NamedArgument(
+                arg=flag, name=self.words_to_name(choose_unique_name(flag_options))
+            )
+            for flag, flag_options in zip(flags, options)
+        ]
 
     case: str = "snake"
     """

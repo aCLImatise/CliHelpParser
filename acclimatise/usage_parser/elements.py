@@ -3,7 +3,11 @@ import re
 from pyparsing import *
 
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
-from acclimatise.flag_parser.elements import flag_with_arg
+from acclimatise.flag_parser.elements import (
+    customIndentedBlock,
+    flag_with_arg,
+    repeated_segment,
+)
 from acclimatise.model import (
     Command,
     EmptyFlagArg,
@@ -117,16 +121,16 @@ Used to illustrate where a list of short flags could be used, e.g. -nurlf indica
 def visit_list_element(s, loc, toks):
     # Pick the last element if there is one, otherwise use the first element
     # This gives us a better name like 'inN.bam' instead of 'in2.bam'
-    el = toks[2] if toks[2] else toks[0]
+    el = toks[-1] if toks[-1] else toks[0]
     el.repeatable = True
     return el
 
 
 list_element = (
     (
-        Or([mandatory_element, variable_element])
-        + "..."
-        + Optional(Or([mandatory_element, variable_element]))
+        OneOrMore(mandatory_element ^ variable_element)
+        + Literal(".")[2, 3]
+        + Optional(mandatory_element ^ variable_element)
     )
     .setParseAction(visit_list_element)
     .setName("list_element")
@@ -163,10 +167,9 @@ def visit_usage(s, loc, toks):
     return toks[0][0]
 
 
-usage = (
-    Regex("usage:", flags=re.IGNORECASE).suppress()
-    + indentedBlock(OneOrMore(usage_element, stopOn=LineEnd()), indentStack=stack)
-).setParseAction(visit_usage)
+usage = Regex("usage:", flags=re.IGNORECASE).suppress() + OneOrMore(
+    usage_element, stopOn=LineEnd()
+)  # .setParseAction(visit_usage).setDebug()
 
 
 # usage = Regex('usage:', flags=re.IGNORECASE).suppress() + delimitedList(usage_element, delim=Or([' ', '\n']))

@@ -2,13 +2,33 @@ import itertools
 import unicodedata
 from collections import Counter, defaultdict
 from itertools import groupby
-from typing import Generator, Iterable, List, Optional, Set
+from typing import Generator, Iterable, List, Optional, Set, Tuple
 
 from spacy.tokens import Token
 
 import regex as re
 from acclimatise.nlp import nlp, wordsegment
 from num2words import num2words
+from word2number import w2n
+
+
+def useless_name(name: List[str]):
+    """
+    Returns true if this name (sequence of strings) shouldn't be used as a variable name because it's too short and
+    uninformative. This includes an entirely numeric name, which is almost never what you want
+    """
+    joined = "".join(name)
+    if len(name) < 1 or len(joined) <= 1 or joined.isnumeric():
+        return True
+
+    # Numeric names are not useful
+    try:
+        if all([w2n.word_to_num(tok) is not None for tok in name]):
+            return True
+    except Exception:
+        pass
+
+    return False
 
 
 def duplicate_keys(l: list) -> Set[int]:
@@ -148,23 +168,89 @@ def segment_string(text: str):
     return [sanitize_token(tok) for tok in segment_tokens]
 
 
-def generate_names(descriptions: List[str], length: int = 3) -> List[List[str]]:
+def choose_unique_name(options: Tuple[List[str], ...]) -> List[str]:
+    """
+    Given a list of possible names for each flag, choose the first one that is not too short
+    """
+    # First try all of them, being picky
+    for option in options:
+        if not useless_name(option):
+            return option
+
+    # Second, try all of them choosing anything that isn't empty
+    for option in options:
+        if len(option) > 0:
+            return option
+
+    raise Exception("No unique names available")
+
+
+def generate_names_segment(
+    descriptions: List[str], initial_length: int = 3, max_length: int = 5
+) -> List[List[str]]:
+    """
+    Given a list of short strings, one for each variable, we segment each string. Any duplicate names are set to an
+    empty list as they are unusable
+    """
+    segmented = [segment_string(desc) for desc in descriptions]
+    for dup in duplicate_keys(segmented):
+        segmented[dup] = []
+    return segmented
+
+    # todo = set(range(len(descriptions)))
+    # segmented = [segment_string(desc) for desc in descriptions]
+    # ret = [[]] * len(descriptions)
+    # empty = set()
+    #
+    # # Increase the maximum length each iteration
+    # for length in range(initial_length, max_length + 1):
+    #
+    #     # If we run out of iterations and still haven't converged, these variables names become empty
+    #     if length >= max_length:
+    #         for j in todo:
+    #             ret[j] = []
+    #         return ret
+    #
+    #     # Update the outputs using each generator
+    #     for j in todo:
+    #         # If this token is still not unique, but it has no more characters left, it's a lost cause
+    #         if length > len(segmented[j]):
+    #             empty.add(j)
+    #             ret[j] = []
+    #         ret[j] = segmented[j][:length]
+    #
+    #     # Clean up old generators
+    #     todo = duplicate_keys(ret) - empty
+    #
+    #     return ret
+
+
+def generate_names_nlp(
+    descriptions: List[str], initial_length: int = 3, max_length: int = 5
+) -> List[List[str]]:
     """
     Given a list of flag descriptions, iterates until it generates a set of unique names for each flag
-    :param length: See :py:func:`generate_name`
+    :param initial_length: The minimum/starting length for each variable name
+    :param max_length: The maximum length variables can have before it will fail
     """
     #: A set of indices of flags that still need to be named
     todo = set(range(len(descriptions)))
-    generators = [generate_name(desc, length=length) for desc in descriptions]
+    generators = [
+        generate_name(desc, initial_length=initial_length) for desc in descriptions
+    ]
     #: A list of flag names, in the same order as the input list
     ret = [[]] * len(descriptions)
     #: A set of generators that are exhausted, meaning we can't iterate on them
     empty = set()
 
     # Iterate until everything is done, at most 5 more times
-    for i in range(5):
-        if i > 5:
-            raise Exception("Variable names failed to converge")
+    for i in range(max_length + 1):
+        if i >= max_length:
+            # If we run out of interations and still haven't converged, these variables names become empty
+            for j in todo:
+                ret[j] = []
+            return ret
+            # raise Exception("Variable names failed to converge")
 
         # Update the outputs using each generator
         for j in todo:
@@ -190,7 +276,7 @@ def generate_names(descriptions: List[str], length: int = 3) -> List[List[str]]:
 
 
 def generate_name(
-    description: str, length: int = 3
+    description: str, initial_length: int = 3
 ) -> Generator[List[str], None, None]:
     """
     Given one or more sentences, attempt to parse out a concise (2-4 word) variable name. This is a generator, and each
@@ -210,7 +296,7 @@ def generate_name(
         return []
 
     tokens = []
-    max = length
+    max = initial_length
     while True:
 
         # All tokens, sorted in order of importance

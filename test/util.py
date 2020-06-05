@@ -1,4 +1,5 @@
 import logging
+import os
 import shutil
 import tempfile
 from io import StringIO
@@ -39,10 +40,19 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/bedtools_multiinter.txt",
+            cmd=["bedtools", "multiinter"],
+            positional=0,
+            named=8,
+            subcommands=0,
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/bedtools_coverage.txt",
             cmd=["bedtools", "coverage"],
             positional=0,
-            named=18,
+            named=20,
             subcommands=0,
         ),
     ),
@@ -51,7 +61,7 @@ all_tests = [
             path="test_data/bwa_mem.txt",
             cmd=["bwa", "mem"],
             positional=3,
-            named=32,
+            named=36,
             subcommands=0,
         ),
     ),
@@ -197,12 +207,22 @@ def validate_wdl(wdl: str, cmd: Command = None, explore=True):
         # If we're not in explore mode, subcommands will be parsed as inputs
         if not explore:
             target += len(cmd.subcommands)
-        assert len(task.parameter_meta) == target
+        assert len(task.parameter_meta) == target, task.parameter_meta.keys()
 
 
 def validate_yml(yml: str, cmd: Command = None, explore=True):
     stream = StringIO(yml)
     yaml.load(stream)
+
+
+def ensure_conda():
+    """
+    Ensures we're in a conda env, and that the PATH is correctly set
+    """
+    if "CONDA_PREFIX" not in os.environ:
+        raise Exception("Must be in a conda environment")
+    bin = os.path.join(os.environ["CONDA_PREFIX"], "bin")
+    os.environ["PATH"] = bin + os.pathsep + os.environ["PATH"]
 
 
 validators = dict(cwl=validate_cwl, wdl=validate_wdl, yml=validate_yml)
