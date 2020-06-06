@@ -16,7 +16,7 @@ jobs:
       - name: Tests
         run: |
           source /root/.bashrc
-          conda env create -f environment.yml
+          conda env create
           conda activate aclimatise-test
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
