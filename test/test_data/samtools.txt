@@ -1,6 +1,6 @@
 
 Program: samtools (Tools for alignments in the SAM format)
-Version: 1.7 (using htslib 1.7-2)
+Version: 1.9 (using htslib 1.9)
 
 Usage:   samtools <command> [options]
 
@@ -8,6 +8,7 @@ Commands:
   -- Indexing
      dict           create a sequence dictionary file
      faidx          index/extract FASTA
+     fqidx          index/extract FASTQ
      index          index alignment
 
   -- Editing

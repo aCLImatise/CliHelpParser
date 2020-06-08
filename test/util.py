@@ -130,7 +130,7 @@ all_tests = [
             cmd=["samtools"],
             positional=0,
             named=0,
-            subcommands=28,
+            subcommands=29,
         ),
     ),
     # These last two are really strange, maybe I'll support them eventually
