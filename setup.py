@@ -19,6 +19,7 @@ setup(
         "regex",
         "num2words",
         "word2number",
+        "psutil",
     ],
     python_requires=">=3.7.5",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},

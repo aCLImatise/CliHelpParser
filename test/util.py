@@ -11,7 +11,7 @@ import cwl_utils.parser_v1_1 as parser
 import pytest
 from cwltool.load_tool import fetch_document, resolve_and_validate_document
 from dataclasses import dataclass
-from WDL import parse_document
+from WDL import Error, parse_document
 
 from acclimatise import Command, WrapperGenerator
 from acclimatise.yaml import yaml
@@ -188,7 +188,12 @@ def validate_wdl(wdl: str, cmd: Command = None, explore=True):
     """
     :param explore: If true, we're in explore mode, and we should ignore subcommands
     """
-    doc = parse_document(wdl)
+    try:
+        doc = parse_document(wdl)
+    except Error.SyntaxError as e:
+        print(wdl)
+        raise e
+
     task = doc.tasks[0]
 
     # task.inputs might be None

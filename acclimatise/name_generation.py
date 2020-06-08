@@ -182,7 +182,11 @@ def choose_unique_name(options: Tuple[List[str], ...]) -> List[str]:
         if len(option) > 0:
             return option
 
-    raise Exception("No unique names available")
+    raise Exception(
+        "No unique names available. Selecting from {}".format(
+            ";".join([" ".join(option) for option in options])
+        )
+    )
 
 
 def generate_names_segment(

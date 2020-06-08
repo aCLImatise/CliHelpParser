@@ -4,7 +4,7 @@ import tempfile
 
 import pytest
 
-from acclimatise import execute_cmd, explore_command
+from acclimatise import explore_command
 
 from .util import (
     HelpText,

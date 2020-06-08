@@ -6,10 +6,12 @@ import typing
 import dataclasses
 from pyparsing import ParseBaseException
 
+import psutil
 from acclimatise.converter import WrapperGenerator
 from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.converter.yml import YmlGenerator
+from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import Command, Flag
 from acclimatise.usage_parser import parse_usage
@@ -205,19 +207,3 @@ def explore_command(
                 command.positional = []
 
     return command
-
-
-def execute_cmd(help_cmd: typing.List[str], **kwargs) -> str:
-    """
-    Execute a command defined by a list of arguments, and return the result as a string
-    """
-    master, slave = pty.openpty()
-    defaults = dict(
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5, stdin=slave
-    )
-    defaults.update(kwargs)
-    try:
-        proc = subprocess.run(help_cmd, **defaults)
-        return (proc.stdout or proc.stderr).decode("utf_8")
-    except subprocess.TimeoutExpired:
-        return ""

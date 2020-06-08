@@ -6,7 +6,7 @@ from textwrap import dedent
 
 import pytest
 
-from acclimatise import execute_cmd
+from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser import elements
 from acclimatise.model import EmptyFlagArg, FlagSynonym, RepeatFlagArg
 

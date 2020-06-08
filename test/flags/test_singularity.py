@@ -2,7 +2,7 @@ import shutil
 
 import pytest
 
-from acclimatise import execute_cmd
+from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser.parser import CliParser
 
 
