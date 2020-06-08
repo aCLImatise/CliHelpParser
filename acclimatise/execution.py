@@ -5,6 +5,7 @@ import os
 import pty
 import signal
 import subprocess
+import sys
 import typing
 
 import psutil
@@ -46,7 +47,11 @@ def execute_cmd(help_cmd: typing.List[str], timeout: int = 5, **kwargs) -> str:
             stdout, stderr = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired as e:
             # Kill the entire process tree, because sometimes killing the parent isn't enough
-            kill_proc_tree(process.pid, include_parent=True)
+            kill_proc_tree(
+                process.pid,
+                include_parent=True,
+                sig=signal.SIGKILL if sys.platform == "linux" else None,
+            )
             return ""
 
     return stdout or stderr

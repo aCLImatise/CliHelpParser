@@ -42,7 +42,7 @@ def test_explore(test: HelpText):
 
 
 @skip_not_installed("dinosaur")
-@pytest.mark.timeout(30)
+@pytest.mark.timeout(360)
 def test_explore_dinosaur():
     """
     Python has an issue with killing process trees, whereby the subprocess runs another subprocess.
