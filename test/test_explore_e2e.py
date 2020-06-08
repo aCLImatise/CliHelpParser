@@ -30,7 +30,7 @@ def test_explore(test: HelpText):
         pytest.skip("Not in a conda environment")
 
     # For speed's sake, only explore to depth 2
-    command = explore_command(test.cmd, max_depth=2)
+    command = explore_command(test.cmd, max_depth=1)
 
     # Check we parsed correctly
     assert len(command.subcommands) == test.subcommands
@@ -49,7 +49,7 @@ def test_explore_dinosaur():
     This tests that dinosaur
     :return:
     """
-    command = explore_command(["dinosaur"], max_depth=2)
+    command = explore_command(["dinosaur"], max_depth=1)
 
 
 @pytest.mark.skipif(not shutil.which("bwa"), reason="bwa is not installed")
@@ -57,7 +57,7 @@ def test_explore_bwa():
     """
     This tests specifically that exploring bwa yields a proper bwa mem
     """
-    command = explore_command(["bwa"])
+    command = explore_command(["bwa"], max_depth=1)
 
     # Check that we parsed bwa mem correctly
     mem = command.subcommands[1]

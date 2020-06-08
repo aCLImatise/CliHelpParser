@@ -158,7 +158,7 @@ def explore_command(
     flags: typing.Iterable[str] = (["--help"], ["-h"], [], ["--usage"]),
     parent: typing.Optional[Command] = None,
     run_kwargs: dict = {},
-    max_depth: int = 3,
+    max_depth: int = 2,
     try_subcommand_flags=True,
 ) -> typing.Optional[Command]:
     """

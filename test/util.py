@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from WDL import Error, parse_document
 
 from acclimatise import Command, WrapperGenerator
+from acclimatise.name_generation import NameGenerationError
 from acclimatise.yaml import yaml
 
 logging.getLogger("cwltool").setLevel(30)
@@ -38,6 +39,15 @@ class HelpText:
 
 
 all_tests = [
+    pytest.param(
+        HelpText(
+            path="test_data/bwa_index.txt",
+            cmd=["bwa", "index"],
+            positional=1,
+            named=4,
+            subcommands=0,
+        ),
+    ),
     pytest.param(
         HelpText(
             path="test_data/bedtools_multiinter.txt",
@@ -168,10 +178,14 @@ def convert_validate(cmd: Command, lang: str = None, explore=True):
         with tempfile.TemporaryDirectory() as tempd:
             for path in conv.generate_tree(cmd, tempd):
                 content = path.read_text()
-                validators[lang](content, cmd, explore=explore)
+                try:
+                    validators[lang](content, cmd, explore=explore)
+                except NameGenerationError as e:
+                    print("Name generation error in file {}".format(path))
+                    raise e
     else:
         for lang in ("cwl", "wdl", "yml"):
-            convert_validate(cmd, lang)
+            convert_validate(cmd, lang, explore=explore)
 
 
 def validate_cwl(cwl: str, cmd: Command = None, explore: bool = True):

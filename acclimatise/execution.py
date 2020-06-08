@@ -53,5 +53,8 @@ def execute_cmd(help_cmd: typing.List[str], timeout: int = 5, **kwargs) -> str:
                 sig=signal.SIGKILL if sys.platform == "linux" else None,
             )
             return ""
+        finally:
+            os.close(master)
+            os.close(slave)
 
     return stdout or stderr

@@ -12,6 +12,10 @@ from num2words import num2words
 from word2number import w2n
 
 
+class NameGenerationError(Exception):
+    pass
+
+
 def useless_name(name: List[str]):
     """
     Returns true if this name (sequence of strings) shouldn't be used as a variable name because it's too short and
@@ -182,7 +186,7 @@ def choose_unique_name(options: Tuple[List[str], ...]) -> List[str]:
         if len(option) > 0:
             return option
 
-    raise Exception(
+    raise NameGenerationError(
         "No unique names available. Selecting from {}".format(
             ";".join([" ".join(option) for option in options])
         )
