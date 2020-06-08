@@ -203,11 +203,14 @@ def validate_wdl(wdl: str, cmd: Command = None, explore=True):
 
     # Check that the generated WDL has the correct parameter meta fields
     if cmd:
+        cmd_names = [arg.full_name() for arg in [*cmd.named, *cmd.positional]]
         target = len(cmd.named) + len(cmd.positional)
         # If we're not in explore mode, subcommands will be parsed as inputs
         if not explore:
             target += len(cmd.subcommands)
-        assert len(task.parameter_meta) == target, task.parameter_meta.keys()
+        assert len(task.parameter_meta) == target, "{} vs {}".format(
+            task.parameter_meta.keys(), cmd_names
+        )
 
 
 def validate_yml(yml: str, cmd: Command = None, explore=True):
