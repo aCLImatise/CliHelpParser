@@ -1,0 +1,11 @@
+
+Usage:   bwa index [options] <in.fasta>
+
+Options: -a STR    BWT construction algorithm: bwtsw, is or rb2 [auto]
+         -p STR    prefix of the index [same as fasta name]
+         -b INT    block size for the bwtsw algorithm (effective with -a bwtsw) [10000000]
+         -6        index files named as <in.fasta>.64.* instead of <in.fasta>.* 
+
+Warning: `-a bwtsw' does not work for short genomes, while `-a is' and
+         `-a div' do not work not for long genomes.
+
