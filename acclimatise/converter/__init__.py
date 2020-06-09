@@ -1,12 +1,14 @@
 from abc import abstractmethod
 from itertools import groupby, zip_longest
+from os import PathLike
 from pathlib import Path
-from typing import Iterable, List, Type
+from typing import Generator, Iterable, List, Set, TextIO, Type
 
 from dataclasses import dataclass
 
 from acclimatise.model import CliArgument, Command, Flag
 from acclimatise.name_generation import (
+    NameGenerationError,
     choose_unique_name,
     generate_name,
     generate_names_nlp,
@@ -52,18 +54,48 @@ class WrapperGenerator:
         pass
 
     @abstractmethod
-    def generate_wrapper(self, cmd: Command) -> str:
+    def save_to_string(self, cmd: Command) -> str:
         """
         Convert the command into a single string, ignoring subcommands
         """
         pass
 
+    def save_to_file(self, cmd: Command, path: Path) -> None:
+        """
+        Write the command into a file
+        """
+        # By default we just write the string out, but subclasses can have different behaviour
+        path.write_text(self.save_to_string(cmd))
+
+    def generate_tree(
+        self, cmd: Command, out_dir: PathLike
+    ) -> Generator[Path, None, None]:
+        out_dir = Path(out_dir)
+        for cmd in cmd.command_tree():
+            path = (out_dir / cmd.as_filename).with_suffix(self.suffix)
+            try:
+                self.save_to_file(cmd, path)
+            except NameGenerationError as e:
+                raise NameGenerationError(
+                    'Name generation error for command "{}". {}'.format(
+                        " ".join(cmd.command), e.message
+                    )
+                )
+            yield path
+
+    @property
+    def reserved(self) -> Set[str]:
+        """
+        A list of reserved keywords for this language
+        """
+        return set()
+
+    @property
     @abstractmethod
-    def generate_tree(self, cmd: Command, out_dir: Path) -> Iterable[Path]:
+    def suffix(self) -> str:
         """
-        Convert the command into a list of tool wrapper files
+        Returns a suffix for files generated using this converter
         """
-        pass
 
     def words_to_name(self, words: Iterable[str]):
         """
@@ -86,7 +118,9 @@ class WrapperGenerator:
         options = list(
             zip_longest(
                 generate_names_segment([flag.full_name() for flag in flags]),
-                generate_names_nlp([flag.description for flag in flags]),
+                generate_names_nlp(
+                    [flag.description for flag in flags], reserved=self.reserved
+                ),
                 [flag.argument_name() for flag in flags if isinstance(flag, Flag)],
                 fillvalue=[],
             )
@@ -94,7 +128,10 @@ class WrapperGenerator:
 
         return [
             NamedArgument(
-                arg=flag, name=self.words_to_name(choose_unique_name(flag_options))
+                arg=flag,
+                name=self.words_to_name(
+                    choose_unique_name(flag_options, reserved=self.reserved)
+                ),
             )
             for flag, flag_options in zip(flags, options)
         ]

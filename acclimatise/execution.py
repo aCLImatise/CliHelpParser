@@ -27,8 +27,6 @@ def kill_proc_tree(
         children.append(parent)
     for p in children:
         p.send_signal(sig)
-    gone, alive = psutil.wait_procs(children, timeout=timeout, callback=on_terminate)
-    return gone, alive
 
 
 def execute_cmd(help_cmd: typing.List[str], timeout: int = 5, **kwargs) -> str:
@@ -52,6 +50,7 @@ def execute_cmd(help_cmd: typing.List[str], timeout: int = 5, **kwargs) -> str:
                 include_parent=True,
                 sig=signal.SIGKILL if sys.platform == "linux" else None,
             )
+            process.communicate()
             return ""
         finally:
             os.close(master)

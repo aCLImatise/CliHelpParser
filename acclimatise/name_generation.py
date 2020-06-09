@@ -13,7 +13,8 @@ from word2number import w2n
 
 
 class NameGenerationError(Exception):
-    pass
+    def __init__(self, message: str):
+        self.message = message
 
 
 def useless_name(name: List[str]):
@@ -132,7 +133,6 @@ def name_to_snake(words: Iterable[str]) -> str:
 
 
 def human_readable_translate(symbol: str):
-
     # First, if the symbol is in this small curated list, use that
     lookup = {".": "dot", ",": "comma", "/": "slash", "\\": "backslash", "@": "at"}
     if symbol in lookup:
@@ -172,17 +172,23 @@ def segment_string(text: str):
     return [sanitize_token(tok) for tok in segment_tokens]
 
 
-def choose_unique_name(options: Tuple[List[str], ...]) -> List[str]:
+def choose_unique_name(
+    options: Tuple[List[str], ...], reserved: Set[str] = []
+) -> List[str]:
     """
     Given a list of possible names for each flag, choose the first one that is not too short
     """
     # First try all of them, being picky
     for option in options:
+        if len(option) == 1 and option[0] in reserved:
+            continue
         if not useless_name(option):
             return option
 
     # Second, try all of them choosing anything that isn't empty
     for option in options:
+        if len(option) == 1 and option[0] in reserved:
+            continue
         if len(option) > 0:
             return option
 
@@ -233,13 +239,28 @@ def generate_names_segment(
     #     return ret
 
 
+def intersection_indices(l: List[List[str]], reserved: Set[str]) -> Set[int]:
+    """
+    Returns a set of indices from the first list that occur in the set of reserved keywords
+    """
+    ret = set()
+    for i, words in enumerate(l):
+        if len(words) == 1 and words[0] in reserved:
+            ret.add(i)
+    return ret
+
+
 def generate_names_nlp(
-    descriptions: List[str], initial_length: int = 3, max_length: int = 5
+    descriptions: List[str],
+    initial_length: int = 3,
+    max_length: int = 5,
+    reserved: Set[str] = set(),
 ) -> List[List[str]]:
     """
     Given a list of flag descriptions, iterates until it generates a set of unique names for each flag
     :param initial_length: The minimum/starting length for each variable name
     :param max_length: The maximum length variables can have before it will fail
+    :param reserved: Keywords that are not permitted to be used as the entire name
     """
     #: A set of indices of flags that still need to be named
     todo = set(range(len(descriptions)))
@@ -254,7 +275,7 @@ def generate_names_nlp(
     # Iterate until everything is done, at most 5 more times
     for i in range(max_length + 1):
         if i >= max_length:
-            # If we run out of interations and still haven't converged, these variables names become empty
+            # If we run out of iterations and still haven't converged, these variables names become empty
             for j in todo:
                 ret[j] = []
             return ret
@@ -271,7 +292,7 @@ def generate_names_nlp(
                 empty.add(j)
 
         # Clean up old generators
-        new_todo = duplicate_keys(ret) - empty
+        new_todo = duplicate_keys(ret) | intersection_indices(ret, reserved) - empty
         for j in todo - new_todo:
             generators[j] = None
         todo = new_todo

@@ -101,18 +101,16 @@ class CwlGenerator(WrapperGenerator):
             )
         return tool
 
-    def generate_wrapper(self, cmd: Command) -> str:
+    @property
+    def suffix(self) -> str:
+        return ".cwl"
+
+    def save_to_string(self, cmd: Command) -> str:
         io = StringIO()
         yaml.dump(self.command_to_tool(cmd).save(), io)
         return io.getvalue()
 
-    def generate_tree(
-        self, cmd: Command, out_dir: PathLike
-    ) -> Generator[Path, None, None]:
-        out_dir = Path(out_dir)
-        for command in cmd.command_tree():
-            path = (out_dir / command.as_filename).with_suffix(".cwl")
-            map = self.command_to_tool(command).save(base_url=str(path))
-            with path.open("w") as fp:
-                yaml.dump(map, fp)
-            yield path
+    def save_to_file(self, cmd: Command, path: Path) -> None:
+        map = self.command_to_tool(cmd).save(base_url=str(path))
+        with path.open("w") as fp:
+            yaml.dump(map, fp)

@@ -10,6 +10,7 @@ from .util import (
     HelpText,
     all_ids,
     all_tests,
+    all_tests_lookup,
     convert_validate,
     validate_cwl,
     validate_wdl,

@@ -1,7 +1,20 @@
 """
 Tests for the name generation of single flags
 """
+from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.model import EmptyFlagArg, Flag, Positional, SimpleFlagArg
+
+
+def test_samtools_dict_output():
+    gen = WdlGenerator()
+    arg = Flag(
+        synonyms=["-o", "--output"],
+        description="file to write out dict file [stdout]",
+        args=SimpleFlagArg(name="str"),
+    )
+    name = gen.choose_variable_names([arg])[0].name
+    # The WDL converter should avoid naming a variable "output" since that's a WDL keyword
+    assert name != "output"
 
 
 def test_bwt2sa_i(gen):

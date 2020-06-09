@@ -41,6 +41,15 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/samtools_dict.txt",
+            cmd=["samtools", "dict"],
+            positional=1,
+            named=5,
+            subcommands=0,
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/bwa_index.txt",
             cmd=["bwa", "index"],
             positional=1,
@@ -166,6 +175,8 @@ all_tests = [
     ),
 ]
 
+all_tests_lookup = {tuple(param.values[0].cmd): param.values[0] for param in all_tests}
+
 all_ids = [" ".join(case.values[0].cmd) for case in all_tests]
 
 
@@ -178,11 +189,7 @@ def convert_validate(cmd: Command, lang: str = None, explore=True):
         with tempfile.TemporaryDirectory() as tempd:
             for path in conv.generate_tree(cmd, tempd):
                 content = path.read_text()
-                try:
-                    validators[lang](content, cmd, explore=explore)
-                except NameGenerationError as e:
-                    print("Name generation error in file {}".format(path))
-                    raise e
+                validators[lang](content, cmd, explore=explore)
     else:
         for lang in ("cwl", "wdl", "yml"):
             convert_validate(cmd, lang, explore=explore)

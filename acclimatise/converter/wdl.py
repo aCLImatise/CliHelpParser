@@ -3,9 +3,10 @@ Functions for generating WDL from the CLI data model
 """
 from os import PathLike
 from pathlib import Path
-from typing import Generator, Iterable, List, Tuple
+from typing import Generator, Iterable, List, Set, Tuple, Type
 
 from inflection import camelize
+from WDL._grammar import keywords
 from wdlgen import ArrayType, Input, ParameterMeta, PrimitiveType, Task, WdlType
 
 from acclimatise import cli_types, model
@@ -70,7 +71,16 @@ def lowest_common_type(types: Iterable[cli_types.CliType]):
 
 
 class WdlGenerator(WrapperGenerator):
+    @property
+    def suffix(self) -> str:
+        return ".wdl"
+
     case = "snake"
+
+    @property
+    def reserved(self) -> Set[str]:
+        # Steal the keywords list from miniWDL
+        return keywords["1.0"]
 
     @classmethod
     def format(cls) -> str:
@@ -114,7 +124,6 @@ class WdlGenerator(WrapperGenerator):
             return WdlType(PrimitiveType(PrimitiveType.kString), optional=optional)
 
     def make_inputs(self, named: Iterable[NamedArgument]) -> List[Input]:
-
         return [
             Input(
                 data_type=self.type_to_wdl(
@@ -151,7 +160,7 @@ class WdlGenerator(WrapperGenerator):
         name = cmd.as_filename
         return camelize(name)
 
-    def generate_wrapper(self, cmd: Command) -> str:
+    def save_to_string(self, cmd: Command) -> str:
         inputs: List[CliArgument] = [*cmd.named] + (
             [] if self.ignore_positionals else [*cmd.positional]
         )
@@ -166,13 +175,3 @@ class WdlGenerator(WrapperGenerator):
         )
 
         return tool.get_string()
-
-    def generate_tree(
-        self, cmd: Command, out_dir: PathLike
-    ) -> Generator[Path, None, None]:
-        out_dir = Path(out_dir)
-        for cmd in cmd.command_tree():
-            path = (out_dir / cmd.as_filename).with_suffix(".wdl")
-            wrapper = self.generate_wrapper(cmd)
-            path.write_text(wrapper, encoding="utf-8")
-            yield path
