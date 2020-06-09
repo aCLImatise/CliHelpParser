@@ -199,6 +199,8 @@ def explore_command(
                 flags=child_flags,
                 parent=command,
                 run_kwargs=run_kwargs,
+                max_depth=max_depth,
+                try_subcommand_flags=try_subcommand_flags,
             )
             if subcommand is not None:
                 command.subcommands.append(subcommand)
