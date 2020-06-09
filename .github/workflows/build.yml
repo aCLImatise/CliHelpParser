@@ -25,7 +25,7 @@ jobs:
           pip install --upgrade pip wheel setuptools
           pip install -e .[dev]
           python -m spacy download en
-          pytest --tb=native
+          pytest --tb=native --log-cli-level INFO
         shell: bash
 
   test_system:
