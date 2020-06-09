@@ -6,6 +6,13 @@ from pyparsing import _bslash
 
 from acclimatise.model import *
 
+#: Characters that can start a CLI element, e.g. "-@"
+element_start_chars = alphanums + "@"
+#: Characters that can be in the middle of a CLI element, e.g. "-some-arg"
+element_body_chars = element_start_chars + "|-_./\\"
+#: Characters that can be in the middle of a CLI element that has brackets around it, e.g. "-arg <argument with space>"
+delimited_body_chars = element_body_chars + " "
+
 
 def customIndentedBlock(
     blockStatementExpr, indentStack, indent=True, terminal=False, lax=False
@@ -73,7 +80,7 @@ def customIndentedBlock(
     return smExpr.setName("custom indented block")
 
 
-cli_id = Word(initChars=alphanums + "@", bodyChars=alphanums + "-_@")
+cli_id = Word(initChars=element_start_chars, bodyChars=element_body_chars)
 
 # short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
 # """A short flag has only a single dash and single character, e.g. `-m`"""
@@ -116,10 +123,10 @@ simple_arg = (
     (
         Or(
             [
-                Word(initChars=alphanums, bodyChars=alphanums + "-_./\\"),
+                Word(initChars=element_start_chars, bodyChars=element_body_chars),
                 # Allow spaces in the argument name, but only if it's enclosed in angle brackets
                 Literal("<").suppress()
-                + Word(initChars=alphas, bodyChars=alphanums + "-_./\\ ")
+                + Word(initChars=element_start_chars, bodyChars=delimited_body_chars)
                 + Literal(">").suppress(),
             ]
         )

@@ -1,0 +1,57 @@
+
+Tool:    bedtools window (aka windowBed)
+Version: v2.26.0
+Summary: Examines a "window" around each feature in A and
+	 reports all features in B that overlap the window. For each
+	 overlap the entire entry in A and B are reported.
+
+Usage:   bedtools window [OPTIONS] -a <bed/gff/vcf> -b <bed/gff/vcf>
+
+Options: 
+	-abam	The A input file is in BAM format.  Output will be BAM as well. Replaces -a.
+
+	-ubam	Write uncompressed BAM output. Default writes compressed BAM.
+
+	-bed	When using BAM input (-abam), write output as BED. The default
+		is to write output in BAM when using -abam.
+
+	-w	Base pairs added upstream and downstream of each entry
+		in A when searching for overlaps in B.
+		- Creates symterical "windows" around A.
+		- Default is 1000 bp.
+		- (INTEGER)
+
+	-l	Base pairs added upstream (left of) of each entry
+		in A when searching for overlaps in B.
+		- Allows one to define assymterical "windows".
+		- Default is 1000 bp.
+		- (INTEGER)
+
+	-r	Base pairs added downstream (right of) of each entry
+		in A when searching for overlaps in B.
+		- Allows one to define assymterical "windows".
+		- Default is 1000 bp.
+		- (INTEGER)
+
+	-sw	Define -l and -r based on strand.  For example if used, -l 500
+		for a negative-stranded feature will add 500 bp downstream.
+		- Default = disabled.
+
+	-sm	Only report hits in B that overlap A on the _same_ strand.
+		- By default, overlaps are reported without respect to strand.
+
+	-Sm	Only report hits in B that overlap A on the _opposite_ strand.
+		- By default, overlaps are reported without respect to strand.
+
+	-u	Write the original A entry _once_ if _any_ overlaps found in B.
+		- In other words, just report the fact >=1 hit was found.
+
+	-c	For each entry in A, report the number of overlaps with B.
+		- Reports 0 for A entries that have no overlap with B.
+		- Overlaps restricted by -f.
+
+	-v	Only report those entries in A that have _no overlaps_ with B.
+		- Similar to "grep -v."
+
+	-header	Print the header from the A file prior to results.
+

@@ -158,3 +158,11 @@ Options:
     assert len(command.named) == 1
     assert command.named[0].longest_synonym == "-i"
     assert isinstance(command.named[0].args, RepeatFlagArg)
+
+
+def test_samtools_dict():
+    text = """
+Usage:   samtools dict [options] <file.fa|file.fa.gz>
+    """
+    command = parse_usage(["samtools", "dict"], text, debug=True)
+    assert len(command.positional) == 1

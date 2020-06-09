@@ -1,6 +1,6 @@
-import tempfile
-from itertools import product
-
+"""
+Test all the test data files
+"""
 import pytest
 from pkg_resources import resource_filename
 

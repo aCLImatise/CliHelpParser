@@ -5,6 +5,25 @@ from acclimatise.converter import WrapperGenerator
 from acclimatise.model import EmptyFlagArg, Flag, SimpleFlagArg
 
 
+def test_bedtools_window_sm():
+    """
+    These two flags have almost the same name, and almost the same description
+    """
+    flags = [
+        Flag(
+            synonyms=["-sm"],
+            description="Only report hits in B that overlap A on the _same_ strand.",
+            args=EmptyFlagArg(),
+        ),
+        Flag(
+            synonyms=["-sm"],
+            description="Only report hits in B that overlap A on the _opposite_ strand.",
+            args=EmptyFlagArg(),
+        ),
+    ]
+    WrapperGenerator().choose_variable_names(flags)
+
+
 def test_same_description():
     """
     Normally we ignore one-character flag names, and instead try to read their descriptions for a more informative name.

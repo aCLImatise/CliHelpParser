@@ -5,6 +5,9 @@ from pyparsing import *
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
 from acclimatise.flag_parser.elements import (
     customIndentedBlock,
+    delimited_body_chars,
+    element_body_chars,
+    element_start_chars,
     flag_with_arg,
     repeated_segment,
 )
@@ -27,7 +30,7 @@ def delimited_item(open, el, close):
 
 
 usage_element = Forward()
-element_char = Word(initChars=alphanums, bodyChars=alphanums + "_-.")
+element_char = Word(initChars=element_start_chars, bodyChars=element_body_chars)
 
 mandatory_element = (
     element_char.copy()
@@ -39,7 +42,9 @@ A mandatory element in the command-line invocation. Might be a variable or a con
 """
 
 variable_element = (
-    delimited_item("<", Word(initChars=alphanums, bodyChars=alphanums + "_-. "), ">")
+    delimited_item(
+        "<", Word(initChars=element_start_chars, bodyChars=delimited_body_chars), ">"
+    )
     .setParseAction(lambda s, loc, toks: UsageElement(text=toks[1], variable=True))
     .setName("variable_element")
 )

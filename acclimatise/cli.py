@@ -124,7 +124,7 @@ def pipe(cmd, pos, generate_names, case, format):
     converter = converter_cls(
         generate_names=generate_names, ignore_positionals=not pos, case=case,
     )
-    output = converter.generate_wrapper(command)
+    output = converter.save_to_string(command)
     print(output)
 
 
