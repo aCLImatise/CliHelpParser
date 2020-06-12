@@ -10,10 +10,10 @@ from acclimatise.model import *
 element_start_chars = alphanums + "@"
 #: Characters that can be in the middle of a CLI element, e.g. "-some-arg"
 element_body_chars = element_start_chars + "-_./\\"
-#: Characters that can be in the middle of a CLI element that has brackets around it, e.g. "-arg <argument with space>"
-delimited_body_chars = element_body_chars + " "
 #: Characters that can only be used in arguments for flags e.g. "<file.fa|file.fa.gz>"
 argument_body_chars = element_body_chars + "|"
+#: Characters that can be in the middle of an argument that has brackets around it, e.g. "-arg <argument with space>"
+delimited_body_chars = argument_body_chars + " "
 
 
 def customIndentedBlock(
