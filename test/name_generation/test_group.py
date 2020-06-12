@@ -20,8 +20,14 @@ def test_bedtools_window_sm():
             description="Only report hits in B that overlap A on the _opposite_ strand.",
             args=EmptyFlagArg(),
         ),
+        Flag(
+            synonyms=["-c"],
+            description="For each entry in A, report the number of overlaps with B.",
+            args=EmptyFlagArg(),
+        ),
     ]
-    WrapperGenerator().choose_variable_names(flags)
+    args = WrapperGenerator().choose_variable_names(flags)
+    assert len(set([arg.name for arg in args])) == 3
 
 
 def test_same_description():

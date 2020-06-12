@@ -1,6 +1,7 @@
 import itertools
 import unicodedata
 from collections import Counter, defaultdict
+from difflib import ndiff, unified_diff
 from itertools import groupby
 from typing import Generator, Iterable, List, Optional, Set, Tuple
 
@@ -89,13 +90,18 @@ def distance_to_root(token, root):
         return dist
 
 
-def token_priority(token: Token, current: List[Token]) -> int:
+def token_priority(token: Token, current: List[Token], key: Set[Token] = set()) -> int:
     """
     Returns a priority (where lowest means highest priority) of tokens
     :param token: The token to prioritise
     :param current: The current list of tokens in the name
     """
+    if token in key:
+        # Tokens that are "keywords" are the highest priority
+        return token.idx - 1000
+
     if token.pos_ not in {"NOUN", "NUM", "PRON", "PROPN", "VERB", "ADJ", "ADV"}:
+        # Tokens that have meaningful POS are prioritised
         return 1000 + token.idx
     else:
         if token.dep_ != "HEAD" and token.head not in current:
@@ -250,6 +256,53 @@ def intersection_indices(l: List[List[str]], reserved: Set[str]) -> Set[int]:
     return ret
 
 
+def find_key_diff_words(
+    descriptions: List[List[Token]], after_index: int = 5
+) -> List[Set[Token]]:
+    """
+    Returns a list of words for each description that uniquely identifies each
+    :param after_index: The index in the string after which to consider key words. Because we always include the first
+    few words in generated names, finding diffs at these positions isn't helpful
+    """
+    desc_strings = [[str(token) for token in desc] for desc in descriptions]
+    ret = [set() for d in descriptions]
+    for i, description_a in enumerate(descriptions):
+        for j, description_b in enumerate(descriptions):
+            if i == j:
+                # Don't compare a word to itself
+                continue
+
+            # Keep iterating until we find the first diff, then add the diff words to a list of key words
+            for k, diff in enumerate(ndiff(desc_strings[i], desc_strings[j])):
+                if diff[0] in ["+", "-"]:
+                    if k > after_index:
+                        # If this token differs
+                        ret[i].add(description_a[k])
+                        ret[j].add(description_b[k])
+
+                    # Always break once we find a diff
+                    break
+
+    return ret
+
+
+def preprocess(text: str) -> List[Token]:
+    """
+    Pre-process some text, remove and unnecessary tokens, and return the Spacy data structure
+    """
+    # Remove all delimited text
+    sanitized = sanitize_symbols(remove_delims(replace_hyphens(text)))
+
+    # Parse the sentence
+    doc = nlp(sanitized)
+
+    candidates = [tok for sent in doc.sents for tok in sent]
+    if len(candidates) == 0:
+        return []
+    else:
+        return candidates
+
+
 def generate_names_nlp(
     descriptions: List[str],
     initial_length: int = 3,
@@ -264,8 +317,13 @@ def generate_names_nlp(
     """
     #: A set of indices of flags that still need to be named
     todo = set(range(len(descriptions)))
+
+    # Preprocessing
+    processed = list(map(preprocess, descriptions))
+    diffs = find_key_diff_words(processed)
     generators = [
-        generate_name(desc, initial_length=initial_length) for desc in descriptions
+        generate_name(proc, initial_length=initial_length, key_words=keywords)
+        for proc, keywords in zip(processed, diffs)
     ]
     #: A list of flag names, in the same order as the input list
     ret = [[]] * len(descriptions)
@@ -305,45 +363,36 @@ def generate_names_nlp(
 
 
 def generate_name(
-    description: str, initial_length: int = 3
+    tokens: List[Token], initial_length: int = 3, key_words: Set[Token] = set()
 ) -> Generator[List[str], None, None]:
     """
     Given one or more sentences, attempt to parse out a concise (2-4 word) variable name. This is a generator, and each
     time you access it, it will return a slightly longer word, this is to help prevent collisions with other variable
     names
-    :param description: One or more sentences of text to parse into a variable name
+    :param tokens: One or more sentences of text that have been pre-processed
+    :param initial_length: The number of words in the first output this produces
     """
-
-    # Remove all delimited text
-    sanitized = sanitize_symbols(remove_delims(replace_hyphens(description)))
-
-    # Parse the sentence
-    doc = nlp(sanitized)
-
-    candidates = [tok for sent in doc.sents for tok in sent]
-    if len(candidates) == 0:
-        return []
-
-    tokens = []
+    candidates = tokens
+    ret = [*key_words]
     max = initial_length
     while True:
 
         # All tokens, sorted in order of importance
         candidates = sorted(
-            candidates, key=lambda token: token_priority(token, tokens), reverse=True
+            candidates, key=lambda token: token_priority(token, ret), reverse=True
         )
 
         # Each time through the loop, we increase the number of candidates we use
         if candidates:
-            tokens.append(candidates.pop())
+            ret.append(candidates.pop())
 
         # Iterate until we have N tokens, then yield the word. Then if the generator is called again, increase N by
         # 1 and continue
 
-        if len(tokens) >= max or len(candidates) == 0:
+        if len(ret) >= max or len(candidates) == 0:
             max += 1
             # Now sort the tokens back into their original positions
             yield [
                 sanitize_token(str(tok)).lower()
-                for tok in sorted(tokens, key=lambda tok: tok.i)
+                for tok in sorted(ret, key=lambda tok: tok.i)
             ]
