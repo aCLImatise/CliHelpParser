@@ -16,21 +16,19 @@ class YmlGenerator(WrapperGenerator):
     Internal YML format
     """
 
-    @classmethod
-    def format(cls) -> str:
-        return "yml"
+    @property
+    def suffix(self) -> str:
+        return ".yml"
 
-    def generate_wrapper(self, cmd: Command) -> str:
+    def save_to_file(self, cmd: Command, path: Path) -> None:
+        with path.open("w") as fp:
+            yaml.dump(cmd, fp)
+
+    def save_to_string(self, cmd: Command) -> str:
         buffer = StringIO()
         yaml.dump(cmd, buffer)
         return buffer.getvalue()
 
-    def generate_tree(
-        self, cmd: Command, out_dir: PathLike
-    ) -> Generator[Path, None, None]:
-        out_dir = Path(out_dir)
-        for cmd in cmd.command_tree():
-            path = (out_dir / cmd.as_filename).with_suffix(".yml")
-            with path.open("w") as fp:
-                yaml.dump(cmd, fp)
-            yield path
+    @classmethod
+    def format(cls) -> str:
+        return "yml"

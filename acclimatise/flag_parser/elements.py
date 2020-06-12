@@ -9,9 +9,11 @@ from acclimatise.model import *
 #: Characters that can start a CLI element, e.g. "-@"
 element_start_chars = alphanums + "@"
 #: Characters that can be in the middle of a CLI element, e.g. "-some-arg"
-element_body_chars = element_start_chars + "|-_./\\"
+element_body_chars = element_start_chars + "-_./\\"
 #: Characters that can be in the middle of a CLI element that has brackets around it, e.g. "-arg <argument with space>"
 delimited_body_chars = element_body_chars + " "
+#: Characters that can only be used in arguments for flags e.g. "<file.fa|file.fa.gz>"
+argument_body_chars = element_body_chars + "|"
 
 
 def customIndentedBlock(
@@ -92,7 +94,7 @@ any_flag = originalTextFor("-" + Optional("-") + cli_id).leaveWhitespace()
 flag_arg_sep = Or([Literal("="), Literal(" ")]).leaveWhitespace()
 """The term that separates the flag from the arguments, e.g. in `--file=FILE` it's `=`"""
 
-arg = cli_id.copy()
+arg = Word(initChars=element_start_chars, bodyChars=argument_body_chars)
 """A single argument name, e.g. `FILE`"""
 
 optional_args = Forward()

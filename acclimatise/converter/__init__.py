@@ -2,7 +2,7 @@ from abc import abstractmethod
 from itertools import groupby, zip_longest
 from os import PathLike
 from pathlib import Path
-from typing import Generator, Iterable, List, Set, TextIO, Type
+from typing import Generator, Iterable, List, Set, TextIO, Tuple, Type
 
 from dataclasses import dataclass
 
@@ -69,7 +69,7 @@ class WrapperGenerator:
 
     def generate_tree(
         self, cmd: Command, out_dir: PathLike
-    ) -> Generator[Path, None, None]:
+    ) -> Generator[Tuple[Path, Command], None, None]:
         out_dir = Path(out_dir)
         for cmd in cmd.command_tree():
             path = (out_dir / cmd.as_filename).with_suffix(self.suffix)
@@ -81,7 +81,7 @@ class WrapperGenerator:
                         " ".join(cmd.command), e.message
                     )
                 )
-            yield path
+            yield path, cmd
 
     @property
     def reserved(self) -> Set[str]:

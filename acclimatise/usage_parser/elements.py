@@ -4,6 +4,7 @@ from pyparsing import *
 
 # from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
 from acclimatise.flag_parser.elements import (
+    arg,
     customIndentedBlock,
     delimited_body_chars,
     element_body_chars,
@@ -30,7 +31,7 @@ def delimited_item(open, el, close):
 
 
 usage_element = Forward()
-element_char = Word(initChars=element_start_chars, bodyChars=element_body_chars)
+element_char = arg.copy()  # Word(initChars=element_start_chars, bodyChars=)
 
 mandatory_element = (
     element_char.copy()

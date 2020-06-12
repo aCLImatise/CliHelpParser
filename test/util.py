@@ -196,9 +196,9 @@ def convert_validate(cmd: Command, lang: str = None, explore=True):
     if lang:
         conv = WrapperGenerator.choose_converter(lang)()
         with tempfile.TemporaryDirectory() as tempd:
-            for path in conv.generate_tree(cmd, tempd):
+            for path, subcommand in conv.generate_tree(cmd, tempd):
                 content = path.read_text()
-                validators[lang](content, cmd, explore=explore)
+                validators[lang](content, subcommand, explore=explore)
     else:
         for lang in ("cwl", "wdl", "yml"):
             convert_validate(cmd, lang, explore=explore)
