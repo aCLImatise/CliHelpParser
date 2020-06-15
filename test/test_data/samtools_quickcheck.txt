@@ -1,4 +1,3 @@
-quickcheck: invalid option -- '-'
 Usage: samtools quickcheck [options] <input> [...]
 Options:
   -v              verbose output (repeat for more verbosity)

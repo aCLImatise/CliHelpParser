@@ -43,7 +43,8 @@ def test_pipe_cwl(runner, htseq_help):
 @pytest.mark.skipif(
     not shutil.which("htseq-count"), reason="htseq-count is not installed"
 )
-def test_explore_htseq(runner):
+def test_explore_htseq(runner, caplog):
+    caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
         result = runner.invoke(main, ["explore", "htseq-count", "--out-dir", tempdir])
         cli_worked(result)
@@ -51,7 +52,8 @@ def test_explore_htseq(runner):
 
 
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
-def test_explore_samtools(runner):
+def test_explore_samtools(runner, caplog):
+    caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
         result = runner.invoke(
             main, ["explore", "samtools", "--help-flag", "--help", "--out-dir", tempdir]
@@ -61,7 +63,8 @@ def test_explore_samtools(runner):
 
 
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
-def test_explore_samtools_no_subcommands(runner):
+def test_explore_samtools_no_subcommands(runner, caplog):
+    caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
         result = runner.invoke(
             main, ["explore", "samtools", "--no-subcommands", "--out-dir", tempdir,],

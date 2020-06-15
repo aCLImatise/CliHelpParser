@@ -16,6 +16,17 @@ def test_samtools_dict_output():
     # The WDL converter should avoid naming a variable "output" since that's a WDL keyword
     assert name != "output"
 
+    # Also, since we have a description, the generator shouldn't choose the lazy option of var_output
+    assert name != "var_output"
+
+
+def test_samtools_quickcheck_output():
+    gen = WdlGenerator()
+    arg = Positional(description="", position=0, name="input")
+    name = gen.choose_variable_names([arg])[0].name
+    # The WDL converter should avoid naming a variable "output" since that's a WDL keyword
+    assert name != "input"
+
 
 def test_bwt2sa_i(gen):
     arg = Flag(synonyms=["-i"], description="", args=SimpleFlagArg(name="32"))

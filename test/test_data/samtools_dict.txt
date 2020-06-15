@@ -1,4 +1,3 @@
-
 About:   Create a sequence dictionary file from a fasta file
 Usage:   samtools dict [options] <file.fa|file.fa.gz>
 

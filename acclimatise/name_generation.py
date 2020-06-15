@@ -5,12 +5,12 @@ from difflib import ndiff, unified_diff
 from itertools import groupby
 from typing import Generator, Iterable, List, Optional, Set, Tuple
 
-from spacy.tokens import Token
-
 import regex as re
-from acclimatise.nlp import nlp, wordsegment
 from num2words import num2words
+from spacy.tokens import Token
 from word2number import w2n
+
+from acclimatise.nlp import nlp, wordsegment
 
 
 class NameGenerationError(Exception):
@@ -179,7 +179,7 @@ def segment_string(text: str):
 
 
 def choose_unique_name(
-    options: Tuple[List[str], ...], reserved: Set[str] = []
+    options: Tuple[List[str], ...], number: int, reserved: Set[Tuple[str, ...]] = []
 ) -> List[str]:
     """
     Given a list of possible names for each flag, choose the first one that is not too short
@@ -187,23 +187,28 @@ def choose_unique_name(
     # First try all of them, being picky
     for option in options:
         if tuple(option) in reserved:
-            # If name generation produces a reserved keyword, add "var" to it as a prefix
-            return ["var", *option]
+            # If name generation produces a reserved keyword, skip it
+            continue
         if not useless_name(option):
             return option
 
     # Second, try all of them choosing anything that isn't empty
     for option in options:
+        if tuple(option) in reserved:
+            # If name generation produces a reserved keyword and we've already tried everything else, add "var" to it as a prefix
+            return ["var", *option]
         if len(option) == 1 and option[0] in reserved:
             continue
         if len(option) > 0:
             return option
 
-    raise NameGenerationError(
-        "No unique names available. Selecting from {}".format(
-            ";".join([" ".join(option) for option in options])
-        )
-    )
+    # If nothing else works, just use something like 'var_3' as the variable name
+    return ["var", str(number)]
+    # raise NameGenerationError(
+    #     "No unique names available. Selecting from {}".format(
+    #         ";".join([" ".join(option) for option in options])
+    #     )
+    # )
 
 
 def generate_names_segment(
