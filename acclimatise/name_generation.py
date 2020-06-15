@@ -5,12 +5,12 @@ from difflib import ndiff, unified_diff
 from itertools import groupby
 from typing import Generator, Iterable, List, Optional, Set, Tuple
 
-import regex as re
-from num2words import num2words
 from spacy.tokens import Token
-from word2number import w2n
 
+import regex as re
 from acclimatise.nlp import nlp, wordsegment
+from num2words import num2words
+from word2number import w2n
 
 
 class NameGenerationError(Exception):
