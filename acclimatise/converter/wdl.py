@@ -12,6 +12,7 @@ from wdlgen import ArrayType, Input, ParameterMeta, PrimitiveType, Task, WdlType
 from acclimatise import cli_types, model
 from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
+from acclimatise.nlp import wordsegment
 
 
 def escape_wdl_str(text):
@@ -78,9 +79,9 @@ class WdlGenerator(WrapperGenerator):
     case = "snake"
 
     @property
-    def reserved(self) -> Set[str]:
+    def reserved(self) -> Set[Tuple[str, ...]]:
         # Steal the keywords list from miniWDL
-        return keywords["1.0"]
+        return {tuple(wordsegment.segment(key)) for key in keywords["1.0"]}
 
     @classmethod
     def format(cls) -> str:

@@ -1,0 +1,27 @@
+quickcheck: invalid option -- '-'
+Usage: samtools quickcheck [options] <input> [...]
+Options:
+  -v              verbose output (repeat for more verbosity)
+  -q              suppress warning messages
+
+Notes:
+
+1. By default quickcheck will emit a warning message if and only if a file
+   fails the checks, in which case the exit status is non-zero.  Under normal
+   behaviour with valid data it will be silent and has a zero exit status.
+   The warning messages are purely for manual inspection and should not be 
+   parsed by scripts.
+
+2. In order to use this command programmatically, you should check its exit
+   status.  One way to use quickcheck might be as a check that all BAM files in
+   a directory are okay:
+
+	samtools quickcheck *.bam && echo 'all ok' \
+	   || echo 'fail!'
+
+   The first level of verbosity lists only files that fail to stdout.
+   To obtain a parsable list of files that have failed, use this option:
+
+	samtools quickcheck -qv *.bam > bad_bams.fofn \
+	   && echo 'all ok' \
+	   || echo 'some files failed check, see bad_bams.fofn'

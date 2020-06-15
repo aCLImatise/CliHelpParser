@@ -84,7 +84,7 @@ class WrapperGenerator:
             yield path, cmd
 
     @property
-    def reserved(self) -> Set[str]:
+    def reserved(self) -> Set[Tuple[str, ...]]:
         """
         A list of reserved keywords for this language
         """
@@ -122,6 +122,8 @@ class WrapperGenerator:
                     [flag.description for flag in flags], reserved=self.reserved
                 ),
                 [flag.argument_name() for flag in flags if isinstance(flag, Flag)],
+                # Add "var_3" as a variable name if we really can't generate anything
+                [["var", str(i)] for i, _ in enumerate(flags)],
                 fillvalue=[],
             )
         )

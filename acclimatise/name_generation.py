@@ -186,8 +186,9 @@ def choose_unique_name(
     """
     # First try all of them, being picky
     for option in options:
-        if len(option) == 1 and option[0] in reserved:
-            continue
+        if tuple(option) in reserved:
+            # If name generation produces a reserved keyword, add "var" to it as a prefix
+            return ["var", *option]
         if not useless_name(option):
             return option
 
@@ -245,13 +246,15 @@ def generate_names_segment(
     #     return ret
 
 
-def intersection_indices(l: List[List[str]], reserved: Set[str]) -> Set[int]:
+def intersection_indices(
+    l: List[List[str]], reserved: Set[Tuple[str, ...]]
+) -> Set[int]:
     """
-    Returns a set of indices from the first list that occur in the set of reserved keywords
+    Returns a set of indices from ``l`` that occur in the set of reserved keywords
     """
     ret = set()
     for i, words in enumerate(l):
-        if len(words) == 1 and words[0] in reserved:
+        if tuple(words) in reserved:
             ret.add(i)
     return ret
 
@@ -307,7 +310,7 @@ def generate_names_nlp(
     descriptions: List[str],
     initial_length: int = 3,
     max_length: int = 5,
-    reserved: Set[str] = set(),
+    reserved: Set[Tuple[str, ...]] = set(),
 ) -> List[List[str]]:
     """
     Given a list of flag descriptions, iterates until it generates a set of unique names for each flag
