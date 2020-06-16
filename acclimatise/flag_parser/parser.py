@@ -1,6 +1,7 @@
 from itertools import groupby
 from operator import attrgetter
 
+import regex
 from acclimatise.flag_parser.elements import *
 
 
@@ -39,6 +40,16 @@ def unique_by(
     return ret
 
 
+#: Used to find normal word boundaries
+single_space = regex.compile(r"\b \b")
+
+#: Used to find unusual word boundaries
+multi_space = regex.compile(r"\b[\s]{2,}\b")
+
+# Used to find words that contain no alphabetical characters
+non_alpha = regex.compile(r"^[^[:alpha:]]+$")
+
+
 class CliParser:
     def parse_command(self, cmd, name) -> Command:
         all_flags = list(itertools.chain.from_iterable(self.flags.searchString(cmd)))
@@ -60,10 +71,15 @@ class CliParser:
 
         def parse_description(s, lok, toks):
             text = " ".join([tok[0] for tok in toks[0]])
-            if all([not word.isalpha() for word in text.split()]):
+            if all([non_alpha.match(word) for word in text.split()]):
                 raise ParseException(
                     "This can't be a description block if all text is numeric!"
                 )
+            if len(multi_space.findall(text)) > len(single_space.findall(text)):
+                raise ParseException(
+                    "This description block has more unusual spaces than word spaces, it probably isn't a real description"
+                )
+
             return text
 
         self.indented_desc = customIndentedBlock(
