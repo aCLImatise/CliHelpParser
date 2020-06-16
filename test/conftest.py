@@ -4,6 +4,19 @@ import pytest
 from pkg_resources import resource_filename
 
 from acclimatise.flag_parser.parser import CliParser
+from acclimatise.yaml import yaml
+
+
+@pytest.fixture()
+def bedtools_cmd():
+    with open(resource_filename(__name__, "test_data/bedtools/bedtools.yml")) as fp:
+        return yaml.load(fp)
+
+
+@pytest.fixture()
+def samtools_cmd():
+    with open(resource_filename(__name__, "test_data/samtools/samtools.yml")) as fp:
+        return yaml.load(fp)
 
 
 @pytest.fixture

@@ -219,8 +219,6 @@ When the help lists multiple synonyms for a flag, e.g:
 # The description of the flag
 # e.g. for grep's `-o, --only-matching`, this is:
 # "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line."
-def success(a, b, c):
-    pass
-
-
-desc_line = originalTextFor(SkipTo(LineEnd()))  # .setParseAction(success))
+desc_line = originalTextFor(
+    delimitedList(Regex("[^\s]+"), delim=" ", combine=True).leaveWhitespace()
+)

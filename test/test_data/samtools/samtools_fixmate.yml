@@ -1,0 +1,1876 @@
+!Command &id003
+positional:
+  - !Positional
+    description: ""
+    position: 0
+    name: in.nameSrt.bam
+    optional: false
+  - !Positional
+    description: ""
+    position: 1
+    name: out.nameSrt.bam
+    optional: false
+named:
+  - !Flag
+    description: Reference sequence FASTA FILE [null]
+    synonyms:
+      - --reference
+    args: !SimpleFlagArg
+      name: FILE
+    optional: true
+  - !Flag
+    description: Number of additional threads to use [0]
+    synonyms:
+      - -@
+      - --threads
+    args: !SimpleFlagArg
+      name: INT
+    optional: true
+command:
+  - samtools
+  - fixmate
+parent: !Command &id001
+  positional: []
+  named: []
+  command:
+    - samtools
+  parent:
+  subcommands:
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: file.fa|file.fa.gz
+          optional: false
+      named:
+        - !Flag
+          description: assembly
+          synonyms:
+            - -a
+            - --assembly
+          args: !SimpleFlagArg
+            name: STR
+          optional: true
+        - !Flag
+          description: do not print @HD line
+          synonyms:
+            - -H
+            - --no-header
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: file to write out dict file [stdout]
+          synonyms:
+            - -o
+            - --output
+          args: !SimpleFlagArg
+            name: STR
+          optional: true
+        - !Flag
+          description: species
+          synonyms:
+            - -s
+            - --species
+          args: !SimpleFlagArg
+            name: STR
+          optional: true
+        - !Flag
+          description: URI [file:///abs/path/to/file.fa]
+          synonyms:
+            - -u
+            - --uri
+          args: !SimpleFlagArg
+            name: STR
+          optional: true
+      command:
+        - samtools
+        - dict
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "\nAbout:   Create a sequence dictionary file from a fasta file\nUsage:\
+        \   samtools dict [options] <file.fa|file.fa.gz>\n\nOptions: -a, --assembly\
+        \ STR    assembly\n         -H, --no-header       do not print @HD line\n  \
+        \       -o, --output STR      file to write out dict file [stdout]\n       \
+        \  -s, --species STR     species\n         -u, --uri STR         URI [file:///abs/path/to/file.fa]\n\
+        \n"
+      generated_using: &id002
+        - --help
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: file.fa|file.fa.gz
+          optional: false
+      named:
+        - !Flag
+          description: Write FASTA to file.
+          synonyms:
+            - -o
+            - --output
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Length of FASTA sequence line. [60]
+          synonyms:
+            - -n
+            - --length
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: Continue after trying to retrieve missing region.
+          synonyms:
+            - -c
+            - --continue
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: File of regions.  Format is chr:from-to. One per line.
+          synonyms:
+            - -r
+            - --region-file
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: complement sequences.
+          synonyms:
+            - -i
+            - --reverse-complement
+          args: !SimpleFlagArg
+            name: Reverse
+          optional: true
+        - !Flag
+          description:
+            Add strand indicator to sequence name TYPE = rc   for /rc on negative
+            strand (default) no   for no strand indicator sign for (+) / (-) custom,<pos>,<neg>
+            for custom indicator
+          synonyms:
+            - --mark-strand
+          args: !SimpleFlagArg
+            name: TYPE
+          optional: true
+        - !Flag
+          description: File and index in FASTQ format.
+          synonyms:
+            - -f
+            - --fastq
+          args: !EmptyFlagArg {}
+          optional: true
+      command:
+        - samtools
+        - faidx
+      parent: *id001
+      subcommands: []
+      help_flag: !Flag
+        description: This message.
+        synonyms:
+          - -h
+          - --help
+        args: !EmptyFlagArg {}
+        optional: true
+      usage_flag:
+      version_flag:
+      help_text:
+        "Usage: samtools faidx <file.fa|file.fa.gz> [<reg> [...]]\nOption:\
+        \ \n -o, --output FILE        Write FASTA to file.\n -n, --length INT      \
+        \   Length of FASTA sequence line. [60]\n -c, --continue           Continue\
+        \ after trying to retrieve missing region.\n -r, --region-file FILE   File of\
+        \ regions.  Format is chr:from-to. One per line.\n -i, --reverse-complement\
+        \ Reverse complement sequences.\n     --mark-strand TYPE   Add strand indicator\
+        \ to sequence name\n                          TYPE = rc   for /rc on negative\
+        \ strand (default)\n                                 no   for no strand indicator\n\
+        \                                 sign for (+) / (-)\n                     \
+        \            custom,<pos>,<neg> for custom indicator\n -f, --fastq         \
+        \     File and index in FASTQ format.\n -h, --help               This message.\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: file.fq|file.fq.gz
+          optional: false
+      named:
+        - !Flag
+          description: Write FASTQ to file.
+          synonyms:
+            - -o
+            - --output
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Length of FASTQ sequence line. [60]
+          synonyms:
+            - -n
+            - --length
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: Continue after trying to retrieve missing region.
+          synonyms:
+            - -c
+            - --continue
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: File of regions.  Format is chr:from-to. One per line.
+          synonyms:
+            - -r
+            - --region-file
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: complement sequences.
+          synonyms:
+            - -i
+            - --reverse-complement
+          args: !SimpleFlagArg
+            name: Reverse
+          optional: true
+        - !Flag
+          description:
+            Add strand indicator to sequence name TYPE = rc   for /rc on negative
+            strand (default) no   for no strand indicator sign for (+) / (-) custom,<pos>,<neg>
+            for custom indicator
+          synonyms:
+            - --mark-strand
+          args: !SimpleFlagArg
+            name: TYPE
+          optional: true
+      command:
+        - samtools
+        - fqidx
+      parent: *id001
+      subcommands: []
+      help_flag: !Flag
+        description: This message.
+        synonyms:
+          - -h
+          - --help
+        args: !EmptyFlagArg {}
+        optional: true
+      usage_flag:
+      version_flag:
+      help_text:
+        "Usage: samtools fqidx <file.fq|file.fq.gz> [<reg> [...]]\nOption:\
+        \ \n -o, --output FILE        Write FASTQ to file.\n -n, --length INT      \
+        \   Length of FASTQ sequence line. [60]\n -c, --continue           Continue\
+        \ after trying to retrieve missing region.\n -r, --region-file FILE   File of\
+        \ regions.  Format is chr:from-to. One per line.\n -i, --reverse-complement\
+        \ Reverse complement sequences.\n     --mark-strand TYPE   Add strand indicator\
+        \ to sequence name\n                          TYPE = rc   for /rc on negative\
+        \ strand (default)\n                                 no   for no strand indicator\n\
+        \                                 sign for (+) / (-)\n                     \
+        \            custom,<pos>,<neg> for custom indicator\n -h, --help          \
+        \     This message.\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: out.index
+          optional: true
+      named:
+        - !Flag
+          description: Generate BAI-format index for BAM files [default]
+          synonyms:
+            - -b
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: Generate CSI-format index for BAM files
+          synonyms:
+            - -c
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: Set minimum interval size for CSI indices to 2^INT [14]
+          synonyms:
+            - -m
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: Sets the number of threads [none]
+          synonyms:
+            - -@
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -bc
+          args: !EmptyFlagArg {}
+          optional: true
+      command:
+        - samtools
+        - index
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "index: invalid option -- '-'\nUsage: samtools index [-bc] [-m INT]\
+        \ <in.bam> [out.index]\nOptions:\n  -b       Generate BAI-format index for BAM\
+        \ files [default]\n  -c       Generate CSI-format index for BAM files\n  -m\
+        \ INT   Set minimum interval size for CSI indices to 2^INT [14]\n  -@ INT  \
+        \ Sets the number of threads [none]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: aln.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: ref.fasta
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -eubrAESQ
+          args: !EmptyFlagArg {}
+          optional: true
+      command:
+        - samtools
+        - calmd
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "calmd: unrecognized option '--help'\nUsage: samtools calmd [-eubrAESQ]\
+        \ <aln.bam> <ref.fasta>\nOptions:\n  -e       change identical bases to '='\n\
+        \  -u       uncompressed BAM output (for piping)\n  -b       compressed BAM\
+        \ output\n  -S       ignored (input format is auto-detected)\n  -A       modify\
+        \ the quality string\n  -Q       use quiet mode to output less debug info to\
+        \ stdout\n  -r       compute the BQ tag (without -A) or cap baseQ by BAQ (with\
+        \ -A)\n  -E       extended BAQ for better sensitivity but lower specificity\n\
+        \      --input-fmt-option OPT[=VAL]\n               Specify a single input file\
+        \ format option in the form\n               of OPTION or OPTION=VALUE\n    \
+        \  --output-fmt FORMAT[,OPT[=VAL]]...\n               Specify output format\
+        \ (SAM, BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n               Specify\
+        \ a single output file format option in the form\n               of OPTION or\
+        \ OPTION=VALUE\n      --reference FILE\n               Reference sequence FASTA\
+        \ FILE [null]\n  -@, --threads INT\n               Number of additional threads\
+        \ to use [0]\n"
+      generated_using: *id002
+    - *id003
+    - !Command
+      positional:
+        - !Positional
+          description: samtools reheader [-P] -i in.header.sam file.bam
+          position: 0
+          name: or
+          optional: false
+      named:
+        - !Flag
+          description: Do not generate an @PG header line.
+          synonyms:
+            - -P
+            - --no-PG
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: Modify the bam/cram file directly. (Defaults to outputting to stdout.)
+          synonyms:
+            - -i
+            - --in-place
+          args: !EmptyFlagArg {}
+          optional: true
+      command:
+        - samtools
+        - reheader
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "Usage: samtools reheader [-P] in.header.sam in.bam > out.bam\n   or\
+        \  samtools reheader [-P] -i in.header.sam file.bam\n\nOptions:\n    -P, --no-PG\
+        \      Do not generate an @PG header line.\n    -i, --in-place   Modify the\
+        \ bam/cram file directly.\n                     (Defaults to outputting to stdout.)\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - -f
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -Q
+          args: !SimpleFlagArg
+            name: minQ
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -i
+          args: !SimpleFlagArg
+            name: inPen
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - "-0"
+          args: !SimpleFlagArg
+            name: em0
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - "-1"
+          args: !SimpleFlagArg
+            name: em1
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - "-2"
+          args: !SimpleFlagArg
+            name: em2
+          optional: true
+      command:
+        - samtools
+        - targetcut
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "targetcut: unrecognized option '--help'\nUsage: samtools targetcut\
+        \ [-Q minQ] [-i inPen] [-0 em0] [-1 em1] [-2 em2] <in.bam>\n      --input-fmt-option\
+        \ OPT[=VAL]\n               Specify a single input file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n  -f, --reference FILE\n \
+        \              Reference sequence FASTA FILE [null]\n"
+      generated_using: *id002
+    - !Command
+      positional: []
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - addreplacerg
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "addreplacerg: unrecognized option '--help'\nUsage: samtools addreplacerg\
+        \ [options] [-r <@RG line> | -R <existing id>] [-o <output.bam>] <input.bam>\n\
+        \nOptions:\n  -m MODE   Set the mode of operation from one of overwrite_all,\
+        \ orphan_only [overwrite_all]\n  -o FILE   Where to write output to [stdout]\n\
+        \  -r STRING @RG line text\n  -R STRING ID of @RG line in existing header to\
+        \ use\n      --input-fmt FORMAT[,OPT[=VAL]]...\n               Specify input\
+        \ format (SAM, BAM, CRAM)\n      --input-fmt-option OPT[=VAL]\n            \
+        \   Specify a single input file format option in the form\n               of\
+        \ OPTION or OPTION=VALUE\n  -O, --output-fmt FORMAT[,OPT[=VAL]]...\n       \
+        \        Specify output format (SAM, BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n\
+        \               Specify a single output file format option in the form\n   \
+        \            of OPTION or OPTION=VALUE\n      --reference FILE\n           \
+        \    Reference sequence FASTA FILE [null]\n  -@, --threads INT\n           \
+        \    Number of additional threads to use [0]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: input.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: output.bam
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - markdup
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "markdup: unrecognized option '--help'\n\nUsage:  samtools markdup\
+        \ <input.bam> <output.bam>\n\nOption: \n  -r           Remove duplicate reads\n\
+        \  -l INT       Max read length (default 300 bases)\n  -S           Mark supplemenary\
+        \ alignments of duplicates as duplicates (slower).\n  -s           Report stats.\n\
+        \  -T PREFIX    Write temporary files to PREFIX.samtools.nnnn.nnnn.tmp.\n  -t\
+        \           Mark primary duplicates with the name of the original in a 'do'\
+        \ tag. Mainly for information and debugging.\n      --input-fmt-option OPT[=VAL]\n\
+        \               Specify a single input file format option in the form\n    \
+        \           of OPTION or OPTION=VALUE\n  -O, --output-fmt FORMAT[,OPT[=VAL]]...\n\
+        \               Specify output format (SAM, BAM, CRAM)\n      --output-fmt-option\
+        \ OPT[=VAL]\n               Specify a single output file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n      --reference FILE\n \
+        \              Reference sequence FASTA FILE [null]\n  -@, --threads INT\n \
+        \              Number of additional threads to use [0]\n\nThe input file must\
+        \ be coordinate sorted and must have gone through fixmates with the mate scoring\
+        \ option on.\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: prefix
+          optional: true
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -Ou
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -o
+          args: !SimpleFlagArg
+            name: name
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -n
+          args: !SimpleFlagArg
+            name: nFiles
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -l
+          args: !SimpleFlagArg
+            name: cLevel
+          optional: true
+      command:
+        - samtools
+        - collate
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "collate: unrecognized option '--help'\nUsage: samtools collate [-Ou]\
+        \ [-o <name>] [-n nFiles] [-l cLevel] <in.bam> [<prefix>]\n\nOptions:\n    \
+        \  -O       output to stdout\n      -o       output file name (use prefix if\
+        \ not set)\n      -u       uncompressed BAM output\n      -f       fast (only\
+        \ primary alignments)\n      -r       working reads stored (with -f) [10000]\n\
+        \      -l INT   compression level [1]\n      -n INT   number of temporary files\
+        \ [64]\n      --input-fmt-option OPT[=VAL]\n               Specify a single\
+        \ input file format option in the form\n               of OPTION or OPTION=VALUE\n\
+        \      --output-fmt FORMAT[,OPT[=VAL]]...\n               Specify output format\
+        \ (SAM, BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n               Specify\
+        \ a single output file format option in the form\n               of OPTION or\
+        \ OPTION=VALUE\n      --reference FILE\n               Reference sequence FASTA\
+        \ FILE [null]\n  -@, --threads INT\n               Number of additional threads\
+        \ to use [0]\n  <prefix> is required unless the -o or -O options are used.\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in1.bam
+          optional: false
+      named:
+        - !Flag
+          description: list of input BAM/CRAM file names, one per line
+          synonyms:
+            - -b
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: copy the header from FILE [default is 1st input file]
+          synonyms:
+            - -h
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: output BAM/CRAM
+          synonyms:
+            - -o
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+      command:
+        - samtools
+        - cat
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "cat: option requires an argument -- 'h'\nUsage: samtools cat [options]\
+        \ <in1.bam>  [... <inN.bam>]\n       samtools cat [options] <in1.cram> [...\
+        \ <inN.cram>]\n\nConcatenate BAM or CRAM files, first those in <bamlist.fofn>,\
+        \ then those\non the command line.\n\nOptions: -b FILE  list of input BAM/CRAM\
+        \ file names, one per line\n         -h FILE  copy the header from FILE [default\
+        \ is 1st input file]\n         -o FILE  output BAM/CRAM\n"
+      generated_using:
+        - -h
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: out.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: in1.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 2
+          name: inN.bam
+          optional: true
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -nurlf
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -h
+          args: !SimpleFlagArg
+            name: inh.sam
+          optional: true
+        - !Flag
+          description: ""
+          synonyms:
+            - -b
+          args: !SimpleFlagArg
+            name: bamlist.fofn
+          optional: true
+      command:
+        - samtools
+        - merge
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "merge: unrecognized option '--help'\nUsage: samtools merge [-nurlf]\
+        \ [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]\n\
+        \nOptions:\n  -n         Input files are sorted by read name\n  -t TAG     Input\
+        \ files are sorted by TAG value\n  -r         Attach RG tag (inferred from file\
+        \ names)\n  -u         Uncompressed BAM output\n  -f         Overwrite the output\
+        \ BAM if exist\n  -1         Compress level 1\n  -l INT     Compression level,\
+        \ from 0 to 9 [-1]\n  -R STR     Merge file in the specified region STR [all]\n\
+        \  -h FILE    Copy the header in FILE to <out.bam> [in1.bam]\n  -c         Combine\
+        \ @RG headers with colliding IDs [alter IDs to be distinct]\n  -p         Combine\
+        \ @PG headers with colliding IDs [alter IDs to be distinct]\n  -s VALUE   Override\
+        \ random seed\n  -b FILE    List of input BAM filenames, one per line [null]\n\
+        \      --input-fmt-option OPT[=VAL]\n               Specify a single input file\
+        \ format option in the form\n               of OPTION or OPTION=VALUE\n  -O,\
+        \ --output-fmt FORMAT[,OPT[=VAL]]...\n               Specify output format (SAM,\
+        \ BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n               Specify a\
+        \ single output file format option in the form\n               of OPTION or\
+        \ OPTION=VALUE\n      --reference FILE\n               Reference sequence FASTA\
+        \ FILE [null]\n  -@, --threads INT\n               Number of additional threads\
+        \ to use [0]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in1.bam
+          optional: false
+      named:
+        - !Flag
+          description: +      quality is in the Illumina-1.3+ encoding
+          synonyms:
+            - "-6"
+            - --illumina1.3
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: do not discard anomalous read pairs
+          synonyms:
+            - -A
+            - --count-orphans
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: list of input BAM filenames, one per line
+          synonyms:
+            - -b
+            - --bam-list
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: disable BAQ (per-Base Alignment Quality)
+          synonyms:
+            - -B
+            - --no-BAQ
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: adjust mapping quality; recommended:50, disable:0 [0]
+          synonyms:
+            - -C
+            - --adjust-MQ
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: max per-file depth; avoids excessive memory usage [8000]
+          synonyms:
+            - -d
+            - --max-depth
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: recalculate BAQ on the fly, ignore existing BQs
+          synonyms:
+            - -E
+            - --redo-BAQ
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: faidx indexed reference sequence file
+          synonyms:
+            - -f
+            - --fasta-ref
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: exclude read groups listed in FILE
+          synonyms:
+            - -G
+            - --exclude-RG
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: skip unlisted positions (chr pos) or regions (BED)
+          synonyms:
+            - -l
+            - --positions
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: skip alignments with mapQ smaller than INT [0]
+          synonyms:
+            - -q
+            - --min-MQ
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: skip bases with baseQ/BAQ smaller than INT [13]
+          synonyms:
+            - -Q
+            - --min-BQ
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+        - !Flag
+          description: region in which pileup is generated
+          synonyms:
+            - -r
+            - --region
+          args: !SimpleFlagArg
+            name: REG
+          optional: true
+        - !Flag
+          description: ignore RG tags (one BAM = one sample)
+          synonyms:
+            - -R
+            - --ignore-RG
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: "|INT  required flags: skip reads with mask bits unset []"
+          synonyms:
+            - --rf
+            - --incl-flags
+          args: !SimpleFlagArg
+            name: STR
+          optional: true
+        - !Flag
+          description: "|INT  filter flags: skip reads with mask bits set [UNMAP,SECONDARY,QCFAIL,DUP]"
+          synonyms:
+            - --ff
+            - --excl-flags
+          args: !SimpleFlagArg
+            name: STR
+          optional: true
+        - !Flag
+          description: disable read-pair overlap detection
+          synonyms:
+            - -x
+            - --ignore-overlaps
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: write output to FILE [standard output]
+          synonyms:
+            - -o
+            - --output
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: output base positions on reads
+          synonyms:
+            - -O
+            - --output-BP
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: output mapping quality
+          synonyms:
+            - -s
+            - --output-MQ
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: output read names
+          synonyms:
+            - --output-QNAME
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: output all positions (including zero depth)
+          synonyms:
+            - -a
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+      command:
+        - samtools
+        - mpileup
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "mpileup: unrecognized option '--help'\n\nUsage: samtools mpileup [options]\
+        \ in1.bam [in2.bam [...]]\n\nInput options:\n  -6, --illumina1.3+      quality\
+        \ is in the Illumina-1.3+ encoding\n  -A, --count-orphans     do not discard\
+        \ anomalous read pairs\n  -b, --bam-list FILE     list of input BAM filenames,\
+        \ one per line\n  -B, --no-BAQ            disable BAQ (per-Base Alignment Quality)\n\
+        \  -C, --adjust-MQ INT     adjust mapping quality; recommended:50, disable:0\
+        \ [0]\n  -d, --max-depth INT     max per-file depth; avoids excessive memory\
+        \ usage [8000]\n  -E, --redo-BAQ          recalculate BAQ on the fly, ignore\
+        \ existing BQs\n  -f, --fasta-ref FILE    faidx indexed reference sequence file\n\
+        \  -G, --exclude-RG FILE   exclude read groups listed in FILE\n  -l, --positions\
+        \ FILE    skip unlisted positions (chr pos) or regions (BED)\n  -q, --min-MQ\
+        \ INT        skip alignments with mapQ smaller than INT [0]\n  -Q, --min-BQ\
+        \ INT        skip bases with baseQ/BAQ smaller than INT [13]\n  -r, --region\
+        \ REG        region in which pileup is generated\n  -R, --ignore-RG        \
+        \ ignore RG tags (one BAM = one sample)\n  --rf, --incl-flags STR|INT  required\
+        \ flags: skip reads with mask bits unset []\n  --ff, --excl-flags STR|INT  filter\
+        \ flags: skip reads with mask bits set\n                                   \
+        \         [UNMAP,SECONDARY,QCFAIL,DUP]\n  -x, --ignore-overlaps   disable read-pair\
+        \ overlap detection\n\nOutput options:\n  -o, --output FILE       write output\
+        \ to FILE [standard output]\n  -O, --output-BP         output base positions\
+        \ on reads\n  -s, --output-MQ         output mapping quality\n      --output-QNAME\
+        \      output read names\n  -a                      output all positions (including\
+        \ zero depth)\n  -a -a (or -aa)          output absolutely all positions, including\
+        \ unused ref. sequences\n\nGeneric options:\n      --input-fmt-option OPT[=VAL]\n\
+        \               Specify a single input file format option in the form\n    \
+        \           of OPTION or OPTION=VALUE\n      --reference FILE\n            \
+        \   Reference sequence FASTA FILE [null]\n\nNote that using \"samtools mpileup\"\
+        \ to generate BCF or VCF files is now\ndeprecated.  To output these formats,\
+        \ please use \"bcftools mpileup\" instead.\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: options...
+          optional: true
+        - !Positional
+          description: ""
+          position: 1
+          name: in.bam
+          optional: true
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - sort
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "sort: unrecognized option '--help'\nUsage: samtools sort [options...]\
+        \ [in.bam]\nOptions:\n  -l INT     Set compression level, from 0 (uncompressed)\
+        \ to 9 (best)\n  -m INT     Set maximum memory per thread; suffix K/M/G recognized\
+        \ [768M]\n  -n         Sort by read name\n  -t TAG     Sort by value of TAG.\
+        \ Uses position as secondary index (or read name if -n is set)\n  -o FILE  \
+        \  Write final output to FILE rather than standard output\n  -T PREFIX  Write\
+        \ temporary files to PREFIX.nnnn.bam\n      --input-fmt-option OPT[=VAL]\n \
+        \              Specify a single input file format option in the form\n     \
+        \          of OPTION or OPTION=VALUE\n  -O, --output-fmt FORMAT[,OPT[=VAL]]...\n\
+        \               Specify output format (SAM, BAM, CRAM)\n      --output-fmt-option\
+        \ OPT[=VAL]\n               Specify a single output file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n      --reference FILE\n \
+        \              Reference sequence FASTA FILE [null]\n  -@, --threads INT\n \
+        \              Number of additional threads to use [0]\n"
+      generated_using: *id002
+    - !Command
+      positional: []
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - split
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "Usage: samtools split [-u <unaccounted.bam>[:<unaccounted_header.sam>]]\n\
+        \                      [-f <format_string>] [-v] <merged.bam>\nOptions:\n  -f\
+        \ STRING       output filename format string [\"%*_%#.%.\"]\n  -u FILE1    \
+        \    put reads with no RG tag or an unrecognised RG tag in FILE1\n  -u FILE1:FILE2\
+        \  ...and override the header with FILE2\n  -v              verbose output\n\
+        \      --input-fmt-option OPT[=VAL]\n               Specify a single input file\
+        \ format option in the form\n               of OPTION or OPTION=VALUE\n    \
+        \  --output-fmt FORMAT[,OPT[=VAL]]...\n               Specify output format\
+        \ (SAM, BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n               Specify\
+        \ a single output file format option in the form\n               of OPTION or\
+        \ OPTION=VALUE\n      --reference FILE\n               Reference sequence FASTA\
+        \ FILE [null]\n  -@, --threads INT\n               Number of additional threads\
+        \ to use [0]\n\nFormat string expansions:\n  %%     %\n  %*     basename\n \
+        \ %#     @RG index\n  %!     @RG ID\n  %.     filename extension for output\
+        \ format\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: input
+          optional: false
+      named:
+        - !Flag
+          description: verbose output (repeat for more verbosity)
+          synonyms:
+            - -v
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: suppress warning messages
+          synonyms:
+            - -q
+          args: !EmptyFlagArg {}
+          optional: true
+      command:
+        - samtools
+        - quickcheck
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "quickcheck: invalid option -- '-'\nUsage: samtools quickcheck [options]\
+        \ <input> [...]\nOptions:\n  -v              verbose output (repeat for more\
+        \ verbosity)\n  -q              suppress warning messages\n\nNotes:\n\n1. By\
+        \ default quickcheck will emit a warning message if and only if a file\n   fails\
+        \ the checks, in which case the exit status is non-zero.  Under normal\n   behaviour\
+        \ with valid data it will be silent and has a zero exit status.\n   The warning\
+        \ messages are purely for manual inspection and should not be \n   parsed by\
+        \ scripts.\n\n2. In order to use this command programmatically, you should check\
+        \ its exit\n   status.  One way to use quickcheck might be as a check that all\
+        \ BAM files in\n   a directory are okay:\n\n\tsamtools quickcheck *.bam && echo\
+        \ 'all ok' \\\n\t   || echo 'fail!'\n\n   The first level of verbosity lists\
+        \ only files that fail to stdout.\n   To obtain a parsable list of files that\
+        \ have failed, use this option:\n\n\tsamtools quickcheck -qv *.bam > bad_bams.fofn\
+        \ \\\n\t   && echo 'all ok' \\\n\t   || echo 'some files failed check, see bad_bams.fofn'\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description:
+            the first 14 characters are index 1, the next 8 characters are
+            index 2
+          position: 0
+          name: i14i8
+          optional: false
+        - !Positional
+          description:
+            ignore the first 8 characters, and use the next 14 characters for
+            index 1
+          position: 1
+          name: n8i14
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - fastq
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "fastq: unrecognized option '--help'\nUsage: samtools fastq [options...]\
+        \ <in.bam>\nOptions:\n  -0 FILE              write reads designated READ_OTHER\
+        \ to FILE\n  -1 FILE              write reads designated READ1 to FILE\n  -2\
+        \ FILE              write reads designated READ2 to FILE\n                 \
+        \      note: if a singleton file is specified with -s, only\n              \
+        \         paired reads will be written to the -1 and -2 files.\n  -f INT   \
+        \            only include reads with all  of the FLAGs in INT present [0]\n\
+        \  -F INT               only include reads with none of the FLAGS in INT present\
+        \ [0]\n  -G INT               only EXCLUDE reads with all  of the FLAGs in INT\
+        \ present [0]\n  -n                   don't append /1 and /2 to the read name\n\
+        \  -N                   always append /1 and /2 to the read name\n  -O     \
+        \              output quality in the OQ tag if present\n  -s FILE          \
+        \    write singleton reads designated READ1 or READ2 to FILE\n  -t         \
+        \          copy RG, BC and QT tags to the FASTQ header line\n  -T TAGLIST  \
+        \         copy arbitrary tags to the FASTQ header line\n  -v INT           \
+        \    default quality score if not given in file [1]\n  -i                  \
+        \ add Illumina Casava 1.8 format entry to header (eg 1:N:0:ATCACG)\n  -c   \
+        \                compression level [0..9] to use when creating gz or bgzf fastq\
+        \ files\n  --i1 FILE            write first index reads to FILE\n  --i2 FILE\
+        \            write second index reads to FILE\n  --barcode-tag TAG    Barcode\
+        \ tag [default: BC]\n  --quality-tag TAG    Quality tag [default: QT]\n  --index-format\
+        \ STR   How to parse barcode and quality tags\n\n      --input-fmt-option OPT[=VAL]\n\
+        \               Specify a single input file format option in the form\n    \
+        \           of OPTION or OPTION=VALUE\n      --reference FILE\n            \
+        \   Reference sequence FASTA FILE [null]\n  -@, --threads INT\n            \
+        \   Number of additional threads to use [0]\n\nReads are designated READ1 if\
+        \ FLAG READ1 is set and READ2 is not set.\nReads are designated READ2 if FLAG\
+        \ READ1 is not set and READ2 is set.\nReads are designated READ_OTHER if FLAGs\
+        \ READ1 and READ2 are either both set\nor both unset.\nRun 'samtools flags'\
+        \ for more information on flag codes and meanings.\n\nThe index-format string\
+        \ describes how to parse the barcode and quality tags, for example:\n   i14i8\
+        \       the first 14 characters are index 1, the next 8 characters are index\
+        \ 2\n   n8i14       ignore the first 8 characters, and use the next 14 characters\
+        \ for index 1\nIf the tag contains a separator, then the numeric part can be\
+        \ replaced with '*' to mean\n'read until the separator or end of tag', for example:\n\
+        \   n*i*        ignore the left part of the tag until the separator, then use\
+        \ the second part\n               of the tag as index 1\n\nExamples:\n To get\
+        \ just the paired reads in separate files, use:\n   samtools fastq -1 paired1.fq\
+        \ -2 paired2.fq -0 /dev/null -s /dev/null -n -F 0x900 in.bam\n\n To get all\
+        \ non-supplementary/secondary reads in a single file, redirect the output:\n\
+        \   samtools fastq -F 0x900 in.bam > all_reads.fq\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description:
+            the first 14 characters are index 1, the next 8 characters are
+            index 2
+          position: 0
+          name: i14i8
+          optional: false
+        - !Positional
+          description:
+            ignore the first 8 characters, and use the next 14 characters for
+            index 1
+          position: 1
+          name: n8i14
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - fasta
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "fasta: unrecognized option '--help'\nUsage: samtools fasta [options...]\
+        \ <in.bam>\nOptions:\n  -0 FILE              write reads designated READ_OTHER\
+        \ to FILE\n  -1 FILE              write reads designated READ1 to FILE\n  -2\
+        \ FILE              write reads designated READ2 to FILE\n                 \
+        \      note: if a singleton file is specified with -s, only\n              \
+        \         paired reads will be written to the -1 and -2 files.\n  -f INT   \
+        \            only include reads with all  of the FLAGs in INT present [0]\n\
+        \  -F INT               only include reads with none of the FLAGS in INT present\
+        \ [0]\n  -G INT               only EXCLUDE reads with all  of the FLAGs in INT\
+        \ present [0]\n  -n                   don't append /1 and /2 to the read name\n\
+        \  -N                   always append /1 and /2 to the read name\n  -s FILE\
+        \              write singleton reads designated READ1 or READ2 to FILE\n  -t\
+        \                   copy RG, BC and QT tags to the FASTA header line\n  -T TAGLIST\
+        \           copy arbitrary tags to the FASTA header line\n      --input-fmt-option\
+        \ OPT[=VAL]\n               Specify a single input file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n      --reference FILE\n \
+        \              Reference sequence FASTA FILE [null]\n  -@, --threads INT\n \
+        \              Number of additional threads to use [0]\n\nReads are designated\
+        \ READ1 if FLAG READ1 is set and READ2 is not set.\nReads are designated READ2\
+        \ if FLAG READ1 is not set and READ2 is set.\nReads are designated READ_OTHER\
+        \ if FLAGs READ1 and READ2 are either both set\nor both unset.\nRun 'samtools\
+        \ flags' for more information on flag codes and meanings.\n\nThe index-format\
+        \ string describes how to parse the barcode and quality tags, for example:\n\
+        \   i14i8       the first 14 characters are index 1, the next 8 characters are\
+        \ index 2\n   n8i14       ignore the first 8 characters, and use the next 14\
+        \ characters for index 1\nIf the tag contains a separator, then the numeric\
+        \ part can be replaced with '*' to mean\n'read until the separator or end of\
+        \ tag', for example:\n   n*i*        ignore the left part of the tag until the\
+        \ separator, then use the second part\n               of the tag as index 1\n\
+        \nExamples:\n To get just the paired reads in separate files, use:\n   samtools\
+        \ fasta -1 paired1.fa -2 paired2.fa -0 /dev/null -s /dev/null -n -F 0x900 in.bam\n\
+        \n To get all non-supplementary/secondary reads in a single file, redirect the\
+        \ output:\n   samtools fasta -F 0x900 in.bam > all_reads.fa\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bed
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: in1.bam
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+      command:
+        - samtools
+        - bedcov
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "bedcov: unrecognized option '--help'\nUsage: samtools bedcov [options]\
+        \ <in.bed> <in1.bam> [...]\n\nOptions:\n      -Q <int>            mapping quality\
+        \ threshold [0]\n      -j                  do not include deletions (D) and\
+        \ ref skips (N) in bedcov computation\n      --input-fmt-option OPT[=VAL]\n\
+        \               Specify a single input file format option in the form\n    \
+        \           of OPTION or OPTION=VALUE\n      --reference FILE\n            \
+        \   Reference sequence FASTA FILE [null]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in1.bam
+          optional: false
+      named:
+        - !Flag
+          description: output all positions (including zero depth)
+          synonyms:
+            - -a
+          args: !EmptyFlagArg {}
+          optional: true
+        - !Flag
+          description: list of positions or regions
+          synonyms:
+            - -b
+          args: !SimpleFlagArg
+            name: bed
+          optional: true
+        - !Flag
+          description: list of input BAM filenames, one per line [null]
+          synonyms:
+            - -f
+          args: !SimpleFlagArg
+            name: list
+          optional: true
+        - !Flag
+          description: read length threshold (ignore reads shorter than <int>) [0]
+          synonyms:
+            - -l
+          args: !SimpleFlagArg
+            name: int
+          optional: true
+        - !Flag
+          description:
+            maximum coverage depth [8000]. If 0, depth is set to the maximum
+            integer value, effectively removing any depth limit.
+          synonyms:
+            - -d/-m
+          args: !SimpleFlagArg
+            name: int
+          optional: true
+        - !Flag
+          description: base quality threshold [0]
+          synonyms:
+            - -q
+          args: !SimpleFlagArg
+            name: int
+          optional: true
+        - !Flag
+          description: mapping quality threshold [0]
+          synonyms:
+            - -Q
+          args: !SimpleFlagArg
+            name: int
+          optional: true
+        - !Flag
+          description:
+            <chr:from-to>    region --input-fmt-option OPT[=VAL] Specify a
+            single input file format option in the form of OPTION or OPTION=VALUE --reference
+            FILE Reference sequence FASTA FILE [null]
+          synonyms:
+            - -r
+          args: !EmptyFlagArg {}
+          optional: true
+      command:
+        - samtools
+        - depth
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "depth: unrecognized option '--help'\n\nUsage: samtools depth [options]\
+        \ in1.bam [in2.bam [...]]\nOptions:\n   -a                  output all positions\
+        \ (including zero depth)\n   -a -a (or -aa)      output absolutely all positions,\
+        \ including unused ref. sequences\n   -b <bed>            list of positions\
+        \ or regions\n   -f <list>           list of input BAM filenames, one per line\
+        \ [null]\n   -l <int>            read length threshold (ignore reads shorter\
+        \ than <int>) [0]\n   -d/-m <int>         maximum coverage depth [8000]. If\
+        \ 0, depth is set to the maximum\n                       integer value, effectively\
+        \ removing any depth limit.\n   -q <int>            base quality threshold [0]\n\
+        \   -Q <int>            mapping quality threshold [0]\n   -r <chr:from-to> \
+        \   region\n      --input-fmt-option OPT[=VAL]\n               Specify a single\
+        \ input file format option in the form\n               of OPTION or OPTION=VALUE\n\
+        \      --reference FILE\n               Reference sequence FASTA FILE [null]\n\
+        \nThe output is a simple tab-separated table with three columns: reference name,\n\
+        position, and coverage depth.  Note that positions with zero coverage may be\n\
+        omitted by default; see the -a option.\n\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+      named:
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - flagstat
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "flagstat: unrecognized option '--help'\nUsage: samtools flagstat [options]\
+        \ <in.bam>\n      --input-fmt-option OPT[=VAL]\n               Specify a single\
+        \ input file format option in the form\n               of OPTION or OPTION=VALUE\n\
+        \  -@, --threads INT\n               Number of additional threads to use [0]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+      named:
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - idxstats
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "idxstats: unrecognized option '--help'\nUsage: samtools idxstats [options]\
+        \ <in.bam>\n      --input-fmt-option OPT[=VAL]\n               Specify a single\
+        \ input file format option in the form\n               of OPTION or OPTION=VALUE\n\
+        \  -@, --threads INT\n               Number of additional threads to use [0]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+      command:
+        - samtools
+        - phase
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "phase: unrecognized option '--help'\n\nUsage:   samtools phase [options]\
+        \ <in.bam>\n\nOptions: -k INT    block length [13]\n         -b STR    prefix\
+        \ of BAMs to output [null]\n         -q INT    min het phred-LOD [37]\n    \
+        \     -Q INT    min base quality in het calling [13]\n         -D INT    max\
+        \ read depth [256]\n         -F        do not attempt to fix chimeras\n    \
+        \     -A        drop reads with ambiguous phase\n\n      --input-fmt-option\
+        \ OPT[=VAL]\n               Specify a single input file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n      --output-fmt FORMAT[,OPT[=VAL]]...\n\
+        \               Specify output format (SAM, BAM, CRAM)\n      --output-fmt-option\
+        \ OPT[=VAL]\n               Specify a single output file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n      --reference FILE\n \
+        \              Reference sequence FASTA FILE [null]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: file.bam
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - stats
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "About: The program collects statistics from BAM files. The output\
+        \ can be visualized using plot-bamstats.\nUsage: samtools stats [OPTIONS] file.bam\n\
+        \       samtools stats [OPTIONS] file.bam chr:from-to\nOptions:\n    -c, --coverage\
+        \ <int>,<int>,<int>    Coverage distribution min,max,step [1,1000,1]\n    -d,\
+        \ --remove-dups                   Exclude from statistics reads marked as duplicates\n\
+        \    -f, --required-flag  <str|int>      Required flag, 0 for unset. See also\
+        \ `samtools flags` [0]\n    -F, --filtering-flag <str|int>      Filtering flag,\
+        \ 0 for unset. See also `samtools flags` [0]\n        --GC-depth <float>   \
+        \           the size of GC-depth bins (decreasing bin size increases memory\
+        \ requirement) [2e4]\n    -h, --help                          This help message\n\
+        \    -i, --insert-size <int>             Maximum insert size [8000]\n    -I,\
+        \ --id <string>                   Include only listed read group or sample name\n\
+        \    -l, --read-length <int>             Include in the statistics only reads\
+        \ with the given read length []\n    -m, --most-inserts <float>          Report\
+        \ only the main part of inserts [0.99]\n    -P, --split-prefix <str>       \
+        \     Path or string prefix for filepaths output by -S (default is input filename)\n\
+        \    -q, --trim-quality <int>            The BWA trimming parameter [0]\n  \
+        \  -r, --ref-seq <file>                Reference sequence (required for GC-depth\
+        \ and mismatches-per-cycle calculation).\n    -s, --sam                    \
+        \       Ignored (input format is auto-detected).\n    -S, --split <tag>    \
+        \               Also write statistics to separate files split by tagged field.\n\
+        \    -t, --target-regions <file>         Do stats in these regions only. Tab-delimited\
+        \ file chr,from,to, 1-based, inclusive.\n    -x, --sparse                  \
+        \      Suppress outputting IS rows where there are no insertions.\n    -p, --remove-overlaps\
+        \               Remove overlaps of paired-end reads from coverage and base count\
+        \ computations.\n    -g, --cov-threshold                 Only bases with coverage\
+        \ above this value will be included in the target percentage computation.\n\
+        \      --input-fmt-option OPT[=VAL]\n               Specify a single input file\
+        \ format option in the form\n               of OPTION or OPTION=VALUE\n    \
+        \  --reference FILE\n               Reference sequence FASTA FILE [null]\n \
+        \ -@, --threads INT\n               Number of additional threads to use [0]\n\
+        \n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: PAIRED        .. paired-end (or multiple-segment) sequencing technology
+          position: 0
+          name: "0x1"
+          optional: false
+        - !Positional
+          description:
+            PROPER_PAIR   .. each segment properly aligned according to the
+            aligner
+          position: 1
+          name: "0x2"
+          optional: false
+        - !Positional
+          description: UNMAP         .. segment unmapped
+          position: 2
+          name: "0x4"
+          optional: false
+        - !Positional
+          description: MUNMAP        .. next segment in the template unmapped
+          position: 3
+          name: "0x8"
+          optional: false
+        - !Positional
+          description: REVERSE       .. SEQ is reverse complemented
+          position: 4
+          name: "0x10"
+          optional: false
+        - !Positional
+          description: MREVERSE      .. SEQ of the next segment in the template is reversed
+          position: 5
+          name: "0x20"
+          optional: false
+        - !Positional
+          description: READ1         .. the first segment in the template
+          position: 6
+          name: "0x40"
+          optional: false
+        - !Positional
+          description: READ2         .. the last segment in the template
+          position: 7
+          name: "0x80"
+          optional: false
+        - !Positional
+          description: SECONDARY     .. secondary alignment
+          position: 8
+          name: "0x100"
+          optional: false
+        - !Positional
+          description: QCFAIL        .. not passing quality controls
+          position: 9
+          name: "0x200"
+          optional: false
+        - !Positional
+          description: DUP           .. PCR or optical duplicate
+          position: 10
+          name: "0x400"
+          optional: false
+        - !Positional
+          description: SUPPLEMENTARY .. supplementary alignment
+          position: 11
+          name: "0x800"
+          optional: false
+      named: []
+      command:
+        - samtools
+        - flags
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "Error: Could not parse \"--help\"\n\nAbout: Convert between textual\
+        \ and numeric flag representation\nUsage: samtools flags INT|STR[,...]\n\nFlags:\n\
+        \t0x1\tPAIRED        .. paired-end (or multiple-segment) sequencing technology\n\
+        \t0x2\tPROPER_PAIR   .. each segment properly aligned according to the aligner\n\
+        \t0x4\tUNMAP         .. segment unmapped\n\t0x8\tMUNMAP        .. next segment\
+        \ in the template unmapped\n\t0x10\tREVERSE       .. SEQ is reverse complemented\n\
+        \t0x20\tMREVERSE      .. SEQ of the next segment in the template is reversed\n\
+        \t0x40\tREAD1         .. the first segment in the template\n\t0x80\tREAD2  \
+        \       .. the last segment in the template\n\t0x100\tSECONDARY     .. secondary\
+        \ alignment\n\t0x200\tQCFAIL        .. not passing quality controls\n\t0x400\t\
+        DUP           .. PCR or optical duplicate\n\t0x800\tSUPPLEMENTARY .. supplementary\
+        \ alignment\n\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: aln.bam
+          optional: false
+        - !Positional
+          description: ""
+          position: 1
+          name: ref.fasta
+          optional: true
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+      command:
+        - samtools
+        - tview
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "tview: unrecognized option '--help'\nUsage: samtools tview [options]\
+        \ <aln.bam> [ref.fasta]\nOptions:\n   -d display      output as (H)tml or (C)urses\
+        \ or (T)ext \n   -p chr:pos      go directly to this position\n   -s STR   \
+        \       display only reads from this sample or group\n      --input-fmt-option\
+        \ OPT[=VAL]\n               Specify a single input file format option in the\
+        \ form\n               of OPTION or OPTION=VALUE\n      --reference FILE\n \
+        \              Reference sequence FASTA FILE [null]\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+      named:
+        - !Flag
+          description: Reference sequence FASTA FILE [null]
+          synonyms:
+            - -T
+            - --reference
+          args: !SimpleFlagArg
+            name: FILE
+          optional: true
+        - !Flag
+          description: Number of additional threads to use [0]
+          synonyms:
+            - -@
+            - --threads
+          args: !SimpleFlagArg
+            name: INT
+          optional: true
+      command:
+        - samtools
+        - view
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "samtools view: unrecognised option '--help'\n\nUsage: samtools view\
+        \ [options] <in.bam>|<in.sam>|<in.cram> [region ...]\n\nOptions:\n  -b     \
+        \  output BAM\n  -C       output CRAM (requires -T)\n  -1       use fast BAM\
+        \ compression (implies -b)\n  -u       uncompressed BAM output (implies -b)\n\
+        \  -h       include header in SAM output\n  -H       print SAM header only (no\
+        \ alignments)\n  -c       print only the count of matching records\n  -o FILE\
+        \  output file name [stdout]\n  -U FILE  output reads not selected by filters\
+        \ to FILE [null]\n  -t FILE  FILE listing reference names and lengths (see long\
+        \ help) [null]\n  -L FILE  only include reads overlapping this BED FILE [null]\n\
+        \  -r STR   only include reads in read group STR [null]\n  -R FILE  only include\
+        \ reads with read group listed in FILE [null]\n  -q INT   only include reads\
+        \ with mapping quality >= INT [0]\n  -l STR   only include reads in library\
+        \ STR [null]\n  -m INT   only include reads with number of CIGAR operations\
+        \ consuming\n           query sequence >= INT [0]\n  -f INT   only include reads\
+        \ with all  of the FLAGs in INT present [0]\n  -F INT   only include reads with\
+        \ none of the FLAGS in INT present [0]\n  -G INT   only EXCLUDE reads with all\
+        \  of the FLAGs in INT present [0]\n  -s FLOAT subsample reads (given INT.FRAC\
+        \ option value, 0.FRAC is the\n           fraction of templates/read pairs to\
+        \ keep; INT part sets seed)\n  -M       use the multi-region iterator (increases\
+        \ the speed, removes\n           duplicates and outputs the reads as they are\
+        \ ordered in the file)\n  -x STR   read tag to strip (repeatable) [null]\n \
+        \ -B       collapse the backward CIGAR operation\n  -?       print long help,\
+        \ including note about region specification\n  -S       ignored (input format\
+        \ is auto-detected)\n      --input-fmt-option OPT[=VAL]\n               Specify\
+        \ a single input file format option in the form\n               of OPTION or\
+        \ OPTION=VALUE\n  -O, --output-fmt FORMAT[,OPT[=VAL]]...\n               Specify\
+        \ output format (SAM, BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n    \
+        \           Specify a single output file format option in the form\n       \
+        \        of OPTION or OPTION=VALUE\n  -T, --reference FILE\n               Reference\
+        \ sequence FASTA FILE [null]\n  -@, --threads INT\n               Number of\
+        \ additional threads to use [0]\n\n"
+      generated_using: *id002
+    - !Command
+      positional:
+        - !Positional
+          description: ""
+          position: 0
+          name: in.bam
+          optional: false
+      named: []
+      command:
+        - samtools
+        - depad
+      parent: *id001
+      subcommands: []
+      help_flag:
+      usage_flag:
+      version_flag:
+      help_text:
+        "depad: unrecognized option '--help'\n\nUsage:   samtools depad <in.bam>\n\
+        \nOptions:\n  -s           Output is SAM (default is BAM)\n  -S           Input\
+        \ is SAM (default is BAM)\n  -u           Uncompressed BAM output (can't use\
+        \ with -s)\n  -1           Fast compression BAM output (can't use with -s)\n\
+        \  -T, --reference FILE\n               Padded reference sequence file [null]\n\
+        \  -o FILE      Output file name [stdout]\n  -?           Longer help\n    \
+        \  --input-fmt-option OPT[=VAL]\n               Specify a single input file\
+        \ format option in the form\n               of OPTION or OPTION=VALUE\n    \
+        \  --output-fmt FORMAT[,OPT[=VAL]]...\n               Specify output format\
+        \ (SAM, BAM, CRAM)\n      --output-fmt-option OPT[=VAL]\n               Specify\
+        \ a single output file format option in the form\n               of OPTION or\
+        \ OPTION=VALUE\nNotes:\n\n1. Requires embedded reference sequences (before the\
+        \ reads for that reference),\n   or ideally a FASTA file of the padded reference\
+        \ sequences (via a -T option).\n\n2. Input padded alignment reads' CIGAR strings\
+        \ must not use P or I operators.\n\n"
+      generated_using: *id002
+  help_flag:
+  usage_flag:
+  version_flag:
+  help_text:
+    "\nProgram: samtools (Tools for alignments in the SAM format)\nVersion:\
+    \ 1.9 (using htslib 1.9)\n\nUsage:   samtools <command> [options]\n\nCommands:\n\
+    \  -- Indexing\n     dict           create a sequence dictionary file\n     faidx\
+    \          index/extract FASTA\n     fqidx          index/extract FASTQ\n    \
+    \ index          index alignment\n\n  -- Editing\n     calmd          recalculate\
+    \ MD/NM tags and '=' bases\n     fixmate        fix mate information\n     reheader\
+    \       replace BAM header\n     targetcut      cut fosmid regions (for fosmid\
+    \ pool only)\n     addreplacerg   adds or replaces RG tags\n     markdup     \
+    \   mark duplicates\n\n  -- File operations\n     collate        shuffle and group\
+    \ alignments by name\n     cat            concatenate BAMs\n     merge       \
+    \   merge sorted alignments\n     mpileup        multi-way pileup\n     sort \
+    \          sort alignment file\n     split          splits a file by read group\n\
+    \     quickcheck     quickly check if SAM/BAM/CRAM file appears intact\n     fastq\
+    \          converts a BAM to a FASTQ\n     fasta          converts a BAM to a\
+    \ FASTA\n\n  -- Statistics\n     bedcov         read depth per BED region\n  \
+    \   depth          compute the depth\n     flagstat       simple stats\n     idxstats\
+    \       BAM index stats\n     phase          phase heterozygotes\n     stats \
+    \         generate stats (former bamcheck)\n\n  -- Viewing\n     flags       \
+    \   explain BAM flags\n     tview          text alignment viewer\n     view  \
+    \         SAM<->BAM<->CRAM conversion\n     depad          convert padded BAM\
+    \ to unpadded BAM\n\n"
+  generated_using: *id002
+subcommands: []
+help_flag:
+usage_flag:
+version_flag:
+help_text:
+  "fixmate: unrecognized option '--help'\nUsage: samtools fixmate <in.nameSrt.bam>\
+  \ <out.nameSrt.bam>\nOptions:\n  -r           Remove unmapped reads and secondary\
+  \ alignments\n  -p           Disable FR proper pair check\n  -c           Add template\
+  \ cigar ct tag\n  -m           Add mate score tag\n      --input-fmt-option OPT[=VAL]\n\
+  \               Specify a single input file format option in the form\n        \
+  \       of OPTION or OPTION=VALUE\n  -O, --output-fmt FORMAT[,OPT[=VAL]]...\n  \
+  \             Specify output format (SAM, BAM, CRAM)\n      --output-fmt-option\
+  \ OPT[=VAL]\n               Specify a single output file format option in the form\n\
+  \               of OPTION or OPTION=VALUE\n      --reference FILE\n            \
+  \   Reference sequence FASTA FILE [null]\n  -@, --threads INT\n               Number\
+  \ of additional threads to use [0]\n\nAs elsewhere in samtools, use '-' as the filename\
+  \ for stdin/stdout. The input\nfile must be grouped by read name (e.g. sorted by\
+  \ name). Coordinated sorted\ninput is not accepted.\n"
+generated_using: *id002

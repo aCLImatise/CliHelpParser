@@ -17,15 +17,14 @@ from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.yaml import yaml
 
-
-def with_default_none(func, *args, **kwargs):
-    """
-    Calls a function, and inserts None for all arguments you didn't provide
-    """
-    spec = inspect.getfullargspec(func)
-    defaults = {arg: None for arg in spec.args}
-    defaults.pop("self", None)
-    return func(*args, **{**defaults, **kwargs})
+# def with_default_none(func, *args, **kwargs):
+#     """
+#     Calls a function, and inserts None for all arguments you didn't provide
+#     """
+#     spec = inspect.getfullargspec(func)
+#     defaults = {arg: None for arg in spec.args}
+#     defaults.pop("self", None)
+#     return func(*args, **{**defaults, **kwargs})
 
 
 @dataclass
@@ -72,8 +71,7 @@ class CwlGenerator(WrapperGenerator):
         )
         names = self.choose_variable_names(inputs)
 
-        tool = with_default_none(
-            CommandLineTool,
+        tool = CommandLineTool(
             id=cmd.as_filename + ".cwl",
             baseCommand=list(cmd.command),
             cwlVersion="v1.1",
@@ -83,12 +81,10 @@ class CwlGenerator(WrapperGenerator):
 
         for arg in names:
             tool.inputs.append(
-                with_default_none(
-                    CommandInputParameter,
+                CommandInputParameter(
                     id=arg.name,
                     type=self.to_cwl_type(arg.arg.get_type()),
-                    inputBinding=with_default_none(
-                        CommandLineBinding,
+                    inputBinding=CommandLineBinding(
                         position=arg.arg.position
                         if isinstance(arg.arg, Positional)
                         else None,

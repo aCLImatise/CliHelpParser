@@ -51,6 +51,14 @@ def main():
 @opt_case
 @opt_generate_names
 @click.option(
+    "--depth",
+    "-d",
+    type=int,
+    default=1,
+    help="How many levels of subcommands we should look for. Depth 2 means commands can be 3 levels deep, such as "
+    "``git submodule foreach``",
+)
+@click.option(
     "--format",
     "-f",
     "formats",
@@ -68,7 +76,7 @@ def main():
 )
 @click.option(
     "--help-flag",
-    "-f",
+    "-l",
     type=str,
     help="Flag to append to the end of the command to make it output help text",
 )
@@ -84,13 +92,15 @@ def explore(
     generate_names: bool,
     pos: bool,
     help_flag: str,
+    depth: int = None,
 ):
     # Optionally parse subcommands
     kwargs = {}
     if help_flag is not None:
-        kwargs = {"flags": ([help_flag],)}
+        kwargs["flags"] = [[help_flag]]
+
     if subcommands:
-        command = explore_command(list(cmd), **kwargs)
+        command = explore_command(list(cmd), max_depth=depth, **kwargs)
     else:
         command = best_cmd(list(cmd), **kwargs)
 

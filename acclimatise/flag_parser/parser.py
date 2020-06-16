@@ -1,3 +1,6 @@
+from itertools import groupby
+from operator import attrgetter
+
 from acclimatise.flag_parser.elements import *
 
 
@@ -11,19 +14,61 @@ def pick(*args):
     return action
 
 
+def unique_by(
+    iterable: typing.Iterable,
+    by: typing.Callable[[typing.Any], typing.Hashable],
+    keep: str = "first",
+) -> typing.List:
+    """
+    Removes duplicates from an iterable, by grouping by the result of the ``by`` argument, and then
+    :param iterable: An iterable to make unique
+    :param by: A function that returns a value for each element in ``iterable``
+    :param keep: Either "first", "last", or "none". "none" means "delete all objects that are duplicates"
+    """
+    groups = groupby(iterable, by)
+    ret = []
+    for name, group in groups:
+        group = list(group)
+        if keep == "first":
+            ret.append(group[0])
+        elif keep == "last":
+            ret.append(group[-1])
+        elif keep == "none":
+            if len(group) == 1:
+                ret.append(group[0])
+    return ret
+
+
 class CliParser:
     def parse_command(self, cmd, name) -> Command:
         all_flags = list(itertools.chain.from_iterable(self.flags.searchString(cmd)))
-        named = [flag for flag in all_flags if isinstance(flag, Flag)]
-        positional = [flag for flag in all_flags if isinstance(flag, Positional)]
+        # If flags aren't unique, they likely aren't real flags
+        named = unique_by(
+            [flag for flag in all_flags if isinstance(flag, Flag)],
+            by=attrgetter("longest_synonym"),
+            keep="none",
+        )
+        positional = unique_by(
+            [flag for flag in all_flags if isinstance(flag, Positional)],
+            by=attrgetter("name"),
+            keep="none",
+        )
         return Command(command=name, positional=positional, named=named)
 
     def __init__(self, parse_positionals=True):
         stack = [1]
 
+        def parse_description(s, lok, toks):
+            text = " ".join([tok[0] for tok in toks[0]])
+            if all([not word.isalpha() for word in text.split()]):
+                raise ParseException(
+                    "This can't be a description block if all text is numeric!"
+                )
+            return text
+
         self.indented_desc = customIndentedBlock(
             desc_line, indentStack=stack, indent=True, terminal=True
-        ).setParseAction(lambda s, loc, toks: " ".join([tok[0] for tok in toks[0]]))
+        ).setParseAction(parse_description)
 
         self.description = self.indented_desc.copy().setName(
             "description"

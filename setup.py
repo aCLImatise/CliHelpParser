@@ -15,7 +15,7 @@ setup(
         "ruamel.yaml==0.16.5",
         "click",
         "cwltool",
-        "cwl-utils",
+        "cwl-utils>=0.4",
         "regex",
         "num2words",
         "word2number",
