@@ -21,7 +21,7 @@ setup(
         "word2number",
         "psutil",
     ],
-    python_requires=">=3.7.5",
+    python_requires=">=3.6",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},
     extras_require={
         "dev": ["pytest", "pre-commit", "Sphinx", "sphinx-click", "pytest-timeout",],
