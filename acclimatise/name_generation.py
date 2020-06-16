@@ -5,12 +5,12 @@ from difflib import ndiff, unified_diff
 from itertools import groupby
 from typing import Generator, Iterable, List, Optional, Set, Tuple
 
-from spacy.tokens import Token
-
 import regex as re
-from acclimatise.nlp import nlp, wordsegment
 from num2words import num2words
+from spacy.tokens import Token
 from word2number import w2n
+
+from acclimatise.nlp import nlp, wordsegment
 
 
 class NameGenerationError(Exception):
@@ -55,7 +55,7 @@ def duplicate_keys(l: list) -> Set[int]:
 
 
 def ensure_first_alpha(text):
-    return re.sub(r"\b[^[:alpha:]]", "", text)
+    return re.sub(r"\b[^[:alpha:]\s]", "", text)
 
 
 def sanitize_symbols(text):
