@@ -220,5 +220,5 @@ When the help lists multiple synonyms for a flag, e.g:
 # e.g. for grep's `-o, --only-matching`, this is:
 # "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line."
 desc_line = originalTextFor(
-    delimitedList(Regex("[^\s]+"), delim=" ", combine=True).leaveWhitespace()
-)
+    delimitedList(Regex("[^\s]+"), delim=" ", combine=True)
+).leaveWhitespace()
