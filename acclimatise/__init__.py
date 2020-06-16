@@ -4,9 +4,9 @@ import subprocess
 import typing
 
 import dataclasses
+import psutil
 from pyparsing import ParseBaseException
 
-import psutil
 from acclimatise.converter import WrapperGenerator
 from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.wdl import WdlGenerator

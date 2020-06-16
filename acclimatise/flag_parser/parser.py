@@ -2,6 +2,7 @@ from itertools import groupby
 from operator import attrgetter
 
 import regex
+
 from acclimatise.flag_parser.elements import *
 
 

@@ -13,12 +13,12 @@ import spacy
 from dataclasses import InitVar, dataclass, field
 from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
+from word2number import w2n
 
 from acclimatise import cli_types
 from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.nlp import wordsegment
 from acclimatise.yaml import yaml
-from word2number import w2n
 
 
 def useless_name(name: typing.List[str]):
