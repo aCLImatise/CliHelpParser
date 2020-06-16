@@ -1021,12 +1021,6 @@ parent: !Command &id001
           args: !EmptyFlagArg {}
           optional: true
         - !Flag
-          description: output all positions (including zero depth)
-          synonyms:
-            - -a
-          args: !EmptyFlagArg {}
-          optional: true
-        - !Flag
           description: Reference sequence FASTA FILE [null]
           synonyms:
             - --reference
@@ -1332,12 +1326,6 @@ parent: !Command &id001
           name: in1.bam
           optional: false
       named:
-        - !Flag
-          description: output all positions (including zero depth)
-          synonyms:
-            - -a
-          args: !EmptyFlagArg {}
-          optional: true
         - !Flag
           description: list of positions or regions
           synonyms:

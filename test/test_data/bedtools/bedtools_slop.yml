@@ -1,10 +1,5 @@
 !Command &id003
-positional:
-  - !Positional
-    description: "4262"
-    position: 0
-    name: chr18_gl000207_random
-    optional: false
+positional: []
 named:
   - !Flag
     description:
@@ -1747,12 +1742,7 @@ parent: !Command &id001
         \ (INTEGER)\n\n"
       generated_using: *id002
     - !Command
-      positional:
-        - !Positional
-          description: "4262"
-          position: 0
-          name: chr18_gl000207_random
-          optional: false
+      positional: []
       named:
         - !Flag
           description: ""
@@ -1788,12 +1778,7 @@ parent: !Command &id001
         \ chrom, size from hg19.chromInfo\"  > hg19.genome\n\n"
       generated_using: *id002
     - !Command
-      positional:
-        - !Positional
-          description: "4262"
-          position: 0
-          name: chr18_gl000207_random
-          optional: false
+      positional: []
       named:
         - !Flag
           description:
@@ -2100,12 +2085,7 @@ parent: !Command &id001
       generated_using: *id002
     - *id003
     - !Command
-      positional:
-        - !Positional
-          description: "4262"
-          position: 0
-          name: chr18_gl000207_random
-          optional: false
+      positional: []
       named:
         - !Flag
           description:
@@ -2288,12 +2268,7 @@ parent: !Command &id001
         \t-header\tPrint the header from the A file prior to results.\n\n"
       generated_using: *id002
     - !Command
-      positional:
-        - !Positional
-          description: "4262"
-          position: 0
-          name: chr18_gl000207_random
-          optional: false
+      positional: []
       named:
         - !Flag
           description: The length of the intervals to generate. - Default = 100. - (INTEGER)
@@ -2347,12 +2322,7 @@ parent: !Command &id001
         \ chrom, size from hg19.chromInfo\"  > hg19.genome\n\n"
       generated_using: *id002
     - !Command
-      positional:
-        - !Positional
-          description: "4262"
-          position: 0
-          name: chr18_gl000207_random
-          optional: false
+      positional: []
       named:
         - !Flag
           description:
@@ -2610,32 +2580,7 @@ parent: !Command &id001
         \ currently has no effect with compressed files.\n\nNotes: \n"
       generated_using: *id002
     - !Command
-      positional:
-        - !Positional
-          description: "0   10  . "
-          position: 0
-          name: chr1
-          optional: false
-        - !Positional
-          description: "10  20  0 "
-          position: 1
-          name: chr1
-          optional: false
-        - !Positional
-          description: "21  30  1 "
-          position: 2
-          name: chr1
-          optional: false
-        - !Positional
-          description: "35  45  5 "
-          position: 3
-          name: chr1
-          optional: false
-        - !Positional
-          description: "100 200 55 "
-          position: 4
-          name: chr1
-          optional: false
+      positional: []
       named:
         - !Flag
           description: If using BAM input, write output as BED.
@@ -4317,10 +4262,10 @@ parent: !Command &id001
     - !Command
       positional:
         - !Positional
-          description: "4262"
+          description: ""
           position: 0
-          name: chr18_gl000207_random
-          optional: false
+          name: OR
+          optional: true
       named:
         - !Flag
           description:
@@ -4583,35 +4528,10 @@ parent: !Command &id001
     - !Command
       positional:
         - !Positional
-          description: 10      20      1       10
+          description: ""
           position: 0
-          name: chr1
-          optional: false
-        - !Positional
-          description: 10      20      2       20
-          position: 1
-          name: chr1
-          optional: false
-        - !Positional
-          description: 10      20      3       30
-          position: 2
-          name: chr1
-          optional: false
-        - !Positional
-          description: 40      50      4       40
-          position: 3
-          name: chr1
-          optional: false
-        - !Positional
-          description: 40      50      5       50
-          position: 4
-          name: chr1
-          optional: false
-        - !Positional
-          description: 40      50      6       60
-          position: 5
-          name: chr1
-          optional: false
+          name: COLS
+          optional: true
       named:
         - !Flag
           description: Input file. Assumes "stdin" if omitted.

@@ -54,6 +54,10 @@ def duplicate_keys(l: list) -> Set[int]:
     return ret
 
 
+def ensure_first_alpha(text):
+    return re.sub(r"\b[^[:alpha:]]", "", text)
+
+
 def sanitize_symbols(text):
     """
     Remove any non-word symbols
@@ -299,7 +303,9 @@ def preprocess(text: str) -> List[Token]:
     Pre-process some text, remove and unnecessary tokens, and return the Spacy data structure
     """
     # Remove all delimited text
-    sanitized = sanitize_symbols(remove_delims(replace_hyphens(text)))
+    sanitized = ensure_first_alpha(
+        sanitize_symbols(remove_delims(replace_hyphens(text)))
+    )
 
     # Parse the sentence
     doc = nlp(sanitized)

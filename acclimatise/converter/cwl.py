@@ -80,6 +80,7 @@ class CwlGenerator(WrapperGenerator):
         )
 
         for arg in names:
+            assert arg.name != "", arg
             tool.inputs.append(
                 CommandInputParameter(
                     id=arg.name,
