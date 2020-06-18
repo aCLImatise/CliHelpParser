@@ -4,6 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python API &#8212; aCLImatise 0.0.16 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -35,6 +36,53 @@
   <div class="section" id="module-acclimatise">
 <span id="python-api"></span><h1>Python API<a class="headerlink" href="#module-acclimatise" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
+<dt id="acclimatise.best_cmd">
+<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">best_cmd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">flags</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">['--help'], ['-h'], [], ['--usage']</span></em>, <em class="sig-param"><span class="n">run_kwargs</span><span class="p">:</span> <span class="n">dict</span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.best_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the best Command instance for a given command line tool, by trying many
+different help flags, such as –help and -h, then return the Command. Use this if you know the command you want to
+parse, but you don’t know which flags it responds to with help text. Unlike <code class="xref py py-func docutils literal notranslate"><span class="pre">aclimatise.explore_command()</span></code>,
+this doesn’t even attempt to parse subcommands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – The command to analyse, e.g. [‘wc’] or [‘bwa’, ‘mem’]</p></li>
+<li><p><strong>flags</strong> – A list of help flags to try, e.g. [‘–help’, ‘-h’], in order how which one you would prefer to use.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Generally [] aka no flags should be last
+:param run_kwargs: kwargs to pass into subprocess.run, when we run the executable</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="acclimatise.execute_cmd">
+<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">execute_cmd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">help_cmd</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">timeout</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">5</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.execute_cmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute a command defined by a list of arguments, and return the result as a string</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="acclimatise.explore_command">
+<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">explore_command</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">flags</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">['--help'], ['-h'], [], ['--usage']</span></em>, <em class="sig-param"><span class="n">parent</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">run_kwargs</span><span class="p">:</span> <span class="n">dict</span> <span class="o">=</span> <span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">max_depth</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">2</span></em>, <em class="sig-param"><span class="n">try_subcommand_flags</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span><a class="headerlink" href="#acclimatise.explore_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a command to start with, builds a model of this command and all its subcommands (if they exist).
+Use this if you know the command you want to parse, you don’t know which flags it responds to with help text, and
+you want to include subcommands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmd</strong> – Command line executable and arguments to explore</p></li>
+<li><p><strong>flags</strong> – A list of help flags to try, e.g. [‘–help’, ‘-h’], in order how which one you would prefer to use.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Generally [] aka no flags should be last
+:param parent: A parent Command to add this command to as a subcommand, if this command actually exists
+:param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
+:param try_subcommand_flags: If true, try all the <code class="docutils literal notranslate"><span class="pre">flags</span></code> on each subcommand. If False, we choose
+the best help flag on the parent command and then use that same one on each child. Generally True is recommended
+since some tools (such as bedtools) use different help flags for subcommands</p>
+</dd></dl>
+
+<dl class="py function">
 <dt id="acclimatise.parse_help">
 <code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">parse_help</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">parse_positionals</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.parse_help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a string of help text into a Command. Use this if you already have run the executable and extracted the
@@ -48,48 +96,6 @@ help text yourself</p>
 </ul>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="acclimatise.best_cmd">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">best_cmd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">flags</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[], ['-h'], ['--help'], ['--usage']</span></em>, <em class="sig-param"><span class="n">run_kwargs</span><span class="p">:</span> <span class="n">dict</span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.best_cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determine the best Command instance for a given command line tool, by trying many
-different help flags, such as –help and -h, then return the Command. Use this if you know the command you want to
-parse, but you don’t know which flags it responds to with help text. Unlike <code class="xref py py-func docutils literal notranslate"><span class="pre">aclimatise.explore_command()</span></code>,
-this doesn’t even attempt to parse subcommands.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cmd</strong> – The command to analyse, e.g. [‘wc’] or [‘bwa’, ‘mem’]</p></li>
-<li><p><strong>flags</strong> – A list of help flags to try, e.g. [‘–help’, ‘-h’]</p></li>
-<li><p><strong>run_kwargs</strong> – kwargs to pass into subprocess.run, when we run the executable</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="acclimatise.explore_command">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">explore_command</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">flags</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">[], ['-h'], ['--help'], ['--usage']</span></em>, <em class="sig-param"><span class="n">parent</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">run_kwargs</span><span class="p">:</span> <span class="n">dict</span> <span class="o">=</span> <span class="default_value">{}</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span><a class="headerlink" href="#acclimatise.explore_command" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a command to start with, builds a model of this command and all its subcommands (if they exist).
-Use this if you know the command you want to parse, you don’t know which flags it responds to with help text, and
-you want to include subcommands.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>cmd</strong> – Command line executable and arguments to explore</p></li>
-<li><p><strong>flags</strong> – List of flags to append to cmd in order to look for help commands, e.g. “–help”</p></li>
-<li><p><strong>parent</strong> – A parent Command to add this command to as a subcommand, if this command actually exists</p></li>
-<li><p><strong>run_kwargs</strong> – kwargs to pass into subprocess.run, when we run the executable</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="acclimatise.execute_cmd">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">execute_cmd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">help_cmd</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#acclimatise.execute_cmd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Execute a command defined by a list of arguments, and return the result as a string</p>
 </dd></dl>
 
 </div>
@@ -155,7 +161,7 @@ you want to include subcommands.</p>
       &copy;2020, Michael Milton.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

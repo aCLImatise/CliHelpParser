@@ -4,6 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Changelog &#8212; aCLImatise 0.0.16 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -34,20 +35,58 @@
   <div class="section" id="changelog">
 <h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id1">
-<h2>0.1.5 (2020-05-18)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<h2>0.2.0 (2020-05-25)<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="features">
+<h3>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">parameter_meta</span></code> (parameter documentation) generation back into WDL definitions</p></li>
+<li><p>Add <a class="reference internal" href="model.html#acclimatise.model.Command.depth" title="acclimatise.model.Command.depth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">acclimatise.model.Command.depth()</span></code></a>, and <a href="#id2"><span class="problematic" id="id3">:py:attribute:`acclimatise.model.Command.parent`</span></a> to <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.model.Command</span></code></a> to facilitate the traversal of the command tree</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">dinosaur</span></code> and <code class="docutils literal notranslate"><span class="pre">mauveAligner</span></code> as test cases in <code class="docutils literal notranslate"><span class="pre">test/test_data</span></code></p></li>
+<li><p>Convert tests into a series of test case objects that can be used to parameterize each test function</p></li>
+<li><p>Add the option to parallelize tests using pytest-parallel</p></li>
+<li><p>Better conversion of symbols to variable names, for example “/” is now “slash” rather than “solidus”</p></li>
+<li><p>Add logging to the high level functions like <code class="docutils literal notranslate"><span class="pre">explore_command</span></code>, using the <code class="docutils literal notranslate"><span class="pre">acclimatise</span></code> logger. This should make</p></li>
+</ul>
+<p>tracking errors and progress a tad easier.
+* By default, re-use the best help command from the parent on the child. For example if we determine that
+<code class="docutils literal notranslate"><span class="pre">samtools</span> <span class="pre">--help</span></code> is the most accurate help command for <code class="docutils literal notranslate"><span class="pre">samtools</span></code>, then we use <code class="docutils literal notranslate"><span class="pre">samtools</span> <span class="pre">sort</span> <span class="pre">--help</span></code> without
+having to test out every possible flag here
+* Add <code class="docutils literal notranslate"><span class="pre">generated_using</span></code> field to the <code class="docutils literal notranslate"><span class="pre">Command</span></code> class, which tracks the flag used to generate it</p>
+</div>
+<div class="section" id="changes">
+<h3>Changes<a class="headerlink" href="#changes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Set the default command depth to 3</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aCLImatise</span></code> now only supports Python &gt;= 3.7.5, due to <a class="reference external" href="https://bugs.python.org/issue37424">this bug</a></p></li>
+</ul>
+</div>
+<div class="section" id="fixes">
+<h3>Fixes<a class="headerlink" href="#fixes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Avoid variable naming collisions using a generator-based iteration method in <code class="docutils literal notranslate"><span class="pre">acclimatise.name_generation.generate_names</span></code></p></li>
+<li><p>Keep a global <code class="docutils literal notranslate"><span class="pre">spacy</span></code> instance to minimize memory footprint. This is available in <a href="#id4"><span class="problematic" id="id5">:py:module:`acclimatise.nlp`</span></a></p></li>
+<li><p>Fix infinite loops in explore, e.g. tools like <code class="docutils literal notranslate"><span class="pre">dinosaur</span></code> and <code class="docutils literal notranslate"><span class="pre">mauve</span></code> by adding more advanced subcommand detection in <code class="docutils literal notranslate"><span class="pre">acclimatise.is_subcommand</span></code></p></li>
+<li><p>Make cmd optional for validators</p></li>
+<li><p>Always run commands in a pseudo-TTY so that commands like <code class="docutils literal notranslate"><span class="pre">samtools</span></code> will output help</p></li>
+<li><p>Various other fixes</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>0.1.5 (2020-05-18)<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Bugfix for when we have no help text</p></li>
 <li><p>Add a test for a program that we know fails</p></li>
 </ul>
 </div>
-<div class="section" id="id2">
-<h2>0.1.4 (2020-05-18)<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id7">
+<h2>0.1.4 (2020-05-18)<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Choose best command using length of help text, if everything else is equal</p></li>
 </ul>
 </div>
-<div class="section" id="id3">
-<h2>0.1.3 (2020-05-15)<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id8">
+<h2>0.1.3 (2020-05-15)<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">Command</span></code> types now contain a <code class="docutils literal notranslate"><span class="pre">help_text</span></code> field which records the string that was used to generate them. This should enable efficient re-parsing, and can also be displayed downstream by BaseCamp</p></li>
 <li><p>Rewrite tests into a parametrized, consolidated end-to-end test</p></li>
@@ -56,22 +95,22 @@
 </ul>
 <p>command</p>
 </div>
-<div class="section" id="id4">
-<h2>0.1.2 (2020-05-15)<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id9">
+<h2>0.1.2 (2020-05-15)<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Generating YAML output now produces one file for each subcommand, to match other converters</p></li>
 </ul>
 </div>
-<div class="section" id="id5">
-<h2>0.1.1 (2020-05-13)<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id10">
+<h2>0.1.1 (2020-05-13)<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Make <code class="docutils literal notranslate"><span class="pre">explore</span> <span class="pre">-o</span></code> flag default to current working directory, for simplicity</p></li>
 <li><p>Updated the readme</p></li>
 <li><p>Add installation instructions</p></li>
 </ul>
 </div>
-<div class="section" id="id6">
-<h2>0.1.0 (2020-05-13)<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id11">
+<h2>0.1.0 (2020-05-13)<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p>Fix the doubled variable names like <code class="docutils literal notranslate"><span class="pre">bytesBytes</span></code></p></li>
 <li><p>Smarter POS-based algorithm for generating names from descriptions</p></li>
@@ -144,7 +183,7 @@
       &copy;2020, Michael Milton.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
