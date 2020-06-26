@@ -37,7 +37,7 @@ element_char = arg.copy()  # Word(initChars=element_start_chars, bodyChars=)
 mandatory_element = (
     element_char.copy()
     .setParseAction(lambda s, loc, toks: UsageElement(text=toks[0],))
-    .setName("mandatory_element")
+    .setName("MandatoryElement")
 )
 """
 A mandatory element in the command-line invocation. Might be a variable or a constant
@@ -48,7 +48,7 @@ variable_element = (
         "<", Word(initChars=element_start_chars, bodyChars=delimited_body_chars), ">"
     )
     .setParseAction(lambda s, loc, toks: UsageElement(text=toks[1], variable=True))
-    .setName("variable_element")
+    .setName("VariableElement")
 )
 """
 Any element inside angle brackets is a variable, meaning you are supposed to provide your own value for it.
@@ -66,7 +66,7 @@ def visit_optional_section(s, loc, toks):
 optional_section = (
     delimited_item("[", OneOrMore(usage_element), "]")
     .setParseAction(visit_optional_section)
-    .setName("optional_section")
+    .setName("OptionalSection")
 )
 """
 Anything can be nested within square brackets, which indicates that everything there is optional
@@ -128,16 +128,21 @@ Used to illustrate where a list of short flags could be used, e.g. -nurlf indica
 def visit_list_element(s, loc, toks):
     # Pick the last element if there is one, otherwise use the first element
     # This gives us a better name like 'inN.bam' instead of 'in2.bam'
-    el = toks[-1] if toks[-1] else toks[0]
-    el.repeatable = True
-    return el
+    els = [tok for tok in toks if isinstance(tok, (UsageElement, Flag))]
+    for el in els:
+        el.repeatable = True
+    return els
 
+
+options_placeholder = (
+    Regex("options?", flags=re.IGNORECASE).suppress().setName("OptionsPlaceholder")
+)
 
 list_element = (
     (
-        OneOrMore(mandatory_element ^ variable_element)
+        OneOrMore(options_placeholder ^ mandatory_element ^ variable_element)
         + Literal(".")[2, 3]
-        + Optional(mandatory_element ^ variable_element)
+        + Optional(options_placeholder ^ mandatory_element ^ variable_element)
     )
     .setParseAction(visit_list_element)
     .setName("list_element")
@@ -152,6 +157,7 @@ usage_flag = (
     .setName("usage_flag")
 )
 
+
 usage_element <<= Or(
     [
         optional_section,
@@ -159,6 +165,7 @@ usage_element <<= Or(
         # short_flag_list,
         usage_flag,
         variable_element,
+        options_placeholder,
         mandatory_element,
     ]
 ).setName("usage_element")

@@ -171,12 +171,23 @@ class CliParser:
             + self.flag_block.copy().setParseAction(visit_flags)
         )
 
+        self.unindented_flag_block = OneOrMore(
+            LineStart().suppress() + self.flag
+        )  # delimitedList(self.flag, delim='\n')
+        self.unindented_flag_block.skipWhitespace = False
+        """
+        This is a list of flags that aren't indented. Because of this, we don't parse positional elements here, because
+        doing so would include basically any paragraph of text
+        """
+
         # self.colon_block.skipWhitespace = True
         # self.newline_block.skipWhitespace = True
 
         # A flag block can start with a colon, but then it must have 2 or more flags. If it starts with a newline it
         # only has to have one flag at least
-        self.flags = (self.newline_block ^ self.colon_block).setName(
+        self.flags = (
+            self.newline_block ^ self.colon_block ^ self.unindented_flag_block
+        ).setName(
             "FlagList"
         )  # .leaveWhitespace()
         self.flags.skipWhitespace = False

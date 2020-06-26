@@ -41,6 +41,15 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/gth.txt",
+            cmd=["gth"],
+            positional=0,
+            named=37,
+            subcommands=0,
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/bedtools_closest.txt",
             cmd=["bedtools", "closest"],
             positional=0,

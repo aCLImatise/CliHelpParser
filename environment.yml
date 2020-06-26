@@ -10,3 +10,4 @@ dependencies:
   - htseq==0.12.4
   - dinosaur==1.1.3
   - pisces==5.2.9.122
+  - genomethreader==1.7.1

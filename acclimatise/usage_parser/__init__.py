@@ -28,7 +28,7 @@ def parse_usage(cmd, text, debug=False):
     flags = [tok for tok in toks if isinstance(tok, Flag)]
 
     # Remove an "options" argument which is just a proxy for other flags
-    positional = [pos for pos in positional if pos.text.lower() != "options"]
+    # positional = [pos for pos in positional if pos.text.lower() != "options"]
     # The usage often starts with a re-iteration of the command name itself. Remove this if present
     for i in range(len(positional)):
         # For each positional argument, if the entire cmd string is present, slice away this and everything before it
