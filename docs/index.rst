@@ -14,6 +14,7 @@ Welcome to aCLImatise's documentation!
    api
    cli
    model
+   grammar
    changes
 
 .. include:: ../README.rst

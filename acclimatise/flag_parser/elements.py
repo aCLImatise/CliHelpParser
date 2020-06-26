@@ -2,7 +2,6 @@
 Re-usable parser elements that aren't tied to the parser object
 """
 from pyparsing import *
-from pyparsing import _bslash
 
 from acclimatise.model import *
 
@@ -14,6 +13,8 @@ element_body_chars = element_start_chars + "-_./\\"
 argument_body_chars = element_body_chars + "|"
 #: Characters that can be in the middle of an argument that has brackets around it, e.g. "-arg <argument with space>"
 delimited_body_chars = argument_body_chars + " "
+
+NL = OneOrMore(LineEnd().setWhitespaceChars("\t ").suppress()).setName("Newline")
 
 
 def customIndentedBlock(
@@ -60,10 +61,9 @@ def customIndentedBlock(
             raise ParseException(s, l, "not an unindent")
         indentStack.pop()
 
-    NL = OneOrMore(LineEnd().setWhitespaceChars("\t ").suppress())
-    INDENT = (Empty() + Empty().setParseAction(checkSubIndent)).setName("INDENT")
-    PEER = Empty().setParseAction(checkPeerIndent).setName("")
-    UNDENT = Empty().setParseAction(checkUnindent).setName("UNINDENT")
+    INDENT = (Empty() + Empty().setParseAction(checkSubIndent)).setName("Indent")
+    PEER = Empty().setParseAction(checkPeerIndent).setName("PeerIndent")
+    UNDENT = Empty().setParseAction(checkUnindent).setName("Unindent")
     if indent:
         smExpr = Group(
             Optional(NL)
@@ -78,8 +78,8 @@ def customIndentedBlock(
             Optional(NL) + (OneOrMore(PEER + Group(blockStatementExpr) + Optional(NL)))
         )
     smExpr.setFailAction(lambda a, b, c, d: reset_stack())
-    blockStatementExpr.ignore(_bslash + LineEnd())
-    return smExpr.setName("custom indented block")
+    blockStatementExpr.ignore("\\" + LineEnd())
+    return smExpr.setName("IndentedBlock")
 
 
 cli_id = Word(initChars=element_start_chars, bodyChars=element_body_chars)
@@ -88,16 +88,20 @@ cli_id = Word(initChars=element_start_chars, bodyChars=element_body_chars)
 # """A short flag has only a single dash and single character, e.g. `-m`"""
 # long_flag = originalTextFor(Literal('--') + cli_id)
 # """A long flag has two dashes and any amount of characters, e.g. `--max-count`"""
-any_flag = originalTextFor("-" + Optional("-") + cli_id).leaveWhitespace()
+any_flag = (
+    originalTextFor("-" + Optional("-") + cli_id).leaveWhitespace().setName("Flag")
+)
 """The flag is the part with the dashes, e.g. `-m` or `--max-count`"""
 
-flag_arg_sep = Or([Literal("="), Literal(" ")]).leaveWhitespace()
+flag_arg_sep = (
+    Or([Literal("="), Literal(" ")]).leaveWhitespace().setName("FlagArgSeparator")
+)
 """The term that separates the flag from the arguments, e.g. in `--file=FILE` it's `=`"""
 
 arg = Word(initChars=element_start_chars, bodyChars=argument_body_chars)
 """A single argument name, e.g. `FILE`"""
 
-optional_args = Forward()
+optional_args = Forward().setName("OptionalArg")
 
 
 def visit_optional_args(s, lok, toks):
@@ -111,8 +115,10 @@ def visit_optional_args(s, lok, toks):
             return OptionalFlagArg(names=[first] + second.names, separator=sep)
 
 
-optional_args <<= (arg + "[" + "," + (optional_args ^ arg) + "]").setParseAction(
-    visit_optional_args
+optional_args <<= (
+    (arg + "[" + "," + (optional_args ^ arg) + "]")
+    .setParseAction(visit_optional_args)
+    .setName("OptionalArgs")
 )
 """
 When the flag has multiple arguments, some of which are optional, e.g.
@@ -127,34 +133,45 @@ simple_arg = (
             [
                 Word(initChars=element_start_chars, bodyChars=element_body_chars),
                 # Allow spaces in the argument name, but only if it's enclosed in angle brackets
-                Literal("<").suppress()
-                + Word(initChars=element_start_chars, bodyChars=delimited_body_chars)
-                + Literal(">").suppress(),
+                (
+                    Literal("<").suppress()
+                    + Word(
+                        initChars=element_start_chars, bodyChars=delimited_body_chars
+                    )
+                    + Literal(">").suppress()
+                ).setName("angle_delimited_arg"),
             ]
         )
     )
     .leaveWhitespace()
     .setParseAction(lambda s, loc, toks: SimpleFlagArg(toks[0]))
-)
+).setName("SimpleArg")
 
 repeated_segment = (
-    ZeroOrMore(arg) + Literal(".")[2, 3].suppress() + Optional(arg)
-).setParseAction(
-    lambda s, loc, toks: RepeatFlagArg(toks[-1] or toks[0])
+    (ZeroOrMore(arg) + Literal(".")[2, 3].suppress() + Optional(arg))
+    .setParseAction(lambda s, loc, toks: RepeatFlagArg(toks[-1] or toks[0]))
+    .setName("RepeatedSegment")
 )  # Either ".." or "..."
+
 list_type_arg = (
-    (arg + repeated_segment)
-    ^ (arg + Literal("[").suppress() + repeated_segment + Literal("]").suppress())
-).setParseAction(lambda s, loc, toks: toks[1])
+    (
+        (arg + repeated_segment)
+        ^ (arg + Literal("[").suppress() + repeated_segment + Literal("]").suppress())
+    )
+    .setParseAction(lambda s, loc, toks: toks[1])
+    .setName("repeated_arg")
+)
 """
     When the argument is an array of values, e.g. when the help says `--samout SAMOUTS [SAMOUTS ...]` or 
     `-i FILE1 FILE2 .. FILEn`
 
 """
 
-choice_type_arg = nestedExpr(
-    opener="{", closer="}", content=delimitedList(cli_id, delim=",")
-).setParseAction(lambda s, loc, toks: ChoiceFlagArg(set(toks[0])))
+choice_type_arg = (
+    nestedExpr(opener="{", closer="}", content=delimitedList(cli_id, delim=","))
+    .setParseAction(lambda s, loc, toks: ChoiceFlagArg(set(toks[0])))
+    .setName("ChoiceArg")
+)
 """When the argument is one from a list of values, e.g. when the help says `--format {sam,bam}`"""
 
 
@@ -173,10 +190,16 @@ arg_expression = (
 arg_expression.skipWhitespace = False
 """An argument with separator, e.g. `=FILE`"""
 
-flag_with_arg = (any_flag + Optional(arg_expression)).setParseAction(
-    lambda s, loc, toks: (
-        FlagSynonym(name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg())
+flag_with_arg = (
+    (any_flag + Optional(arg_expression))
+    .setParseAction(
+        lambda s, loc, toks: (
+            FlagSynonym(
+                name=toks[0], argtype=toks[1] if len(toks) > 1 else EmptyFlagArg()
+            )
+        )
     )
+    .setName("FlagWithArg")
 )
 flag_with_arg.skipWhitespace = True
 """e.g. `--max-count=NUM`"""
@@ -187,7 +210,7 @@ synonym_delim = Word(" ,|", max=2).setParseAction(noop).leaveWhitespace()
 The character used to separate synonyms of a flag. Depending on the help text this might be a comma, pipe or space
 """
 
-description_sep = White(min=1).setName("description_sep").suppress()
+description_sep = White(min=1).suppress()
 """
 The section that separates a flag from its description. This needs to be broad enough that it will match all different
 formats of help outputs but not so broad that every single word starting with a dash will be matched as a flag
@@ -209,7 +232,9 @@ Command: index         index sequences in the FASTA format
          mem           BWA-MEM algorithm
 """
 
-flag_synonyms = delimitedList(flag_with_arg, delim=synonym_delim)
+flag_synonyms = delimitedList(flag_with_arg, delim=synonym_delim).setName(
+    "FlagSynonyms"
+)
 """
 When the help lists multiple synonyms for a flag, e.g:
 -n, --lines=NUM
@@ -219,7 +244,9 @@ When the help lists multiple synonyms for a flag, e.g:
 # The description of the flag
 # e.g. for grep's `-o, --only-matching`, this is:
 # "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line."
-desc_line = originalTextFor(SkipTo(LineEnd()))  # .setParseAction(success))
+desc_line = originalTextFor(SkipTo(LineEnd())).setName(
+    "DescriptionLine"
+)  # .setParseAction(success))
 # desc_line = originalTextFor(
 #     delimitedList(Regex("[^\s]+"), delim=" ", combine=True)
 # ).leaveWhitespace()

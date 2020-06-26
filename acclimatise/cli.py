@@ -140,9 +140,18 @@ def pipe(cmd, pos, generate_names, case, format):
 
 @main.command(help="Output a representation of the internal grammar")
 @opt_pos
-def grammar(pos):
-    parser = CliParser(pos)
-    print(str(parser.flags))
+def railroad(pos):
+    try:
+        from pyparsing.diagram import to_railroad, railroad_to_html
+
+        parser = CliParser(pos)
+        railroad = to_railroad(parser.flags)
+        sys.stdout.write(railroad_to_html(railroad))
+    except ImportError:
+        print(
+            "You need PyParsing 3.0.0a2 or greater to use this feature", file=sys.stderr
+        )
+        sys.exit(1)
 
 
 if __name__ == "__main__":

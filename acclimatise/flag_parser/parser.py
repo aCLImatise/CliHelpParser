@@ -83,9 +83,13 @@ class CliParser:
 
             return text
 
-        self.indented_desc = customIndentedBlock(
-            desc_line, indentStack=stack, indent=True, terminal=True
-        ).setParseAction(parse_description)
+        self.indented_desc = (
+            customIndentedBlock(
+                desc_line, indentStack=stack, indent=True, terminal=True
+            )
+            .setParseAction(parse_description)
+            .setName("DescriptionBlock")
+        )
 
         self.description = self.indented_desc.copy().setName(
             "description"
@@ -153,7 +157,7 @@ class CliParser:
 
         self.flag_block = customIndentedBlock(
             block_element, indentStack=stack, indent=True, lax=True
-        ).setName("flag_block")
+        ).setName("FlagBlock")
 
         # self.flag_block.skipWhitespace = True
 
@@ -172,7 +176,9 @@ class CliParser:
 
         # A flag block can start with a colon, but then it must have 2 or more flags. If it starts with a newline it
         # only has to have one flag at least
-        self.flags = self.newline_block ^ self.colon_block  # .leaveWhitespace()
+        self.flags = (self.newline_block ^ self.colon_block).setName(
+            "FlagList"
+        )  # .leaveWhitespace()
         self.flags.skipWhitespace = False
 
         self.flag_section_header = Regex("(arguments|options):", flags=re.IGNORECASE)

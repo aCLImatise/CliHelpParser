@@ -96,7 +96,13 @@ jobs:
           user: __token__
           password: ${{ secrets.pypi_password }}
 
-      - name: Test the documentation still builds
+      - name: Generate railroad diagram
+        run: |
+          # We need an unpublished version of PyParsing for this
+          pip install https://github.com/pyparsing/pyparsing.git
+          acclimatise railroad > docs/_static/railroad.html
+
+      - name: Build the documentation
         run: |
           cd docs
           make html
