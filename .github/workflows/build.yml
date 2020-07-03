@@ -99,7 +99,7 @@ jobs:
       - name: Generate railroad diagram
         run: |
           # We need an unpublished version of PyParsing for this
-          pip install git+https://github.com/pyparsing/pyparsing.git
+          pip install git+https://github.com/pyparsing/pyparsing.git#egg=pyparsing[diagrams]
           acclimatise railroad > docs/_static/railroad.html
 
       - name: Build the documentation
