@@ -3,8 +3,10 @@ import tempfile
 import traceback
 from pathlib import Path
 
+import pyparsing
 import pytest
 from click.testing import CliRunner
+from packaging import version
 
 from acclimatise.cli import main
 
@@ -74,6 +76,7 @@ def test_explore_samtools_no_subcommands(runner, caplog):
         assert len(list(Path(tempdir).iterdir())) >= 3
 
 
+@pytest.mark.skipif(version.parse(pyparsing.__version__) >= version.parse("3.0.0a2"))
 def test_grammar(runner):
     result = runner.invoke(main, ["grammar"])
     assert result.exit_code == 0

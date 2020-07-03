@@ -131,7 +131,7 @@ def visit_list_element(s, loc, toks):
     els = [tok for tok in toks if isinstance(tok, (UsageElement, Flag))]
     for el in els:
         el.repeatable = True
-    return els
+    return els[-1]
 
 
 options_placeholder = (

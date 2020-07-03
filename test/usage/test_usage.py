@@ -67,6 +67,14 @@ def test_samtools_merge_optional_flag_arg():
     assert isinstance(els[0].args, SimpleFlagArg)
 
 
+def test_samtools_merge_list_args():
+    text = "[<in2.bam> ... <inN.bam>]"
+    el = usage_element.parseString(text)
+    assert len(el) == 1
+    assert isinstance(el[0], UsageElement)
+    assert el[0].repeatable
+
+
 def test_samtools_merge_full(process):
     text = process(
         """
