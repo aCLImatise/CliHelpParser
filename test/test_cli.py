@@ -77,7 +77,7 @@ def test_explore_samtools_no_subcommands(runner, caplog):
 
 
 @pytest.mark.skipif(
-    version.parse(pyparsing.__version__) >= version.parse("3.0.0a2"),
+    version.parse(pyparsing.__version__) < version.parse("3.0.0a2"),
     reason="PyParsing 3.0.0+ is not installed",
 )
 def test_grammar(runner):
