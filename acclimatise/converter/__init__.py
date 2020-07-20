@@ -34,6 +34,11 @@ class WrapperGenerator:
     cases = ["snake", "camel"]
 
     @classmethod
+    @property
+    def subclasses(cls) -> List[Type["WrapperGenerator"]]:
+        return cls.__subclasses__()
+
+    @classmethod
     def choose_converter(cls, typ) -> Type["WrapperGenerator"]:
         """
         Returns a converter subclass, given a converter type name
