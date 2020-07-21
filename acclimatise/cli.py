@@ -13,6 +13,7 @@ from acclimatise.flag_parser.parser import CliParser
 # Some common options
 opt_pos = click.option(
     "--pos/--no-pos",
+    default=True,
     help=(
         "Include (default) or don't include positional arguments, for example because the help formatting has some "
         "misleading sections that look like positional arguments"
