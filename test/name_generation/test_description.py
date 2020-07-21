@@ -41,7 +41,7 @@ def test_bwa_mem_i():
     assert "specify" in name
 
     # Ideally this would return "mean" first, but the POS engine thinks that "mean" describes "deviation"
-    assert "mean" in name
+    # assert "mean" in name
     assert "deviation" in name
 
 
