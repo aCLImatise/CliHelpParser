@@ -288,9 +288,11 @@ def find_key_diff_words(
             for k, diff in enumerate(ndiff(desc_strings[i], desc_strings[j])):
                 if diff[0] in ["+", "-"]:
                     if k > after_index:
-                        # If this token differs
-                        ret[i].add(description_a[k])
-                        ret[j].add(description_b[k])
+                        # If this token differs, add the difference
+                        if len(description_a) > k:
+                            ret[i].add(description_a[k])
+                        if len(description_b) > k:
+                            ret[j].add(description_b[k])
 
                     # Always break once we find a diff
                     break
