@@ -1,0 +1,10 @@
+Usage: samtools bedcov [options] <in.bed> <in1.bam> [...]
+
+Options:
+      -Q <int>            mapping quality threshold [0]
+      -j                  do not include deletions (D) and ref skips (N) in bedcov computation
+      --input-fmt-option OPT[=VAL]
+               Specify a single input file format option in the form
+               of OPTION or OPTION=VALUE
+      --reference FILE
+               Reference sequence FASTA FILE [null]

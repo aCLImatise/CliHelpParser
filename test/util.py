@@ -41,6 +41,15 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/samtools_bedcov.txt",
+            cmd=["samtools", "bedcov"],
+            positional=2,
+            named=4,
+            subcommands=0,
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/gth.txt",
             cmd=["gth"],
             positional=0,
@@ -257,6 +266,9 @@ def validate_cwl(cwl: str, cmd: Command = None, explore: bool = True):
         tmpfile.write_text(cwl)
         loading_context, workflowobj, uri = fetch_document(str(tmpfile))
         resolve_and_validate_document(loading_context, workflowobj, uri)
+
+        if cmd:
+            assert len(workflowobj["inputs"]) == len(cmd.positional) + len(cmd.named)
 
 
 def validate_wdl(wdl: str, cmd: Command = None, explore=True):

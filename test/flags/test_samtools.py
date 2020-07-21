@@ -3,6 +3,28 @@ import shutil
 import pytest
 
 from acclimatise.execution import execute_cmd
+from acclimatise.model import Flag
+
+
+def test_samtools_bedcov_j(parser):
+    text = """
+      -j                  do not include deletions (D) and ref skips (N) in bedcov computation
+    """
+    flag = parser.flag.parseString(text)[0]
+    assert isinstance(flag, Flag)
+    assert flag.synonyms[0] == "-j"
+
+
+def test_samtools_bedcov_qjfmt(parser):
+    text = """
+      -Q <int>            mapping quality threshold [0]
+      -j                  do not include deletions (D) and ref skips (N) in bedcov computation
+      --input-fmt-option OPT[=VAL]
+               Specify a single input file format option in the form
+               of OPTION or OPTION=VALUE
+    """
+    flags = list(parser.flags.setDebug().searchString(text)[0])
+    assert len(flags) == 3
 
 
 def test_samtools(parser, samtools_help):
