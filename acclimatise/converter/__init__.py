@@ -34,8 +34,7 @@ class WrapperGenerator:
     cases = ["snake", "camel"]
 
     @classmethod
-    @property
-    def subclasses(cls) -> List[Type["WrapperGenerator"]]:
+    def get_subclasses(cls) -> List[Type["WrapperGenerator"]]:
         return cls.__subclasses__()
 
     @classmethod
