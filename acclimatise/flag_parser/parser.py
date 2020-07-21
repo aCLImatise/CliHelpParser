@@ -171,9 +171,10 @@ class CliParser:
             + self.flag_block.copy().setParseAction(visit_flags)
         )
 
-        self.unindented_flag_block = OneOrMore(
-            LineStart().suppress() + self.flag
+        self.unindented_flag_block = LineStart().suppress() + OneOrMore(
+            self.flag
         )  # delimitedList(self.flag, delim='\n')
+        # self.unindented_flag_block.leaveWhitespace()
         self.unindented_flag_block.skipWhitespace = False
         """
         This is a list of flags that aren't indented. Because of this, we don't parse positional elements here, because
