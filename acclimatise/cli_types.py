@@ -79,7 +79,10 @@ class CliDir(CliType):
     Takes a directory path
     """
 
-    pass
+    output: bool = None
+    """
+    Indicator if the file is input or output (None if unknown)
+    """
 
 
 @dataclass(unsafe_hash=True)
@@ -88,7 +91,10 @@ class CliFile(CliType):
     Takes a file path
     """
 
-    pass
+    output: bool = None
+    """
+    Indicator if the file is input or output (None if unknown)
+    """
 
 
 @dataclass(unsafe_hash=True)
