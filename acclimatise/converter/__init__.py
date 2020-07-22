@@ -51,6 +51,16 @@ class WrapperGenerator:
 
     @classmethod
     @abstractmethod
+    def validate(cls, wrapper: str, cmd: Command = None, explore=True):
+        """
+        Validates that the tool wrapper is correct, and that it correctly represents the command.
+        :param wrapper: The generated tool definition
+        :param cmd: The command to validate against
+        :param explore: If true, we're in explore mode, and we should ignore subcommands
+        """
+
+    @classmethod
+    @abstractmethod
     def format(cls) -> str:
         """
         Returns the output format that this generator produces as a string, e.g. "cwl"
