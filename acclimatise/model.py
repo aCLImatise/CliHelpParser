@@ -394,14 +394,14 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     elif file_re.match(string):
         if input_re.match(string) and not output_re.match(string):
             return cli_types.CliFile(output=False)
-        elif not input_re.match(string) and output_re.match(string): 
+        elif not input_re.match(string) and output_re.match(string):
             return cli_types.CliFile(output=True)
         else:
             return cli_types.CliFile()
     elif dir_re.match(string):
         if input_re.match(string) and not output_re.match(string):
             return cli_types.CliDir(output=False)
-        elif not input_re.match(string) and output_re.match(string): 
+        elif not input_re.match(string) and output_re.match(string):
             return cli_types.CliDir(output=True)
         else:
             return cli_types.CliDir()
