@@ -397,7 +397,7 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     elif str_re.match(string):
         return cli_types.CliString()
     else:
-        return cli_types.CliString()
+        return None
 
 
 @yaml_object(yaml)
