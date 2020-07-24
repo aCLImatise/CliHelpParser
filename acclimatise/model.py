@@ -370,14 +370,18 @@ class FlagSynonym:
         )
 
 
-int_re = re.compile("(int(eger)?)|size|length|max|min", flags=re.IGNORECASE)
-str_re = re.compile("str(ing)?", flags=re.IGNORECASE)
-float_re = re.compile("float|decimal", flags=re.IGNORECASE)
-bool_re = re.compile("bool(ean)?", flags=re.IGNORECASE)
-file_re = re.compile("file|path", flags=re.IGNORECASE)
-input_re = re.compile("input", flags=re.IGNORECASE)
-output_re = re.compile("output", flags=re.IGNORECASE)
-dir_re = re.compile("folder|directory", flags=re.IGNORECASE)
+int_re = re.compile(r"\b((int(eger)?)|size|length|max|min|num(ber)?)\b", flags=re.IGNORECASE)
+str_re = re.compile(r"\bstr(ing)?\b", flags=re.IGNORECASE)
+float_re = re.compile(r"\b(float|decimal)\b", flags=re.IGNORECASE)
+bool_re = re.compile(r"\bbool(ean)?\b", flags=re.IGNORECASE)
+file_re = re.compile(r"\b(file|path)\b", flags=re.IGNORECASE)
+input_re = re.compile(r"input", flags=re.IGNORECASE)
+output_re = re.compile(r"output", flags=re.IGNORECASE)
+dir_re = re.compile(r"\b(folder|directory)\b", flags=re.IGNORECASE)
+
+default_re = re.compile(r"default(?: value)?(?:[:=] ?| )([^ )\]]+)", flags=re.IGNORECASE)
+float_re = re.compile(r'[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)', flags=re.IGNORECASE)
+int_re = re.compile(r'[+-]?([0-9]+[^.0-9])', flags=re.IGNORECASE)
 
 
 def infer_type(string) -> typing.Optional[cli_types.CliType]:
