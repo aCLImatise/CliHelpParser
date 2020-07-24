@@ -375,8 +375,8 @@ str_re = re.compile("str(ing)?", flags=re.IGNORECASE)
 float_re = re.compile("float|decimal", flags=re.IGNORECASE)
 bool_re = re.compile("bool(ean)?", flags=re.IGNORECASE)
 file_re = re.compile("file|path", flags=re.IGNORECASE)
-input_re = re.compile("read|in(put)?", flags=re.IGNORECASE)
-output_re = re.compile("write|out(put)?", flags=re.IGNORECASE)
+input_re = re.compile("input", flags=re.IGNORECASE)
+output_re = re.compile("output", flags=re.IGNORECASE)
 dir_re = re.compile("folder|directory", flags=re.IGNORECASE)
 
 
