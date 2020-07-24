@@ -76,7 +76,7 @@ class WrapperGenerator:
     ) -> Generator[Tuple[Path, Command], None, None]:
         out_dir = Path(out_dir)
         for cmd in cmd.command_tree():
-            path = (out_dir / cmd.as_filename).with_suffix(self.suffix)
+            path = out_dir / (cmd.as_filename + self.suffix)
             try:
                 self.save_to_file(cmd, path)
             except NameGenerationError as e:
