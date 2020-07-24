@@ -74,7 +74,19 @@ class CliBoolean(CliType):
 
 
 @dataclass(unsafe_hash=True)
-class CliDir(CliType):
+class CliFileSystemType(CliType):
+    """
+    Takes a directory / file path
+    """
+
+    output: bool = None
+    """
+    Indicator if it is input or output (None if unknown)
+    """
+
+
+@dataclass(unsafe_hash=True)
+class CliDir(CliFileSystemType):
     """
     Takes a directory path
     """
@@ -83,25 +95,7 @@ class CliDir(CliType):
 
 
 @dataclass(unsafe_hash=True)
-class CliOutputDir(CliType):
-    """
-    Takes a directory path
-    """
-
-    pass
-
-
-@dataclass(unsafe_hash=True)
-class CliFile(CliType):
-    """
-    Takes a file path
-    """
-
-    pass
-
-
-@dataclass(unsafe_hash=True)
-class CliOutputFile(CliType):
+class CliFile(CliFileSystemType):
     """
     Takes a file path
     """
