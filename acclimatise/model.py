@@ -79,6 +79,13 @@ class Command:
         return "_".join(self.command).replace("-", "_")
 
     @property
+    def empty(self) -> bool:
+        """
+        True if we think this command failed in parsing, ie it has no arguments
+        """
+        return (len(self.positional) + len(self.named) + len(self.subcommands)) == 0
+
+    @property
     def depth(self) -> int:
         """
         Returns the "depth" of this command, aka how many ancestors it has. An orphan command has depth 0, a subcommand
