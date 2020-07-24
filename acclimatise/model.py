@@ -385,27 +385,27 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     Reads a string (argument description etc) to find hints about what type this argument might be. This is
     generally called by the get_type() methods
     """
-    if bool_re.match(string):
+    if bool_re.search(string):
         return cli_types.CliBoolean()
-    elif float_re.match(string):
+    elif float_re.search(string):
         return cli_types.CliFloat()
-    elif int_re.match(string):
+    elif int_re.search(string):
         return cli_types.CliInteger()
-    elif file_re.match(string):
-        if input_re.match(string) and not output_re.match(string):
+    elif file_re.search(string):
+        if input_re.search(string) and not output_re.search(string):
             return cli_types.CliFile(output=False)
-        elif not input_re.match(string) and output_re.match(string):
+        elif not input_re.search(string) and output_re.search(string):
             return cli_types.CliFile(output=True)
         else:
             return cli_types.CliFile()
-    elif dir_re.match(string):
-        if input_re.match(string) and not output_re.match(string):
+    elif dir_re.search(string):
+        if input_re.search(string) and not output_re.search(string):
             return cli_types.CliDir(output=False)
-        elif not input_re.match(string) and output_re.match(string):
+        elif not input_re.search(string) and output_re.search(string):
             return cli_types.CliDir(output=True)
         else:
             return cli_types.CliDir()
-    elif str_re.match(string):
+    elif str_re.search(string):
         return cli_types.CliString()
     else:
         return None
