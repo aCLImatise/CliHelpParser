@@ -16,7 +16,7 @@ def normalise_cline(tokens):
     return [Path(el.lower()).stem for el in tokens]
 
 
-def parse_usage(cmd, text, debug=False):
+def parse_usage(cmd, text, debug=False) -> Command:
     toks = usage.setDebug(debug).searchString(text)
     if not toks:
         # If we had no results, return an empty command
