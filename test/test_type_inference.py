@@ -6,7 +6,7 @@ from acclimatise.cli_types import (
     CliFile,
     CliFloat,
     CliInteger,
-    CliString
+    CliString,
 )
 from acclimatise.model import infer_type
 
@@ -30,8 +30,8 @@ from acclimatise.model import infer_type
         ("output file", CliFile, True),
         ("folder", CliDir, False),
         ("directory", CliDir, False),
-        ("output directory", CliDir, True)
-    ]
+        ("output directory", CliDir, True),
+    ],
 )
 def test_type_inference(string, typ, isoutput):
     inferred_type = infer_type(string)
