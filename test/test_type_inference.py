@@ -31,6 +31,10 @@ from acclimatise.model import infer_type
         ("folder", CliDir, None),
         ("directory", CliDir, None),
         ("output directory", CliDir, True),
+        ("blah 23 blub", CliInteger, False),
+        ("nonsense 23.42", CliFloat, True),
+        (".42 gibberish", CliFloat, True),
+        ("1E-5", CliFloat, True),
     ],
 )
 def test_type_inference(string, typ, isoutput):

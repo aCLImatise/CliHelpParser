@@ -371,7 +371,7 @@ class FlagSynonym:
 
 
 int_re = re.compile(
-    r"\b((int(eger)?)|size|length|max|min|num(ber)?)\b", flags=re.IGNORECASE
+    r"\b((int(eger)?)|size|length|max|min|(num(ber)?))\b", flags=re.IGNORECASE
 )
 str_re = re.compile(r"\bstr(ing)?\b", flags=re.IGNORECASE)
 float_re = re.compile(r"\b(float|decimal)\b", flags=re.IGNORECASE)
@@ -384,8 +384,11 @@ dir_re = re.compile(r"\b(folder|directory)\b", flags=re.IGNORECASE)
 default_re = re.compile(
     r"default(?: value)?(?:[:=] ?| )([^ )\]]+)", flags=re.IGNORECASE
 )
-float_re = re.compile(r"[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)", flags=re.IGNORECASE)
-int_re = re.compile(r"[+-]?([0-9]+[^.0-9])", flags=re.IGNORECASE)
+float_num_re = re.compile(
+    r"[+-]?(([0-9]*\.[0-9]+)|((?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)))",
+    flags=re.IGNORECASE,
+)
+int_num_re = re.compile(r"([+-]?[0-9]+)", flags=re.IGNORECASE)
 
 
 def infer_type(string) -> typing.Optional[cli_types.CliType]:
@@ -416,7 +419,13 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     elif str_re.search(string):
         return cli_types.CliString()
     else:
-        return None
+        if float_num_re.search(string):
+            return cli_types.CliFloat()
+        elif int_num_re.search(string):
+            print("int num")
+            return cli_types.CliInteger()
+        else:
+            return None
 
 
 @yaml_object(yaml)
