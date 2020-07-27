@@ -1,0 +1,10 @@
+Program: samtools.pl (helper script for SAMtools)
+Version: 0.3.3
+Contact: Heng Li <lh3@sanger.ac.uk>
+
+Usage:   samtools.pl <command> [<arguments>]
+
+Command: varFilter     filtering SNPs and short indels
+         pileup2fq     generate fastq from `pileup -c'
+         showALEN      print alignment length (ALEN) following CIGAR
+
