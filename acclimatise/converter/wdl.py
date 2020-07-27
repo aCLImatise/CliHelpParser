@@ -1,6 +1,7 @@
 """
 Functions for generating WDL from the CLI data model
 """
+import re
 from os import PathLike
 from pathlib import Path
 from typing import Generator, Iterable, List, Set, Tuple, Type
@@ -14,8 +15,13 @@ from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.nlp import wordsegment
 
+#: A regex, borrowed from MiniWDL, that ma
+WDL_IDENT = re.compile(r"[a-zA-Z][a-zA-Z0-9_]*")
+#: Matches all characters we should remove from a WDL identifier
+WDL_STRIP = re.compile(r"(^[^a-zA-Z])|([^a-zA-Z0-9_])")
 
-def escape_wdl_str(text):
+
+def escape_wdl_str(text: str):
     """
     Escape literal quotes in a Python string, to become suitable for WDL
     """
@@ -137,7 +143,7 @@ class WdlGenerator(WrapperGenerator):
 
     def make_command(self, cmd: Command, inputs: List[NamedArgument]) -> Task.Command:
         return Task.Command(
-            command=" ".join(cmd.command),
+            command=" ".join([WDL_STRIP.sub("_", tok) for tok in cmd.command]),
             inputs=[
                 flag_to_command_input(input, self)
                 for input in inputs
@@ -158,8 +164,11 @@ class WdlGenerator(WrapperGenerator):
         return ParameterMeta(**params)
 
     def make_task_name(self, cmd: Command) -> str:
-        name = cmd.as_filename
-        return camelize(name)
+        return camelize(
+            "_".join([WDL_STRIP.sub("", token) for token in cmd.command]).replace(
+                "-", "_"
+            )
+        )
 
     def save_to_string(self, cmd: Command) -> str:
         inputs: List[CliArgument] = [*cmd.named] + (
