@@ -76,7 +76,7 @@ class Command:
         """
         Returns a sample filename that might be used to store this command (without a suffix)
         """
-        return "_".join(self.command).replace("-", "_")
+        return "_".join([token for token in self.command]).replace("-", "_")
 
     @property
     def empty(self) -> bool:
