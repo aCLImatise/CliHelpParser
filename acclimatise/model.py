@@ -224,7 +224,7 @@ class Positional(CliArgument):
         if name_type is not None:
             return name_type
 
-        return infer_type(self.full_name(), default=cli_types.CliString())
+        return infer_type(self.full_name()) or cli_types.CliString()
 
 
 @yaml_object(yaml)
@@ -294,7 +294,7 @@ class Flag(CliArgument):
         if flag_type is not None:
             return flag_type
 
-        return infer_type(self.description, default=cli_types.CliString())
+        return infer_type(self.description) or cli_types.CliString()
 
     def full_name(self) -> str:
         """
@@ -371,7 +371,7 @@ file_re = re.compile("file|path", flags=re.IGNORECASE)
 dir_re = re.compile("folder|directory", flags=re.IGNORECASE)
 
 
-def infer_type(string, default=None) -> typing.Optional[cli_types.CliType]:
+def infer_type(string) -> typing.Optional[cli_types.CliType]:
     """
     Reads a string (argument description etc) to find hints about what type this argument might be. This is
     generally called by the get_type() methods
@@ -389,7 +389,7 @@ def infer_type(string, default=None) -> typing.Optional[cli_types.CliType]:
     elif str_re.match(string):
         return cli_types.CliString()
     else:
-        return default
+        return None
 
 
 @yaml_object(yaml)
@@ -487,7 +487,7 @@ class SimpleFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        return infer_type(self.name, default=cli_types.CliString())
+        return infer_type(self.name) or cli_types.CliString()
 
 
 @yaml_object(yaml)
@@ -509,7 +509,7 @@ class RepeatFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        t = infer_type(self.name, default=cli_types.CliString())
+        t = infer_type(self.name) or cli_types.CliString()
         return cli_types.CliList(t)
 
 
