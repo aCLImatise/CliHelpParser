@@ -12,32 +12,31 @@ from acclimatise.model import infer_type
 
 
 @pytest.mark.parametrize(
-    "string,typ,isoutput",
+    "string,typ",
     [
-        ("", CliString, False),
-        ("int", CliInteger, False),
-        ("size", CliInteger, False),
-        ("length", CliInteger, False),
-        ("max", CliInteger, False),
-        ("min", CliInteger, False),
-        ("str", CliString, False),
-        ("float", CliFloat, False),
-        ("decimal", CliFloat, False),
-        ("bool", CliBoolean, False),
-        ("file", CliFile, None),
-        ("path", CliFile, None),
-        ("input file", CliFile, False),
-        ("output file", CliFile, True),
-        ("folder", CliDir, None),
-        ("directory", CliDir, None),
-        ("output directory", CliDir, True),
-        ("blah 23 blub", CliInteger, False),
-        ("nonsense 23.42", CliFloat, True),
-        (".42 gibberish", CliFloat, True),
-        ("1E-5", CliFloat, True),
+        ("", None),
+        ("int", CliInteger()),
+        ("size", CliInteger()),
+        ("length", CliInteger()),
+        ("max", CliInteger()),
+        ("min", CliInteger()),
+        ("str", CliString()),
+        ("float", CliFloat()),
+        ("decimal", CliFloat()),
+        ("bool", CliBoolean()),
+        ("file", CliFile()),
+        ("path", CliFile()),
+        ("input file", CliFile(output=False)),
+        ("output file", CliFile(output=True)),
+        ("folder", CliDir()),
+        ("directory", CliDir()),
+        ("output directory", CliDir(output=True)),
+        ("blah 23 blub", CliInteger()),
+        ("nonsense 23.42", CliFloat()),
+        (".42 gibberish", CliFloat()),
+        ("1E-5", CliFloat()),
     ],
 )
-def test_type_inference(string, typ, isoutput):
+def test_type_inference(string, typ):
     inferred_type = infer_type(string)
-    assert isinstance(inferred_type, typ)
-    assert not hasattr(inferred_type, "output") or inferred_type.output == isoutput
+    assert inferred_type == typ
