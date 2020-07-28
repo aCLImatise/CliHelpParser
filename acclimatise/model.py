@@ -388,6 +388,20 @@ float_num_re = re.compile(
 int_num_re = re.compile(r"([+-]?[0-9]+)", flags=re.IGNORECASE)
 
 
+def distinguish_inout(string, cls) -> cli_types.CliFileSystemType:
+    """
+    distinguish input/output files/directories given a string
+    """
+    im = input_re.search(string)
+    om = output_re.search(string)
+    if im and not om:
+        return cls(output=False)
+    elif not im and om:
+        return cls(output=True)
+    else:
+        return cls()
+
+
 def infer_type(string) -> typing.Optional[cli_types.CliType]:
     """
     Reads a string (argument description etc) to find hints about what type this argument might be. This is
@@ -400,19 +414,9 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     elif int_re.search(string):
         return cli_types.CliInteger()
     elif file_re.search(string):
-        if input_re.search(string) and not output_re.search(string):
-            return cli_types.CliFile(output=False)
-        elif not input_re.search(string) and output_re.search(string):
-            return cli_types.CliFile(output=True)
-        else:
-            return cli_types.CliFile()
+        return distinguish_inout(string, cli_types.CliFile)
     elif dir_re.search(string):
-        if input_re.search(string) and not output_re.search(string):
-            return cli_types.CliDir(output=False)
-        elif not input_re.search(string) and output_re.search(string):
-            return cli_types.CliDir(output=True)
-        else:
-            return cli_types.CliDir()
+        return distinguish_inout(string, cli_types.CliDir)
     elif str_re.search(string):
         return cli_types.CliString()
     elif float_num_re.search(string):
