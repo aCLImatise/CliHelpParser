@@ -415,13 +415,12 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
             return cli_types.CliDir()
     elif str_re.search(string):
         return cli_types.CliString()
+    elif float_num_re.search(string):
+        return cli_types.CliFloat()
+    elif int_num_re.search(string):
+        return cli_types.CliInteger()
     else:
-        if float_num_re.search(string):
-            return cli_types.CliFloat()
-        elif int_num_re.search(string):
-            return cli_types.CliInteger()
-        else:
-            return None
+        return None
 
 
 @yaml_object(yaml)
