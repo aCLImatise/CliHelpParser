@@ -381,9 +381,6 @@ input_re = re.compile(r"input", flags=re.IGNORECASE)
 output_re = re.compile(r"output", flags=re.IGNORECASE)
 dir_re = re.compile(r"\b(folder|directory)\b", flags=re.IGNORECASE)
 
-default_re = re.compile(
-    r"default(?: value)?(?:[:=] ?| )([^ )\]]+)", flags=re.IGNORECASE
-)
 float_num_re = re.compile(
     r"[+-]?(([0-9]*\.[0-9]+)|((?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)))",
     flags=re.IGNORECASE,
@@ -422,7 +419,6 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
         if float_num_re.search(string):
             return cli_types.CliFloat()
         elif int_num_re.search(string):
-            print("int num")
             return cli_types.CliInteger()
         else:
             return None
