@@ -17,4 +17,5 @@ class DockerExecutor(Executor):
         exit_code, (stdout, stderr) = self.container.exec_run(
             command, stdout=True, stderr=True, demux=True
         )
-        return stdout or stderr
+        out = stdout or stderr
+        return out.decode()
