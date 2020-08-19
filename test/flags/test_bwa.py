@@ -4,7 +4,6 @@ from textwrap import dedent
 import pytest
 
 from acclimatise import parse_help
-from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser import elements
 from acclimatise.model import Flag, FlagSynonym, OptionalFlagArg
 

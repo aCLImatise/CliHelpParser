@@ -6,7 +6,6 @@ from textwrap import dedent
 
 import pytest
 
-from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser import elements
 from acclimatise.model import EmptyFlagArg, FlagSynonym, RepeatFlagArg
 
@@ -165,9 +164,9 @@ def test_noarg(parser):
 @pytest.mark.skipif(
     not shutil.which("htseq-count"), reason="htseq-count is not installed"
 )
-def test_full(parser):
+def test_full(parser, local_executor):
     # Parse help
-    help_text = execute_cmd(["htseq-count", "--help"])
+    help_text = local_executor.execute(["htseq-count", "--help"])
     flag_sections = parser.flags.searchString(help_text)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 2
