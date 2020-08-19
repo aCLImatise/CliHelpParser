@@ -1,6 +1,21 @@
 Changelog
 =========
-0.2.2 (2020-07-04)
+0.3.0 (2020-08-19)
+------------------
+User-Facing
+***********
+* Support executables that have a file extension e.g. samtools.pl
+* Refactor the command execution code into a new ``Executor`` class, and add a docker executor, allowing you to aCLImatise
+  executables in a Docker image
+* Fix for usage parsing when usage is in the middle of the line
+
+Internal
+********
+* Run CI on pull requests
+* Remove ``cwlgen`` as a dependency, thanks to `@illusional <https://github.com/illusional>`_ (`#26 <https://github.com/aCLImatise/CliHelpParser/pull/26>`_)
+* Make ``infer_type`` return ``None`` if it can't determine a type, allowing better handling behaviour. Thanks to `@bernt-matthias <https://github.com/bernt-matthias>`_ (`#25 <https://github.com/aCLImatise/CliHelpParser/pull/25>`_)
+
+0.2.2 (2020-07-22)
 ------------------
 * Add support for Python 3.6 again
 * Parse positionals by default from the CLI
