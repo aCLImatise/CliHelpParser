@@ -7,7 +7,6 @@ setup(
         "pyparsing",
         "jinja2",
         "spacy",
-        "cwlgen",
         "miniwdl",
         "wordsegment",
         "inflection",

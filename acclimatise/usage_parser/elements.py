@@ -181,8 +181,10 @@ def visit_usage(s, loc, toks):
     return toks[0][0]
 
 
-usage = Regex("usage:", flags=re.IGNORECASE).suppress() + OneOrMore(
-    usage_element, stopOn=LineEnd()
+usage = (
+    LineStart()
+    + Regex("usage:", flags=re.IGNORECASE).suppress()
+    + OneOrMore(usage_element, stopOn=LineEnd())
 )  # .setParseAction(visit_usage).setDebug()
 
 

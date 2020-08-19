@@ -174,3 +174,11 @@ Usage:   samtools dict [options] <file.fa|file.fa.gz>
     """
     command = parse_usage(["samtools", "dict"], text, debug=True)
     assert len(command.positional) == 1
+
+
+def test_mid_line_usage():
+    text = """
+    Can't open --usage: No such file or directory at /usr/bin/samtools.pl line 50.
+    """
+    command = parse_usage(["samtools.pl", "showALEN"], text, debug=True)
+    assert command.empty
