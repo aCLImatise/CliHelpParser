@@ -13,3 +13,4 @@ def test_docker(bwamem_help):
     exec = DockerExecutor(container)
     output = exec.execute(["bwa", "mem"])
     assert output == bwamem_help
+    container.kill()
