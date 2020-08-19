@@ -3,8 +3,14 @@ from textwrap import dedent
 import pytest
 from pkg_resources import resource_filename
 
+from acclimatise.converter.yml import YmlGenerator
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.yaml import yaml
+
+
+@pytest.fixture()
+def yaml_converter():
+    return YmlGenerator()
 
 
 @pytest.fixture()

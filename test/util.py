@@ -41,6 +41,15 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/samtools_pl.txt",
+            cmd=["samtools.pl"],
+            positional=0,
+            named=0,
+            subcommands=3,
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/samtools_bedcov.txt",
             cmd=["samtools", "bedcov"],
             positional=2,

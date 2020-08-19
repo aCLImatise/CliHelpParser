@@ -76,7 +76,14 @@ class Command:
         """
         Returns a sample filename that might be used to store this command (without a suffix)
         """
-        return "_".join(self.command).replace("-", "_")
+        return "_".join([token for token in self.command]).replace("-", "_")
+
+    @property
+    def empty(self) -> bool:
+        """
+        True if we think this command failed in parsing, ie it has no arguments
+        """
+        return (len(self.positional) + len(self.named) + len(self.subcommands)) == 0
 
     @property
     def depth(self) -> int:
@@ -224,11 +231,7 @@ class Positional(CliArgument):
         if name_type is not None:
             return name_type
 
-        flag_type = infer_type(self.full_name())
-        if flag_type is not None:
-            return flag_type
-
-        return cli_types.CliString()
+        return infer_type(self.full_name()) or cli_types.CliString()
 
 
 @yaml_object(yaml)
@@ -298,11 +301,7 @@ class Flag(CliArgument):
         if flag_type is not None:
             return flag_type
 
-        description_type = infer_type(self.description)
-        if description_type is not None:
-            return description_type
-
-        return cli_types.CliString()
+        return infer_type(self.description) or cli_types.CliString()
 
     def full_name(self) -> str:
         """
@@ -397,7 +396,7 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     elif str_re.match(string):
         return cli_types.CliString()
     else:
-        return cli_types.CliString()
+        return None
 
 
 @yaml_object(yaml)
@@ -495,7 +494,7 @@ class SimpleFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        return infer_type(self.name)
+        return infer_type(self.name) or cli_types.CliString()
 
 
 @yaml_object(yaml)
@@ -517,7 +516,7 @@ class RepeatFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        t = infer_type(self.name)
+        t = infer_type(self.name) or cli_types.CliString()
         return cli_types.CliList(t)
 
 
