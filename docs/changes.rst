@@ -1,5 +1,19 @@
 Changelog
 =========
+0.2.2 (2020-07-04)
+------------------
+* Add support for Python 3.6 again
+* Parse positionals by default from the CLI
+* Fix bug involving name generation using different-length strings
+* Add ``samtools bedcov`` test case
+* Add a ``get_subclasses`` method for WrapperGenerator
+
+0.2.1 (2020-07-04)
+------------------
+* Add automatic railroad diagram generation for grammar
+* Add names to many of the parser elements to facilitate diagram generations
+* Add genomethreader test
+
 0.2.0 (2020-05-25)
 ------------------
 Features
