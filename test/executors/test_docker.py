@@ -14,3 +14,17 @@ def test_docker(bwamem_help):
     output = exec.execute(["bwa", "mem"])
     assert output == bwamem_help
     container.kill()
+
+
+# @pytest.mark.timeout(360)
+def test_docker_kill():
+    """
+    Test that the DockerExecutor can kill the command if it times out
+    """
+    client = docker.from_env(timeout=99999)
+    container = client.containers.run(
+        "b4adc22212f1", entrypoint=["sleep", "999999999"], detach=True,
+    )
+    exec = DockerExecutor(container)
+    exec.execute(["sleep", "999999"])
+    container.kill()

@@ -1,5 +1,7 @@
 from typing import List
 
+from docker.utils.socket import consume_socket_output, demux_adaptor, frames_iter
+
 from . import Executor
 
 
@@ -12,10 +14,13 @@ class DockerExecutor(Executor):
         self.container = container
 
     def execute(self, command: List[str]) -> str:
-        # Note: the timeout for the command can't be set on the exec command directly, it has to be set on the client
-        # when created
-        exit_code, (stdout, stderr) = self.container.exec_run(
-            command, stdout=True, stderr=True, demux=True
+        _, socket = self.container.exec_run(
+            command, stdout=True, stderr=True, demux=True, socket=True
         )
-        out = stdout or stderr
-        return out.decode()
+
+        socket._sock.settimeout(5)
+        gen = frames_iter(socket, tty=False)
+        gen = (demux_adaptor(*frame) for frame in gen)
+
+        stdout, stderr = consume_socket_output(gen, demux=True)
+        return (stdout or stderr).decode()
