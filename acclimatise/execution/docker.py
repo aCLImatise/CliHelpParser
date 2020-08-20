@@ -19,24 +19,10 @@ class DockerExecutor(Executor):
             yield demux_adaptor(*frame)
 
     def execute(self, command: List[str]) -> str:
-        resp = self.container.client.api.exec_create(
-            self.id,
-            command,
-            stdout=True,
-            stderr=True,
-            stdin=False,
-            tty=False,
-            privileged=False,
-            user="",
-            environment=None,
-            workdir=None,
+        _, socket = self.container.exec_run(
+            command, stdout=True, stderr=True, demux=True, socket=True
         )
 
-        res = self.container.client._post_json(
-            self.container.client._url("/exec/{0}/start", resp["Id"]),
-            headers={"Connection": "Upgrade", "Upgrade": "tcp"},
-            data={"Tty": False, "Detach": False},
-            stream=True,
-            timeout=5,
-        )
-        print(res)
+        socket._sock.settimeout(5)
+        stdout, stderr = consume_socket_output(self.frames(socket), demux=True)
+        return (stdout or stderr).decode()
