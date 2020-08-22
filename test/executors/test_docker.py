@@ -25,6 +25,8 @@ def test_docker_kill():
     container = client.containers.run(
         "b4adc22212f1", entrypoint=["sleep", "999999999"], detach=True,
     )
+
     exec = DockerExecutor(container)
-    exec.execute(["sleep", "999999"])
+    output = exec.execute(["sleep", "999999"])
     container.kill()
+    assert output == ""
