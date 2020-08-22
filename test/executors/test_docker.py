@@ -23,7 +23,7 @@ def test_docker_kill():
     """
     client = docker.from_env(timeout=99999)
     container = client.containers.run(
-        "b4adc22212f1", entrypoint=["sleep", "999999999"], detach=True,
+        "ubuntu:latest", entrypoint=["sleep", "999999999"], detach=True,
     )
 
     exec = DockerExecutor(container)
