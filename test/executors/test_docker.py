@@ -16,7 +16,7 @@ def test_docker(bwamem_help):
     container.kill()
 
 
-# @pytest.mark.timeout(360)
+@pytest.mark.timeout(360)
 def test_docker_kill():
     """
     Test that the DockerExecutor can kill the command if it times out
