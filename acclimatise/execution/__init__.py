@@ -11,7 +11,7 @@ class Executor(abc.ABC):
     ["samtools", "sort"] and return the output
     """
 
-    def __init__(self, timeout: int=10, raise_on_timout=False):
+    def __init__(self, timeout: int = 10, raise_on_timout=False):
         """
         :param timeout: Amount of inactivity before the execution will be killed
         :param raise_on_timout: If true, execute will raise a TimeoutError if it

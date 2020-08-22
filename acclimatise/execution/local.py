@@ -13,9 +13,7 @@ import psutil
 from . import Executor
 
 
-def kill_proc_tree(
-    pid, sig=signal.SIGTERM, include_parent=True
-):
+def kill_proc_tree(pid, sig=signal.SIGTERM, include_parent=True):
     """
     Kill a process tree (including grandchildren) with signal "sig" and return a (gone, still_alive) tuple.
     "on_terminate", if specified, is a callabck function which is called as soon as a child terminates.

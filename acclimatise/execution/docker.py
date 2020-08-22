@@ -1,14 +1,12 @@
+import select
+import socket
+from select import select as original_select
 from typing import List
+from unittest.mock import patch
 
 from docker.utils.socket import consume_socket_output, demux_adaptor, frames_iter
 
-
-from select import select as original_select
-import select
-import socket
-
 from . import Executor
-from unittest.mock import patch
 
 
 class DockerExecutor(Executor):
@@ -27,7 +25,13 @@ class DockerExecutor(Executor):
         try:
             sock._sock.settimeout(self.timeout)
 
-            with patch.object(select, 'select', new=lambda rlist, wlist, xlist: original_select(rlist, wlist, xlist, self.timeout)):
+            with patch.object(
+                select,
+                "select",
+                new=lambda rlist, wlist, xlist: original_select(
+                    rlist, wlist, xlist, self.timeout
+                ),
+            ):
                 gen = (demux_adaptor(*frame) for frame in frames_iter(sock, tty=False))
                 stdout, stderr = consume_socket_output(gen, demux=True)
         except socket.timeout as e:
