@@ -2,7 +2,6 @@ import shutil
 
 import pytest
 
-from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser.parser import CliParser
 
 
@@ -17,11 +16,11 @@ def test_singularity_style_flags(parser):
 @pytest.mark.skipif(
     not shutil.which("singularity"), reason="singularity is not installed"
 )
-def test_singularity_pull():
+def test_singularity_pull(local_executor):
     parser = CliParser(parse_positionals=False)
 
     # Parse help
-    help_text = execute_cmd(["singularity", "pull", "--help"])
+    help_text = local_executor.execute(["singularity", "pull", "--help"])
     flag_sections = parser.flags.searchString(help_text)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 1

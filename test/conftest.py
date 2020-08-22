@@ -4,8 +4,14 @@ import pytest
 from pkg_resources import resource_filename
 
 from acclimatise.converter.yml import YmlGenerator
+from acclimatise.execution.local import LocalExecutor
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.yaml import yaml
+
+
+@pytest.fixture()
+def local_executor():
+    return LocalExecutor()
 
 
 @pytest.fixture()

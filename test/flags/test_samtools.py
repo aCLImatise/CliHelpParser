@@ -2,7 +2,6 @@ import shutil
 
 import pytest
 
-from acclimatise.execution import execute_cmd
 from acclimatise.model import Flag
 
 
@@ -35,9 +34,9 @@ def test_samtools(parser, samtools_help):
 
 
 @pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
-def test_samtools_index(parser):
+def test_samtools_index(parser, local_executor):
     # Parse help
-    help_text = execute_cmd(["samtools", "index"])
+    help_text = local_executor.execute(["samtools", "index"])
     flag_sections = parser.flags.searchString(help_text)
     # There is one section for positional arguments and one for named arguments
     assert len(flag_sections) == 1

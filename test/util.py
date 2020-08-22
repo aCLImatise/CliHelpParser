@@ -20,7 +20,7 @@ from acclimatise.yaml import yaml
 logging.getLogger("cwltool").setLevel(30)
 
 
-def skip_not_installed(executable):
+def skip_not_installed(executable: str):
     """
     Returns a pytest decorator to skip the test if the given executable is not in the path
     """

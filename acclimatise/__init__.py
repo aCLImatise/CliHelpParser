@@ -11,12 +11,15 @@ from acclimatise.converter import WrapperGenerator
 from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.converter.yml import YmlGenerator
-from acclimatise.execution import execute_cmd
+from acclimatise.execution import Executor
+from acclimatise.execution.local import LocalExecutor
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import Command, Flag
 from acclimatise.usage_parser import parse_usage
 
 logger = logging.getLogger("acclimatise")
+
+default_executor = LocalExecutor()
 
 
 def _combine_flags(
@@ -78,7 +81,7 @@ def parse_help(
 def best_cmd(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = (["--help"], ["-h"], [], ["--usage"]),
-    run_kwargs: dict = {},
+    executor: Executor = default_executor,
 ) -> Command:
     """
     Determine the best Command instance for a given command line tool, by trying many
@@ -89,7 +92,7 @@ def best_cmd(
     :param cmd: The command to analyse, e.g. ['wc'] or ['bwa', 'mem']
     :param flags: A list of help flags to try, e.g. ['--help', '-h'], in order how which one you would prefer to use.
     Generally [] aka no flags should be last
-    :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
+    :param executor: A class that provides the means to run a command. You can use the pre-made classes or write your own.
     """
     # For each help flag, run the command and then try to parse it
     logger.info("Trying flags for {}".format(" ".join(cmd)))
@@ -98,7 +101,7 @@ def best_cmd(
         help_cmd = cmd + flag
         logger.info("Trying {}".format(" ".join(help_cmd)))
         try:
-            final = execute_cmd(help_cmd, **run_kwargs)
+            final = executor.execute(help_cmd)
             result = parse_help(cmd, final)
             result.generated_using = flag
             commands.append(result)
@@ -157,9 +160,9 @@ def explore_command(
     cmd: typing.List[str],
     flags: typing.Iterable[str] = (["--help"], ["-h"], [], ["--usage"]),
     parent: typing.Optional[Command] = None,
-    run_kwargs: dict = {},
     max_depth: int = 2,
     try_subcommand_flags=True,
+    executor: Executor = default_executor,
 ) -> typing.Optional[Command]:
     """
     Given a command to start with, builds a model of this command and all its subcommands (if they exist).
@@ -170,13 +173,13 @@ def explore_command(
     :param flags: A list of help flags to try, e.g. ['--help', '-h'], in order how which one you would prefer to use.
     Generally [] aka no flags should be last
     :param parent: A parent Command to add this command to as a subcommand, if this command actually exists
-    :param run_kwargs: kwargs to pass into subprocess.run, when we run the executable
+    :param executor: A class that provides the means to run a command. You can use the pre-made classes or write your own.
     :param try_subcommand_flags: If true, try all the ``flags`` on each subcommand. If False, we choose
     the best help flag on the parent command and then use that same one on each child. Generally True is recommended
     since some tools (such as bedtools) use different help flags for subcommands
     """
     logger.info("Exploring {}".format(" ".join(cmd)))
-    command = best_cmd(cmd, flags, run_kwargs=run_kwargs)
+    command = best_cmd(cmd, flags, executor=executor)
 
     # Check if this is a valid subcommand
     if parent:
@@ -198,8 +201,8 @@ def explore_command(
                 cmd=cmd + [positional.name],
                 flags=child_flags,
                 parent=command,
-                run_kwargs=run_kwargs,
                 max_depth=max_depth,
+                executor=executor,
                 try_subcommand_flags=try_subcommand_flags,
             )
             if subcommand is not None:
