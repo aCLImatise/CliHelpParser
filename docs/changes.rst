@@ -1,7 +1,14 @@
 Changelog
 =========
-0.3.0 (2020-08-19)
+1.0.1 (2020-08-22)
 ------------------
+* Enforce timeouts for all executors, including Docker
+* Restructure the executors such that the parameters are all set in the constructor, not in the ``execute()`` call
+
+1.0.0 (2020-08-19)
+------------------
+Since the creation of executors is actually a breaking change, this is now a new major version
+
 User-Facing
 ***********
 * Support executables that have a file extension e.g. samtools.pl
