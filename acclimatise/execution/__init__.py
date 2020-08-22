@@ -11,7 +11,7 @@ class Executor(abc.ABC):
     """
 
     @abc.abstractmethod
-    def execute(self, command: List[str]) -> str:
+    def execute(self, command: List[str], timeout: int) -> str:
         """
         Execute a command defined by a list of arguments, and return the result as a string
         """
