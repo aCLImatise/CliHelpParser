@@ -388,18 +388,18 @@ float_num_re = re.compile(
 int_num_re = re.compile(r"([+-]?[0-9]+)", flags=re.IGNORECASE)
 
 
-def distinguish_inout(string, cls) -> cli_types.CliFileSystemType:
+def distinguish_inout(
+    string, cls: typing.Type[cli_types.CliFileSystemType]
+) -> cli_types.CliFileSystemType:
     """
     distinguish input/output files/directories given a string
     """
     im = input_re.search(string)
     om = output_re.search(string)
-    if im and not om:
-        return cls(output=False)
-    elif not im and om:
+    if not im and om:
         return cls(output=True)
     else:
-        return cls()
+        return cls(output=False)
 
 
 def infer_type(string) -> typing.Optional[cli_types.CliType]:

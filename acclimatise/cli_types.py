@@ -79,9 +79,9 @@ class CliFileSystemType(CliType):
     Takes a directory / file path
     """
 
-    output: bool = None
+    output: bool = False
     """
-    Indicator if it is input or output (None if unknown)
+    Indicator if it is input or output
     """
 
 
