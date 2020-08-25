@@ -30,3 +30,18 @@ def test_docker_kill():
     output = exec.execute(["sleep", "999999"])
     container.kill()
     assert output == ""
+
+
+def test_no_output():
+    # Check that it doesn't crash when no output is received
+
+    client = docker.from_env()
+    container = client.containers.run(
+        "quay.io/biocontainers/gadem:1.3.1--h516909a_2",
+        entrypoint=["sleep", "9999999"],
+        detach=True,
+    )
+    exec = DockerExecutor(container)
+    output = exec.execute(["gadem"])
+    container.kill()
+    assert output is not None

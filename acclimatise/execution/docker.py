@@ -37,4 +37,4 @@ class DockerExecutor(Executor):
         except socket.timeout as e:
             return self.handle_timeout(e)
 
-        return (stdout or stderr).decode()
+        return (stdout or stderr or b"").decode()
