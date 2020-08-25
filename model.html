@@ -498,8 +498,8 @@ CliList.</p>
 
 <dl class="py class">
 <dt id="acclimatise.cli_types.CliDir">
-<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliDir</code><a class="headerlink" href="#acclimatise.cli_types.CliDir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliDir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliFileSystemType" title="acclimatise.cli_types.CliFileSystemType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliFileSystemType</span></code></a></p>
 <p>Takes a directory path</p>
 </dd></dl>
 
@@ -518,9 +518,22 @@ CliList.</p>
 
 <dl class="py class">
 <dt id="acclimatise.cli_types.CliFile">
-<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliFile</code><a class="headerlink" href="#acclimatise.cli_types.CliFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliFile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliFileSystemType" title="acclimatise.cli_types.CliFileSystemType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliFileSystemType</span></code></a></p>
 <p>Takes a file path</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="acclimatise.cli_types.CliFileSystemType">
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.cli_types.</code><code class="sig-name descname">CliFileSystemType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">output</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.cli_types.CliFileSystemType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#acclimatise.cli_types.CliType" title="acclimatise.cli_types.CliType"><code class="xref py py-class docutils literal notranslate"><span class="pre">acclimatise.cli_types.CliType</span></code></a></p>
+<p>Takes a directory / file path</p>
+<dl class="py attribute">
+<dt id="acclimatise.cli_types.CliFileSystemType.output">
+<code class="sig-name descname">output</code><em class="property">: bool</em><em class="property"> = False</em><a class="headerlink" href="#acclimatise.cli_types.CliFileSystemType.output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicator if it is input or output</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">

@@ -1,5 +1,9 @@
 Changelog
 =========
+1.0.2 (2020-08-25)
+------------------
+* Ensure we never return ``None`` from the ``DockerExecutor``
+
 1.0.1 (2020-08-22)
 ------------------
 * Enforce timeouts for all executors, including Docker
