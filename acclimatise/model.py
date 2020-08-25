@@ -370,12 +370,36 @@ class FlagSynonym:
         )
 
 
-int_re = re.compile("(int(eger)?)|size|length|max|min", flags=re.IGNORECASE)
-str_re = re.compile("str(ing)?", flags=re.IGNORECASE)
-float_re = re.compile("float|decimal", flags=re.IGNORECASE)
-bool_re = re.compile("bool(ean)?", flags=re.IGNORECASE)
-file_re = re.compile("file|path", flags=re.IGNORECASE)
-dir_re = re.compile("folder|directory", flags=re.IGNORECASE)
+int_re = re.compile(
+    r"\b((int(eger)?)|size|length|max|min|(num(ber)?))\b", flags=re.IGNORECASE
+)
+str_re = re.compile(r"\bstr(ing)?\b", flags=re.IGNORECASE)
+float_re = re.compile(r"\b(float|decimal)\b", flags=re.IGNORECASE)
+bool_re = re.compile(r"\bbool(ean)?\b", flags=re.IGNORECASE)
+file_re = re.compile(r"\b(file|path)\b", flags=re.IGNORECASE)
+input_re = re.compile(r"input", flags=re.IGNORECASE)
+output_re = re.compile(r"output", flags=re.IGNORECASE)
+dir_re = re.compile(r"\b(folder|directory)\b", flags=re.IGNORECASE)
+
+float_num_re = re.compile(
+    r"[+-]?(([0-9]*\.[0-9]+)|((?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)))",
+    flags=re.IGNORECASE,
+)
+int_num_re = re.compile(r"([+-]?[0-9]+)", flags=re.IGNORECASE)
+
+
+def distinguish_inout(
+    string, cls: typing.Type[cli_types.CliFileSystemType]
+) -> cli_types.CliFileSystemType:
+    """
+    distinguish input/output files/directories given a string
+    """
+    im = input_re.search(string)
+    om = output_re.search(string)
+    if not im and om:
+        return cls(output=True)
+    else:
+        return cls(output=False)
 
 
 def infer_type(string) -> typing.Optional[cli_types.CliType]:
@@ -383,18 +407,22 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
     Reads a string (argument description etc) to find hints about what type this argument might be. This is
     generally called by the get_type() methods
     """
-    if bool_re.match(string):
+    if bool_re.search(string):
         return cli_types.CliBoolean()
-    elif float_re.match(string):
+    elif float_re.search(string):
         return cli_types.CliFloat()
-    elif int_re.match(string):
+    elif int_re.search(string):
         return cli_types.CliInteger()
-    elif file_re.match(string):
-        return cli_types.CliFile()
-    elif dir_re.match(string):
-        return cli_types.CliDir()
-    elif str_re.match(string):
+    elif file_re.search(string):
+        return distinguish_inout(string, cli_types.CliFile)
+    elif dir_re.search(string):
+        return distinguish_inout(string, cli_types.CliDir)
+    elif str_re.search(string):
         return cli_types.CliString()
+    elif float_num_re.search(string):
+        return cli_types.CliFloat()
+    elif int_num_re.search(string):
+        return cli_types.CliInteger()
     else:
         return None
 
