@@ -1,5 +1,9 @@
 Changelog
 =========
+1.0.3 (2020-08-26)
+------------------
+* Add a hard timeout to the ``DockerExecutor``, even if it's producing output, e.g. the ``yes`` command.
+
 1.0.2 (2020-08-25)
 ------------------
 * Ensure we never return ``None`` from the ``DockerExecutor``
