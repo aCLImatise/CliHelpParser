@@ -45,3 +45,19 @@ def test_no_output():
     output = exec.execute(["gadem"])
     container.kill()
     assert output is not None
+
+
+@pytest.mark.timeout(360)
+def test_infinite_output():
+    """
+    Test that the DockerExecutor can kill the command if it's constantly producing output
+    """
+    client = docker.from_env(timeout=99999)
+    container = client.containers.run(
+        "ubuntu:latest", entrypoint=["sleep", "999999999"], detach=True,
+    )
+
+    exec = DockerExecutor(container)
+    output = exec.execute(["yes"])
+    container.kill()
+    assert output.startswith("y")
