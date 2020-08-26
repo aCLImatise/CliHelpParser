@@ -10,7 +10,7 @@ from docker.utils.socket import consume_socket_output, demux_adaptor, frames_ite
 from . import Executor
 
 
-def read_socket(sock, timeout: int = None) -> Tuple[str, str]:
+def read_socket(sock, timeout: int = None) -> Tuple[bytes, bytes]:
     """
     Reads from a docker socket, and returns everything
     :param sock: Docker socket to read from
@@ -18,7 +18,7 @@ def read_socket(sock, timeout: int = None) -> Tuple[str, str]:
     :return: A tuple of stdout, stderr
     """
     start_time = time.time()
-    out = ["", ""]
+    out = [b"", b""]
     for frame in frames_iter(sock, tty=False):
         frame = demux_adaptor(*frame)
 
