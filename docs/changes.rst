@@ -7,6 +7,7 @@ Changelog
 1.0.2 (2020-08-25)
 ------------------
 * Ensure we never return ``None`` from the ``DockerExecutor``
+* Add initial parsing of "output inputs". Thanks to `@bernt-matthias <https://github.com/bernt-matthias>`_ (`#15 <https://github.com/aCLImatise/CliHelpParser/pull/15>`_). However this information is not yet used in the converters.
 
 1.0.1 (2020-08-22)
 ------------------
