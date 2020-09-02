@@ -54,7 +54,11 @@ def test_name_to_words(gen):
     """
     Check that we can get an argument name even if the argument's flag is a symbol
     """
-    arg = Flag(synonyms=["--genomepaths"], description="", args=EmptyFlagArg(),)
+    arg = Flag(
+        synonyms=["--genomepaths"],
+        description="",
+        args=EmptyFlagArg(),
+    )
 
     name = gen.choose_variable_names([arg])[0].name
     assert "genome" in name
