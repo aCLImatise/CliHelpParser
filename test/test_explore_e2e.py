@@ -1,10 +1,12 @@
 import os
 import shutil
 import tempfile
+from unittest.mock import Mock, patch
 
 import pytest
 
 from acclimatise import explore_command
+from acclimatise.model import Command, Positional
 
 from .util import (
     HelpText,
@@ -64,3 +66,23 @@ def test_explore_bwa():
     assert len(mem.positional) == 3
     assert len(mem.subcommands) == 0
     assert len(mem.named) >= 30
+
+
+def test_repeat_positionals():
+    """
+    Test that, if we have multiple duplicate positionals, only the first is tested
+    """
+    parent = Command(
+        command=[],
+        positional=[
+            Positional(name="a", description="", position=i) for i in range(10)
+        ],
+    )
+    child = Command(command=[])
+
+    with patch("acclimatise.explore_command", new=lambda *args, **kwargs: child):
+        with patch("acclimatise.best_cmd", new=Mock(return_value=parent)) as mocked:
+            explore_command([])
+
+            # We should only call best_command once, since there's only one unique positional
+            assert mocked.call_count == 1
