@@ -41,6 +41,15 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/typeHLA.txt",
+            cmd=["typeHLA.js"],
+            positional=1,  # filek
+            named=208,  # yes, really
+            subcommands=2,  # shell and d8
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/samtools_pl.txt",
             cmd=["samtools.pl"],
             positional=0,
