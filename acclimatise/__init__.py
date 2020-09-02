@@ -196,9 +196,11 @@ def explore_command(
     if command.depth < max_depth:
         # By default we use the best parent help-flag
         child_flags = flags if try_subcommand_flags else [command.generated_using]
-        for positional in command.positional:
+
+        # Try each *unique* positional
+        for positional in {positional.name for positional in command.positional}:
             subcommand = explore_command(
-                cmd=cmd + [positional.name],
+                cmd=cmd + [positional],
                 flags=child_flags,
                 parent=command,
                 max_depth=max_depth,
@@ -207,7 +209,6 @@ def explore_command(
             )
             if subcommand is not None:
                 command.subcommands.append(subcommand)
-
                 # If we had any subcommands then we probably don't have any positionals, or at least don't care about them
                 command.positional = []
 
