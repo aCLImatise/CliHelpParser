@@ -36,7 +36,11 @@ element_char = arg.copy()  # Word(initChars=element_start_chars, bodyChars=)
 
 mandatory_element = (
     element_char.copy()
-    .setParseAction(lambda s, loc, toks: UsageElement(text=toks[0],))
+    .setParseAction(
+        lambda s, loc, toks: UsageElement(
+            text=toks[0],
+        )
+    )
     .setName("MandatoryElement")
 )
 """

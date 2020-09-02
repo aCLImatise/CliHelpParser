@@ -108,7 +108,9 @@ def explore(
     for format in formats:
         converter_cls = WrapperGenerator.choose_converter(format)
         converter = converter_cls(
-            generate_names=generate_names, ignore_positionals=not pos, case=case,
+            generate_names=generate_names,
+            ignore_positionals=not pos,
+            case=case,
         )
         list(converter.generate_tree(command, out_dir))
 
@@ -133,7 +135,9 @@ def pipe(cmd, pos, generate_names, case, format):
 
     converter_cls = WrapperGenerator.choose_converter(format)
     converter = converter_cls(
-        generate_names=generate_names, ignore_positionals=not pos, case=case,
+        generate_names=generate_names,
+        ignore_positionals=not pos,
+        case=case,
     )
     output = converter.save_to_string(command)
     print(output)

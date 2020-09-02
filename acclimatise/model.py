@@ -108,19 +108,19 @@ class Command:
         for command in self.subcommands:
             yield from command.command_tree()
 
-    positional: typing.List["Positional"]
+    command: typing.List[str]
+    """
+    The command line used to invoke this command, e.g. ["bwa", "mem"]
+    """
+
+    positional: typing.List["Positional"] = field(default_factory=list)
     """
     All positional arguments supported by this command
     """
 
-    named: typing.List["Flag"]
+    named: typing.List["Flag"] = field(default_factory=list)
     """
     All named arguments (flags) supported by this command
-    """
-
-    command: typing.List[str]
-    """
-    The command line used to invoke this command, e.g. ["bwa", "mem"]
     """
 
     parent: typing.Optional["Command"] = None

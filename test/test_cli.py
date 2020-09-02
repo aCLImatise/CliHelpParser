@@ -69,7 +69,14 @@ def test_explore_samtools_no_subcommands(runner, caplog):
     caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
         result = runner.invoke(
-            main, ["explore", "samtools", "--no-subcommands", "--out-dir", tempdir,],
+            main,
+            [
+                "explore",
+                "samtools",
+                "--no-subcommands",
+                "--out-dir",
+                tempdir,
+            ],
         )
         cli_worked(result)
         # Since we aren't looking at subcommands, there should be one file for each format
