@@ -62,7 +62,7 @@ def test_explore_bwa():
     command = explore_command(["bwa"], max_depth=1)
 
     # Check that we parsed bwa mem correctly
-    mem = command.subcommands[1]
+    mem = [cmd for cmd in command.subcommands if cmd.command[1] == "mem"][0]
     assert len(mem.positional) == 3
     assert len(mem.subcommands) == 0
     assert len(mem.named) >= 30
