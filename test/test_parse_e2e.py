@@ -1,6 +1,3 @@
-import tempfile
-from itertools import product
-
 import pytest
 from pkg_resources import resource_filename
 

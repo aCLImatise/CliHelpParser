@@ -6,6 +6,32 @@ import regex
 from acclimatise.flag_parser.elements import *
 
 
+class IndentCheckpoint(ParserElement):
+    def __init__(self, expr: ParserElement, indent_stack: List[int]):
+        super().__init__()
+        self.expr = expr
+        self.stack = indent_stack
+
+    def parseImpl(self, instring, loc, doActions=True):
+        # Backup the stack whenever we reach this element during the parse
+        backup_stack = self.stack[:]
+        try:
+            return self.expr._parse(instring, loc, doActions, callPreParse=False)
+        except ParseException as e:
+            # On a parse failure, reset the stack
+            self.stack[:] = backup_stack
+            raise e
+
+    def __str__(self):
+        if hasattr(self, "name"):
+            return self.name
+
+        if self.strRepr is None:
+            self.strRepr = "Indented[" + str(self.expr) + "]"
+
+        return self.strRepr
+
+
 def pick(*args):
     def action(s, loc, toks):
         if len(args) == 1:
@@ -68,7 +94,7 @@ class CliParser:
         return Command(command=name, positional=positional, named=named)
 
     def __init__(self, parse_positionals=True):
-        stack = [1]
+        self.stack = [0]
 
         def parse_description(s, lok, toks):
             text = " ".join([tok[0] for tok in toks[0]])
@@ -83,17 +109,20 @@ class CliParser:
 
             return text
 
-        self.indented_desc = (
-            customIndentedBlock(
-                desc_line, indentStack=stack, indent=True, terminal=True
-            )
-            .setParseAction(parse_description)
-            .setName("DescriptionBlock")
-        )
+        # self.indented_desc = (
+        #     customIndentedBlock(
+        #         desc_line, indentStack=stack, indent=True, terminal=True
+        #     )
+        #     .setParseAction(parse_description)
+        #     .setName("DescriptionBlock")
+        # )
 
-        self.description = self.indented_desc.copy().setName(
-            "description"
-        )  # Optional(one_line_desc) + Optional(indented_desc)
+        # self.description = self.indented_desc.copy().setName(
+        #     "description"
+        # )  # Optional(one_line_desc) + Optional(indented_desc)
+        self.description = SkipTo(LineEnd(), include=True).setParseAction(
+            lambda s, loc, toks: toks[0]
+        )
         # A description that takes up one line
         # one_line_desc = SkipTo(LineEnd())
 
@@ -130,9 +159,9 @@ class CliParser:
             # Give the correct position to the positional arguments
             processed = []
             counter = 0
-            flags = toks[0]
+            # flags = toks[0]
 
-            for (flag,) in flags:
+            for flag in toks:
                 if isinstance(flag, Positional):
                     flag.position = counter
                     counter += 1
@@ -150,16 +179,45 @@ class CliParser:
             else:
                 return toks
 
-        if parse_positionals:
-            block_element = self.flag ^ self.positional
-        else:
-            block_element = self.flag
+        block_element = self.flag | self.positional
 
-        self.flag_block = customIndentedBlock(
-            block_element, indentStack=stack, indent=True, lax=True
-        ).setName("FlagBlock")
+        # self.flag_block = customIndentedBlock(
+        #     block_element, indentStack=stack, indent=True, lax=True
+        # ).setName("FlagBlock")
+        # A flag block is one flag, followed by other flags, or more description lines. These description lines will
+        # get concatenated onto the previous flag.
+        # self.indent = (Empty() + Empty().setParseAction(self.check_sub_indent)).setName('Indent')
+        # self.peer = Empty().setParseAction(self.check_peer_indent).setName('Peer')
+        # self.unindent = Empty().setParseAction(self.check_unindent).setName('Unindent')
 
-        # self.flag_block.skipWhitespace = True
+        def visit_flag_block(s, loc, toks):
+            ret: List[Flag] = []
+
+            # The tokens are a mix of flags and lines of text. Append the text to the previous flag
+            for tok in toks:
+                if isinstance(tok, Flag):
+                    ret.append(tok)
+                else:
+                    ret[-1].description += "\n" + tok
+            return ret
+
+        self.flag_block = IndentCheckpoint(
+            (self.peer_indent() | self.indent())
+            + block_element
+            + (
+                block_element
+                | IndentCheckpoint(
+                    self.indent()
+                    + (self.peer_indent(allow_greater=True) + self.description)[...]
+                    + self.dedent(),
+                    indent_stack=self.stack,
+                )
+            )[...]
+            + self.dedent(),
+            indent_stack=self.stack,
+        ).setParseAction(
+            visit_flag_block
+        )  # self.flag_block.skipWhitespace = True
 
         self.colon_block = Literal(
             ":"
@@ -187,7 +245,7 @@ class CliParser:
         # A flag block can start with a colon, but then it must have 2 or more flags. If it starts with a newline it
         # only has to have one flag at least
         self.flags = (
-            self.newline_block ^ self.colon_block ^ self.unindented_flag_block
+            self.colon_block | self.newline_block  # ^ self.unindented_flag_block
         ).setName(
             "FlagList"
         )  # .leaveWhitespace()
@@ -197,3 +255,45 @@ class CliParser:
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(
             lambda s, loc, toks: toks[1:]
         )
+
+    def peer_indent(self, allow_greater=False):
+        """
+        :param allow_greater: Allow greater indent than the previous indentation, but don't add it to the stack
+        """
+
+        def check_peer_indent(s, l, t):
+            if l >= len(s):
+                return
+            curCol = col(l, s)
+            if allow_greater and curCol >= self.stack[-1]:
+                return
+            elif curCol == self.stack[-1]:
+                return
+            else:
+                if curCol > self.stack[-1]:
+                    raise ParseException(s, l, "illegal nesting")
+                raise ParseException(s, l, "not a peer entry")
+
+        return Empty().setParseAction(check_peer_indent).setName("Peer")
+
+    def indent(self):
+        def check_sub_indent(s, l, t):
+            curCol = col(l, s)
+            if curCol > self.stack[-1]:
+                self.stack.append(curCol)
+            else:
+                raise ParseException(s, l, "not a subentry")
+
+        return (Empty() + Empty().setParseAction(check_sub_indent)).setName("Indent")
+
+    def dedent(self):
+        def check_dedent(s, l, t):
+            if l >= len(s):
+                return
+            curCol = col(l, s)
+            if not (self.stack and curCol in self.stack):
+                raise ParseException(s, l, "not an unindent")
+            if curCol < self.stack[-1]:
+                self.stack.pop()
+
+        return Empty().setParseAction(check_dedent).setName("Unindent")

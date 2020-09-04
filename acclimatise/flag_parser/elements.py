@@ -1,6 +1,8 @@
 """
 Re-usable parser elements that aren't tied to the parser object
 """
+from typing import List
+
 from pyparsing import *
 
 from acclimatise.model import *
