@@ -85,7 +85,7 @@ def test_repeat_type(parser):
 
 
 def test_full_flags(parser):
-    results = parser.flag.scanString(
+    results = parser.flags.parseString(
         dedent(
             """
   -h, --help            show this help message and exit

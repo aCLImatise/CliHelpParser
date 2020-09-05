@@ -6,10 +6,10 @@ import regex
 from acclimatise.flag_parser.elements import *
 
 
-class IndentCheckpoint(ParserElement):
+class IndentCheckpoint(ParseElementEnhance):
     def __init__(self, expr: ParserElement, indent_stack: List[int]):
-        super().__init__()
-        self.expr = expr
+        super().__init__(expr)
+        # self.expr = expr
         self.stack = indent_stack
 
     def parseImpl(self, instring, loc, doActions=True):
@@ -43,9 +43,9 @@ def pick(*args):
 
 
 def unique_by(
-    iterable: typing.Iterable,
-    by: typing.Callable[[typing.Any], typing.Hashable],
-    keep: str = "first",
+        iterable: typing.Iterable,
+        by: typing.Callable[[typing.Any], typing.Hashable],
+        keep: str = "first",
 ) -> typing.List:
     """
     Removes duplicates from an iterable, by grouping by the result of the ``by`` argument, and then
@@ -94,10 +94,10 @@ class CliParser:
         return Command(command=name, positional=positional, named=named)
 
     def __init__(self, parse_positionals=True):
-        self.stack = [0]
+        self.stack = [1]
 
         def parse_description(s, lok, toks):
-            text = " ".join([tok[0] for tok in toks[0]])
+            text = "".join(toks)
             if all([non_alpha.match(word) for word in text.split()]):
                 raise ParseException(
                     "This can't be a description block if all text is numeric!"
@@ -120,9 +120,17 @@ class CliParser:
         # self.description = self.indented_desc.copy().setName(
         #     "description"
         # )  # Optional(one_line_desc) + Optional(indented_desc)
-        self.description = SkipTo(LineEnd(), include=True).setParseAction(
+
+        self.description_line = SkipTo(LineEnd(), include=True).setParseAction(
             lambda s, loc, toks: toks[0]
-        )
+        ).setWhitespaceChars(' \t')
+
+        self.description = (self.description_line + Optional(IndentCheckpoint(
+                    self.indent()
+                    + (self.peer_indent(allow_greater=True) + self.description_line)[...]
+                    + self.dedent(),
+                    indent_stack=self.stack,
+                ))).setParseAction(parse_description)
         # A description that takes up one line
         # one_line_desc = SkipTo(LineEnd())
 
@@ -132,8 +140,8 @@ class CliParser:
         # The entire flag documentation, including all synonyms and description
         self.flag = (
             (flag_synonyms + self.description)
-            .setName("flag")
-            .setParseAction(
+                .setName("flag")
+                .setParseAction(
                 lambda s, loc, toks: (
                     Flag.from_synonyms(synonyms=toks[0:-1], description=toks[-1])
                 )
@@ -144,8 +152,8 @@ class CliParser:
             # Unlike with flags, we have to be a bit pickier about what defines a positional because it's very easy
             # for a paragraph of regular text to be parsed as a positional. So we add a minimum of 2 spaces separation
             (cli_id + White(min=2).suppress() + self.description)
-            .setName("positional")
-            .setParseAction(
+                .setName("positional")
+                .setParseAction(
                 lambda s, loc, toks: Positional(
                     name=toks[0], description=toks[1], position=-1
                 )
@@ -195,28 +203,24 @@ class CliParser:
 
             # The tokens are a mix of flags and lines of text. Append the text to the previous flag
             for tok in toks:
-                if isinstance(tok, Flag):
+                if isinstance(tok, CliArgument):
                     ret.append(tok)
                 else:
                     ret[-1].description += "\n" + tok
             return ret
 
         self.flag_block = IndentCheckpoint(
-            (self.peer_indent() | self.indent())
-            + block_element
-            + (
-                block_element
-                | IndentCheckpoint(
-                    self.indent()
-                    + (self.peer_indent(allow_greater=True) + self.description)[...]
-                    + self.dedent(),
-                    indent_stack=self.stack,
-                )
-            )[...]
-            + self.dedent(),
+            (
+                # The entire block might be indented
+                (self.peer_indent() | self.indent())
+                # We have to have a flag at the start, otherwise it might just be a
+                # block of description text
+                + block_element[1, ...]
+                + self.dedent()
+            ).setParseAction(
+                visit_flag_block
+            ),
             indent_stack=self.stack,
-        ).setParseAction(
-            visit_flag_block
         )  # self.flag_block.skipWhitespace = True
 
         self.colon_block = Literal(
@@ -224,9 +228,9 @@ class CliParser:
         ).suppress() + self.flag_block.copy().setParseAction(visit_colon_block)
 
         self.newline_block = (
-            LineStart().leaveWhitespace()
-            + White().suppress()
-            + self.flag_block.copy().setParseAction(visit_flags)
+                LineStart().leaveWhitespace()
+                + White().suppress()
+                + self.flag_block.copy().setParseAction(visit_flags)
         )
 
         self.unindented_flag_block = LineStart().suppress() + OneOrMore(
@@ -245,7 +249,7 @@ class CliParser:
         # A flag block can start with a colon, but then it must have 2 or more flags. If it starts with a newline it
         # only has to have one flag at least
         self.flags = (
-            self.colon_block | self.newline_block  # ^ self.unindented_flag_block
+                self.colon_block | self.newline_block  # ^ self.unindented_flag_block
         ).setName(
             "FlagList"
         )  # .leaveWhitespace()

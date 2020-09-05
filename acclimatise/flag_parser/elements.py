@@ -236,6 +236,8 @@ Command: index         index sequences in the FASTA format
 
 flag_synonyms = delimitedList(flag_with_arg, delim=synonym_delim).setName(
     "FlagSynonyms"
+).setParseAction(lambda s, loc, toks:
+toks
 )
 """
 When the help lists multiple synonyms for a flag, e.g:
