@@ -15,7 +15,7 @@ from acclimatise.execution import Executor
 from acclimatise.execution.local import LocalExecutor
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import Command, Flag
-from acclimatise.usage_parser import parse_usage
+from acclimatise.usage_parser.parser import UsageParser
 
 logger = logging.getLogger("acclimatise")
 
@@ -56,7 +56,7 @@ def parse_help(
     :param parse_positionals: If false, don't parse positional arguments
     """
     help_command = CliParser().parse_command(name=cmd, cmd=text)
-    usage_command = parse_usage(cmd, text)
+    usage_command = UsageParser().parse_usage(cmd, text)
 
     # Combine the two commands by picking from the help_command where possible, otherwise falling back on the usage
     fields = dict(
