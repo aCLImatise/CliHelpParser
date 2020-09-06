@@ -43,9 +43,9 @@ def pick(*args):
 
 
 def unique_by(
-        iterable: typing.Iterable,
-        by: typing.Callable[[typing.Any], typing.Hashable],
-        keep: str = "first",
+    iterable: typing.Iterable,
+    by: typing.Callable[[typing.Any], typing.Hashable],
+    keep: str = "first",
 ) -> typing.List:
     """
     Removes duplicates from an iterable, by grouping by the result of the ``by`` argument, and then
@@ -77,6 +77,9 @@ multi_space = regex.compile(r"\b[\s]{2,}\b")
 non_alpha = regex.compile(r"^[^[:alpha:]]+$")
 
 
+# The reason we have a parser class here instead of just a function is so that we can store the parser state, in
+# particular the indentation stack. Without this, we would have to use a global stack which would be even more
+# worrying
 class CliParser:
     def parse_command(self, cmd, name) -> Command:
         all_flags = list(itertools.chain.from_iterable(self.flags.searchString(cmd)))
@@ -113,59 +116,43 @@ class CliParser:
 
             return text
 
-        # self.indented_desc = (
-        #     customIndentedBlock(
-        #         desc_line, indentStack=stack, indent=True, terminal=True
-        #     )
-        #     .setParseAction(parse_description)
-        #     .setName("DescriptionBlock")
-        # )
-
-        # self.description = self.indented_desc.copy().setName(
-        #     "description"
-        # )  # Optional(one_line_desc) + Optional(indented_desc)
-
         def visit_description_line(s, loc, toks):
             return toks[0].strip()
-        self.description_line = SkipTo(LineEnd(), include=True).setParseAction(
-            visit_description_line
-        ).setWhitespaceChars(' \t')
 
-        self.description = self.description_line
+        self.description_line = (
+            SkipTo(LineEnd(), include=True)
+            .setParseAction(visit_description_line)
+            .setWhitespaceChars(" \t")
+        )
+
         def visit_mandatory_description(s, loc, toks):
             text = toks[0].strip()
             if len(text.strip()) == 0:
-                raise ParseException('A positional argument must have a description')
-        self.mandatory_description = self.description_line.copy().setParseAction(visit_mandatory_description)
-        # (self.description_line + Optional(IndentCheckpoint(
-        #     self.indent()
-        #     + (self.peer_indent(allow_greater=True) + self.description_line)[...]
-        #     + self.dedent(precise=False),
-        #     indent_stack=self.stack,
-        # ))).setParseAction(parse_description)
-        # A description that takes up one line
-        # one_line_desc = SkipTo(LineEnd())
+                raise ParseException("A positional argument must have a description")
 
-        # A flag description that makes up an indented block
-        # originalTextFor(SkipTo(flag_prefix ^ LineEnd()))
+        self.mandatory_description = self.description_line.copy().setParseAction(
+            visit_mandatory_description
+        )
 
-        # The entire flag documentation, including all synonyms and description
         self.flag = (
-            (flag_synonyms + self.description)
-                .setName("flag")
-                .setParseAction(
+            (flag_synonyms + self.description_line)
+            .setName("flag")
+            .setParseAction(
                 lambda s, loc, toks: (
                     Flag.from_synonyms(synonyms=toks[0:-1], description=toks[-1])
                 )
             )
-        ).setDebug()
+        )
+        """
+        The entire flag documentation, including all synonyms and description
+        """
 
         self.positional = (
             # Unlike with flags, we have to be a bit pickier about what defines a positional because it's very easy
             # for a paragraph of regular text to be parsed as a positional. So we add a minimum of 2 spaces separation
             (positional_name + White(min=2).suppress() + self.mandatory_description)
-                .setName("positional")
-                .setParseAction(
+            .setName("positional")
+            .setParseAction(
                 lambda s, loc, toks: Positional(
                     name=toks[0], description=toks[1], position=-1
                 )
@@ -199,16 +186,31 @@ class CliParser:
             else:
                 return toks
 
-        block_element = self.flag | self.positional
+        self.block_element = self.flag | self.positional
 
-        # self.flag_block = customIndentedBlock(
-        #     block_element, indentStack=stack, indent=True, lax=True
-        # ).setName("FlagBlock")
-        # A flag block is one flag, followed by other flags, or more description lines. These description lines will
-        # get concatenated onto the previous flag.
-        # self.indent = (Empty() + Empty().setParseAction(self.check_sub_indent)).setName('Indent')
-        # self.peer = Empty().setParseAction(self.check_peer_indent).setName('Peer')
-        # self.unindent = Empty().setParseAction(self.check_unindent).setName('Unindent')
+        def visit_description_block(s, loc, toks):
+            return "\n".join(toks)
+
+        self.description_block = IndentCheckpoint(
+            self.indent()
+            + (self.peer_indent(allow_greater=True) + self.description_line)[1, ...]
+            + self.dedent(precise=False),
+            indent_stack=self.stack,
+        ).setParseAction(visit_description_block)
+        """
+        The description block is the section of indented text after a flag. e.g. in this example:
+            --use_strict (enforce strict mode)
+                  type: bool  default: false
+        The description block is "type: bool  default: false"
+        """
+
+        self.indented_flag = IndentCheckpoint(
+            self.update_indent() + self.block_element, indent_stack=self.stack
+        )
+        """
+        Each flag can actually be at any indentation level, but we need to update the indent stack whenever we find one,
+        so that we can identify the indented description block
+        """
 
         def visit_flag_block(s, loc, toks):
             ret: List[Flag] = []
@@ -220,37 +222,34 @@ class CliParser:
                 else:
                     # Add a newline if we already have some content
                     if len(ret[-1].description) > 0:
-                        ret[-1].description += '\n'
-                    ret[-1].description +=  tok
+                        ret[-1].description += "\n"
+                    ret[-1].description += tok
             return ret
 
-        # self.optionally_indented = self.update_indent() + block_element.setParseAction(visit_flag_block).setDebug()# + self.update_indent()
         self.flag_block = (
-        (
-            IndentCheckpoint(self.update_indent() + block_element, indent_stack=self.stack)
-            |
-            (self.indent(update=False) + self.description)
-        )[1, ...]).setParseAction(visit_flag_block)
-        # self.flag_block = IndentCheckpoint(
-        #     (
-        #         # Indenting the flag block is optional
-        #             (self.indent() + block_element[1, ...] + self.dedent()) |
-        #             block_element[1, ...]
-        #     ).setParseAction(
-        #         visit_flag_block
-        #     ),
-        #     indent_stack=self.stack,
-        # )  # self.flag_block.skipWhitespace = True
+            self.indented_flag + (self.indented_flag | self.description_block)[...]
+        ).setParseAction(visit_flag_block)
+        """
+        A block of flags is one or more flags, each followed by a description block. 
+        The grammar is written this way so that parsing a flag is *always* prioritised over the description block, 
+        preventing certain indented flags from being missed
+        """
 
         self.colon_block = Literal(
             ":"
         ).suppress() + self.flag_block.copy().addParseAction(visit_colon_block)
+        """
+        When the block is introduced by a colon, we can be more lax about parsing
+        """
 
         self.newline_block = (
-                LineStart().leaveWhitespace()
-                + White().suppress()
-                + self.flag_block.copy().addParseAction(visit_flags)
+            LineStart().leaveWhitespace()
+            + White().suppress()
+            + self.flag_block.copy().addParseAction(visit_flags)
         )
+        """
+        When the block is introduced by a newline, we have to be quite strict about its contents
+        """
 
         self.unindented_flag_block = LineStart().suppress() + OneOrMore(
             self.flag
@@ -268,7 +267,7 @@ class CliParser:
         # A flag block can start with a colon, but then it must have 2 or more flags. If it starts with a newline it
         # only has to have one flag at least
         self.flags = (
-                self.colon_block | self.newline_block  # ^ self.unindented_flag_block
+            self.colon_block | self.newline_block  # ^ self.unindented_flag_block
         ).setName(
             "FlagList"
         )  # .leaveWhitespace()
@@ -324,6 +323,7 @@ class CliParser:
         """
         :param update: If true, update the stack, otherwise simply check for an indent
         """
+
         def check_sub_indent(s, l, t):
             curCol = col(l, s)
             if curCol > self.stack[-1]:

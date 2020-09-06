@@ -70,6 +70,13 @@ def test_pisces_indent_dedent(parser):
 
     assert len(flags) == 5
 
+    assert isinstance(flags[0].args, SimpleFlagArg)
+    assert flags[0].synonyms == ["-i", "--intervalpaths"]
+
+    assert isinstance(flags[3].args, SimpleFlagArg)
+    assert flags[3].synonyms == ["-d", "--debug"]
+    assert flags[3].description == "BOOL"
+
 
 def test_pisces_triple_long_flag_synonyms(parser):
     cmd = "--minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>"
