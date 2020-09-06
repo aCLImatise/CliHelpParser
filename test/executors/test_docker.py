@@ -1,6 +1,6 @@
+import docker
 import pytest
 
-import docker
 from acclimatise.execution.docker import DockerExecutor
 
 

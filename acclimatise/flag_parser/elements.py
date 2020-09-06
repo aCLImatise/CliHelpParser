@@ -86,7 +86,9 @@ def customIndentedBlock(
 
 cli_id = Word(initChars=element_start_chars, bodyChars=element_body_chars)
 
-positional_name = Word(initChars=element_start_chars, bodyChars=element_body_chars, min=2)
+positional_name = Word(
+    initChars=element_start_chars, bodyChars=element_body_chars, min=2
+)
 
 # short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
 # """A short flag has only a single dash and single character, e.g. `-m`"""

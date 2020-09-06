@@ -155,7 +155,9 @@ def test_choice(parser):
 
 
 def test_noarg(parser):
-    flag = parser.flag_block.parseString("-q, --quiet           suppress progress report")[0]
+    flag = parser.flag_block.parseString(
+        "-q, --quiet           suppress progress report"
+    )[0]
     assert flag.longest_synonym == "--quiet"
     assert len(flag.synonyms) == 2
     assert isinstance(flag.args, EmptyFlagArg)
