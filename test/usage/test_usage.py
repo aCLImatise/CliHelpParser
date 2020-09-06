@@ -1,3 +1,5 @@
+from itertools import chain
+
 import pytest
 
 from acclimatise.flag_parser.elements import (
@@ -6,7 +8,6 @@ from acclimatise.flag_parser.elements import (
     list_type_arg,
 )
 from acclimatise.model import Flag, RepeatFlagArg, SimpleFlagArg
-from acclimatise.usage_parser import parse_usage
 from acclimatise.usage_parser.elements import (  # short_flag_list,
     stack,
     usage,
@@ -75,13 +76,13 @@ def test_samtools_merge_list_args():
     assert el[0].repeatable
 
 
-def test_samtools_merge_full(process):
+def test_samtools_merge_full(process, usage_parser):
     text = process(
         """
     Usage: samtools merge [-nurlf] [-h inh.sam] [-b <bamlist.fofn>] <out.bam> <in1.bam> [<in2.bam> ... <inN.bam>]
     """
     )
-    command = parse_usage(cmd=["samtools", "merge"], text=text)
+    command = usage_parser.parse_usage(cmd=["samtools", "merge"], usage=text)
 
     assert len(command.positional) == 3
     assert command.positional[0].name == "out.bam"
@@ -93,16 +94,16 @@ def test_samtools_merge_full(process):
     assert command.named[2].longest_synonym == "-b"
 
 
-def test_pisces_usage():
+def test_pisces_usage(usage_parser):
     text = "USAGE: dotnet Pisces.dll -bam <bam path> -g <genome path>"
-    command = parse_usage(["pisces"], text)
+    command = usage_parser.parse_usage(["pisces"], text)
     assert len(command.named) == 2
     assert len(command.positional) == 0
     assert command.named[0].longest_synonym == "-bam"
     assert command.named[1].longest_synonym == "-g"
 
 
-def test_trailing_text(process):
+def test_trailing_text(process, usage_parser):
     """
     Tests that the usage parser will not parse text after the usage section has ended
     """
@@ -115,17 +116,17 @@ def test_trailing_text(process):
     to it. See http://htseq.readthedocs.io/en/master/count.html for details.
     """
     )
-    command = parse_usage(["htseq-count"], text)
+    command = usage_parser.parse_usage(["htseq-count"], text)
     # We don't count either the command "htseq-count", or "[options]" as an argument, so there are only 2 positionals
     assert len(command.positional) == 2
 
 
-def test_bwt2sa():
+def test_bwt2sa(usage_parser):
     text = """
 Usage: bwa bwt2sa [-i 32] <in.bwt> <out.sa>
     """
 
-    command = parse_usage(["bwa", "bwt2sa"], text)
+    command = usage_parser.parse_usage(["bwa", "bwt2sa"], text)
 
     # in and out
     assert len(command.positional) == 2
@@ -148,7 +149,7 @@ def test_bedtools_multiinter_flag():
     assert arg.name == "-i"
 
 
-def test_bedtools_multiinter():
+def test_bedtools_multiinter(usage_parser):
     text = """
 Summary: Identifies common intervals among multiple
 	 BED/GFF/VCF files.
@@ -160,7 +161,7 @@ Options:
 	-cluster	Invoke Ryan Layers's clustering algorithm.
     """
 
-    command = parse_usage(["bedtools", "multiinter"], text)
+    command = usage_parser.parse_usage(["bedtools", "multiinter"], text)
 
     assert len(command.positional) == 0
     assert len(command.named) == 1
@@ -168,17 +169,45 @@ Options:
     assert isinstance(command.named[0].args, RepeatFlagArg)
 
 
-def test_samtools_dict():
+def test_samtools_dict(usage_parser):
     text = """
 Usage:   samtools dict [options] <file.fa|file.fa.gz>
     """
-    command = parse_usage(["samtools", "dict"], text, debug=True)
+    command = usage_parser.parse_usage(["samtools", "dict"], text, debug=True)
     assert len(command.positional) == 1
 
 
-def test_mid_line_usage():
+def test_mid_line_usage(usage_parser):
     text = """
     Can't open --usage: No such file or directory at /usr/bin/samtools.pl line 50.
     """
-    command = parse_usage(["samtools.pl", "showALEN"], text, debug=True)
+    command = usage_parser.parse_usage(["samtools.pl", "showALEN"], text, debug=True)
     assert command.empty
+
+
+def test_usage_description_block(usage_parser):
+    text = """
+Usage:
+  shell [options] -e string
+    execute string in V8
+  shell [options] file1 file2 ... filek
+    run JavaScript scripts in file1, file2, ..., filek
+  shell [options]
+  shell [options] --shell [file1 file2 ... filek]
+    run an interactive JavaScript shell
+  d8 [options] file1 file2 ... filek
+  d8 [options]
+  d8 [options] --shell [file1 file2 ... filek]
+    run the new debugging shell
+    """
+    command = usage_parser.parse_usage(["typeHLA.js"], text, debug=True)
+
+    positional_names = {pos.name for pos in command.positional}
+    flag_synonyms = set(chain.from_iterable([flag.synonyms for flag in command.named]))
+
+    assert "shell" in positional_names
+    assert "filek" in positional_names
+    assert "d8" in positional_names
+
+    assert "--shell" in flag_synonyms
+    assert "-e" in flag_synonyms

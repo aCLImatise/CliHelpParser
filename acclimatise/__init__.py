@@ -55,9 +55,7 @@ def parse_help(
     :param text: The help text to parse
     :param parse_positionals: If false, don't parse positional arguments
     """
-    help_command = CliParser(parse_positionals=parse_positionals).parse_command(
-        name=cmd, cmd=text
-    )
+    help_command = CliParser().parse_command(name=cmd, cmd=text)
     usage_command = parse_usage(cmd, text)
 
     # Combine the two commands by picking from the help_command where possible, otherwise falling back on the usage

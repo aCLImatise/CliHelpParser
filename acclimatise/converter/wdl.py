@@ -25,7 +25,7 @@ def escape_wdl_str(text: str):
     """
     Escape literal quotes in a Python string, to become suitable for WDL
     """
-    return text.replace('"', '\\"')
+    return text.replace('"', '\\"').replace("\n", "\\n")
 
 
 def flag_to_command_input(

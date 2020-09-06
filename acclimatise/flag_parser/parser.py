@@ -4,32 +4,7 @@ from operator import attrgetter
 import regex
 
 from acclimatise.flag_parser.elements import *
-
-
-class IndentCheckpoint(ParseElementEnhance):
-    def __init__(self, expr: ParserElement, indent_stack: List[int]):
-        super().__init__(expr)
-        # self.expr = expr
-        self.stack = indent_stack
-
-    def parseImpl(self, instring, loc, doActions=True):
-        # Backup the stack whenever we reach this element during the parse
-        backup_stack = self.stack[:]
-        try:
-            return self.expr._parse(instring, loc, doActions, callPreParse=False)
-        except ParseException as e:
-            # On a parse failure, reset the stack
-            self.stack[:] = backup_stack
-            raise e
-
-    def __str__(self):
-        if hasattr(self, "name"):
-            return self.name
-
-        if self.strRepr is None:
-            self.strRepr = "Indented[" + str(self.expr) + "]"
-
-        return self.strRepr
+from acclimatise.parser import IndentCheckpoint, IndentParserMixin
 
 
 def pick(*args):
@@ -80,7 +55,7 @@ non_alpha = regex.compile(r"^[^[:alpha:]]+$")
 # The reason we have a parser class here instead of just a function is so that we can store the parser state, in
 # particular the indentation stack. Without this, we would have to use a global stack which would be even more
 # worrying
-class CliParser:
+class CliParser(IndentParserMixin):
     def parse_command(self, cmd, name) -> Command:
         all_flags = list(itertools.chain.from_iterable(self.flags.searchString(cmd)))
         # If flags aren't unique, they likely aren't real flags
@@ -96,8 +71,8 @@ class CliParser:
         )
         return Command(command=name, positional=positional, named=named)
 
-    def __init__(self, parse_positionals=True):
-        self.stack = [1]
+    def __init__(self):
+        super().__init__()
 
         def parse_description(s, lok, toks):
             text = "".join(toks)
@@ -116,26 +91,17 @@ class CliParser:
 
             return text
 
-        def visit_description_line(s, loc, toks):
-            return toks[0].strip()
-
-        self.description_line = (
-            SkipTo(LineEnd(), include=True)
-            .setParseAction(visit_description_line)
-            .setWhitespaceChars(" \t")
-        )
-
         def visit_mandatory_description(s, loc, toks):
             text = toks[0].strip()
             if len(text.strip()) == 0:
                 raise ParseException("A positional argument must have a description")
 
-        self.mandatory_description = self.description_line.copy().setParseAction(
+        self.mandatory_description = description_line.copy().setParseAction(
             visit_mandatory_description
         )
 
         self.flag = (
-            (flag_synonyms + self.description_line)
+            (flag_synonyms + description_line)
             .setName("flag")
             .setParseAction(
                 lambda s, loc, toks: (
@@ -193,7 +159,7 @@ class CliParser:
 
         self.description_block = IndentCheckpoint(
             self.indent()
-            + (self.peer_indent(allow_greater=True) + self.description_line)[1, ...]
+            + (self.peer_indent(allow_greater=True) + description_line)[1, ...]
             + self.dedent(precise=False),
             indent_stack=self.stack,
         ).setParseAction(visit_description_block)
@@ -277,71 +243,3 @@ class CliParser:
         self.flag_section = (self.flag_section_header + self.flags).setParseAction(
             lambda s, loc, toks: toks[1:]
         )
-
-    def update_indent(self):
-        def check_indent(s, l, t):
-            if l >= len(s):
-                return
-            curCol = col(l, s)
-            last_indent = self.stack[-1]
-            if curCol > last_indent:
-                # Option 1: this is an indent
-                self.stack.append(curCol)
-            elif curCol in self.stack:
-                # Option 1: this is a dedent that we've seen before
-                while curCol < self.stack[-1]:
-                    self.stack.pop()
-            elif curCol < last_indent:
-                # Option 3: this is a dedent that we haven't seen before
-                self.stack.pop()
-                self.stack.append(curCol)
-            return None
-
-        return (Empty() + Empty()).setParseAction(check_indent).setName("Update")
-
-    def peer_indent(self, allow_greater=False):
-        """
-        :param allow_greater: Allow greater indent than the previous indentation, but don't add it to the stack
-        """
-
-        def check_peer_indent(s, l, t):
-            if l >= len(s):
-                return
-            curCol = col(l, s)
-            if allow_greater and curCol >= self.stack[-1]:
-                return
-            elif curCol == self.stack[-1]:
-                return
-            else:
-                if curCol > self.stack[-1]:
-                    raise ParseException(s, l, "illegal nesting")
-                raise ParseException(s, l, "not a peer entry")
-
-        return Empty().setParseAction(check_peer_indent).setName("Peer")
-
-    def indent(self, update=True):
-        """
-        :param update: If true, update the stack, otherwise simply check for an indent
-        """
-
-        def check_sub_indent(s, l, t):
-            curCol = col(l, s)
-            if curCol > self.stack[-1]:
-                if update:
-                    self.stack.append(curCol)
-            else:
-                raise ParseException(s, l, "not a subentry")
-
-        return (Empty() + Empty().setParseAction(check_sub_indent)).setName("Indent")
-
-    def dedent(self, precise=True):
-        def check_dedent(s, l, t):
-            if l >= len(s):
-                return
-            curCol = col(l, s)
-            if precise and self.stack and curCol not in self.stack:
-                raise ParseException(s, l, "not an unindent")
-            if curCol < self.stack[-1]:
-                self.stack.pop()
-
-        return Empty().setParseAction(check_dedent).setName("Unindent")

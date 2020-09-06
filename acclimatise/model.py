@@ -133,6 +133,13 @@ class Command:
     A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
     """
 
+    usage: typing.List["acclimatise.usage_parser.model.UsageInstance"] = field(
+        default_factory=list
+    )
+    """
+    Different usage examples provided by the help
+    """
+
     help_flag: typing.Optional["Flag"] = None
     """
     If identified, this is the flag that returns help text
