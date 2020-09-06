@@ -9,7 +9,7 @@ def test_podchecker_flags(parser):
             increasing to level two causes flagging of unescaped "<,>"
             characters.
     """
-    flag = parser.flag.parseString(cmd)
+    flag = parser.flag_block.parseString(cmd)
     assert isinstance(flag[0], Flag)
     assert len(flag[0].synonyms) == 2
 

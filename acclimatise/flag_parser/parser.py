@@ -98,10 +98,14 @@ class CliParser:
 
         def parse_description(s, lok, toks):
             text = "".join(toks)
+            if len(text.strip()) == 0:
+                return ""
+
             if all([non_alpha.match(word) for word in text.split()]):
                 raise ParseException(
                     "This can't be a description block if all text is numeric!"
                 )
+
             if len(multi_space.findall(text)) > len(single_space.findall(text)):
                 raise ParseException(
                     "This description block has more unusual spaces than word spaces, it probably isn't a real description"
@@ -121,16 +125,24 @@ class CliParser:
         #     "description"
         # )  # Optional(one_line_desc) + Optional(indented_desc)
 
+        def visit_description_line(s, loc, toks):
+            return toks[0].strip()
         self.description_line = SkipTo(LineEnd(), include=True).setParseAction(
-            lambda s, loc, toks: toks[0]
+            visit_description_line
         ).setWhitespaceChars(' \t')
 
-        self.description = (self.description_line + Optional(IndentCheckpoint(
-                    self.indent()
-                    + (self.peer_indent(allow_greater=True) + self.description_line)[...]
-                    + self.dedent(),
-                    indent_stack=self.stack,
-                ))).setParseAction(parse_description)
+        self.description = self.description_line
+        def visit_mandatory_description(s, loc, toks):
+            text = toks[0].strip()
+            if len(text.strip()) == 0:
+                raise ParseException('A positional argument must have a description')
+        self.mandatory_description = self.description_line.copy().setParseAction(visit_mandatory_description)
+        # (self.description_line + Optional(IndentCheckpoint(
+        #     self.indent()
+        #     + (self.peer_indent(allow_greater=True) + self.description_line)[...]
+        #     + self.dedent(precise=False),
+        #     indent_stack=self.stack,
+        # ))).setParseAction(parse_description)
         # A description that takes up one line
         # one_line_desc = SkipTo(LineEnd())
 
@@ -146,12 +158,12 @@ class CliParser:
                     Flag.from_synonyms(synonyms=toks[0:-1], description=toks[-1])
                 )
             )
-        )
+        ).setDebug()
 
         self.positional = (
             # Unlike with flags, we have to be a bit pickier about what defines a positional because it's very easy
             # for a paragraph of regular text to be parsed as a positional. So we add a minimum of 2 spaces separation
-            (cli_id + White(min=2).suppress() + self.description)
+            (positional_name + White(min=2).suppress() + self.mandatory_description)
                 .setName("positional")
                 .setParseAction(
                 lambda s, loc, toks: Positional(
@@ -206,31 +218,38 @@ class CliParser:
                 if isinstance(tok, CliArgument):
                     ret.append(tok)
                 else:
-                    ret[-1].description += "\n" + tok
+                    # Add a newline if we already have some content
+                    if len(ret[-1].description) > 0:
+                        ret[-1].description += '\n'
+                    ret[-1].description +=  tok
             return ret
 
-        self.flag_block = IndentCheckpoint(
-            (
-                # The entire block might be indented
-                (self.peer_indent() | self.indent())
-                # We have to have a flag at the start, otherwise it might just be a
-                # block of description text
-                + block_element[1, ...]
-                + self.dedent()
-            ).setParseAction(
-                visit_flag_block
-            ),
-            indent_stack=self.stack,
-        )  # self.flag_block.skipWhitespace = True
+        # self.optionally_indented = self.update_indent() + block_element.setParseAction(visit_flag_block).setDebug()# + self.update_indent()
+        self.flag_block = (
+        (
+            IndentCheckpoint(self.update_indent() + block_element, indent_stack=self.stack)
+            |
+            (self.indent(update=False) + self.description)
+        )[1, ...]).setParseAction(visit_flag_block)
+        # self.flag_block = IndentCheckpoint(
+        #     (
+        #         # Indenting the flag block is optional
+        #             (self.indent() + block_element[1, ...] + self.dedent()) |
+        #             block_element[1, ...]
+        #     ).setParseAction(
+        #         visit_flag_block
+        #     ),
+        #     indent_stack=self.stack,
+        # )  # self.flag_block.skipWhitespace = True
 
         self.colon_block = Literal(
             ":"
-        ).suppress() + self.flag_block.copy().setParseAction(visit_colon_block)
+        ).suppress() + self.flag_block.copy().addParseAction(visit_colon_block)
 
         self.newline_block = (
                 LineStart().leaveWhitespace()
                 + White().suppress()
-                + self.flag_block.copy().setParseAction(visit_flags)
+                + self.flag_block.copy().addParseAction(visit_flags)
         )
 
         self.unindented_flag_block = LineStart().suppress() + OneOrMore(
@@ -260,6 +279,27 @@ class CliParser:
             lambda s, loc, toks: toks[1:]
         )
 
+    def update_indent(self):
+        def check_indent(s, l, t):
+            if l >= len(s):
+                return
+            curCol = col(l, s)
+            last_indent = self.stack[-1]
+            if curCol > last_indent:
+                # Option 1: this is an indent
+                self.stack.append(curCol)
+            elif curCol in self.stack:
+                # Option 1: this is a dedent that we've seen before
+                while curCol < self.stack[-1]:
+                    self.stack.pop()
+            elif curCol < last_indent:
+                # Option 3: this is a dedent that we haven't seen before
+                self.stack.pop()
+                self.stack.append(curCol)
+            return None
+
+        return (Empty() + Empty()).setParseAction(check_indent).setName("Update")
+
     def peer_indent(self, allow_greater=False):
         """
         :param allow_greater: Allow greater indent than the previous indentation, but don't add it to the stack
@@ -280,22 +320,26 @@ class CliParser:
 
         return Empty().setParseAction(check_peer_indent).setName("Peer")
 
-    def indent(self):
+    def indent(self, update=True):
+        """
+        :param update: If true, update the stack, otherwise simply check for an indent
+        """
         def check_sub_indent(s, l, t):
             curCol = col(l, s)
             if curCol > self.stack[-1]:
-                self.stack.append(curCol)
+                if update:
+                    self.stack.append(curCol)
             else:
                 raise ParseException(s, l, "not a subentry")
 
         return (Empty() + Empty().setParseAction(check_sub_indent)).setName("Indent")
 
-    def dedent(self):
+    def dedent(self, precise=True):
         def check_dedent(s, l, t):
             if l >= len(s):
                 return
             curCol = col(l, s)
-            if not (self.stack and curCol in self.stack):
+            if precise and self.stack and curCol not in self.stack:
                 raise ParseException(s, l, "not an unindent")
             if curCol < self.stack[-1]:
                 self.stack.pop()

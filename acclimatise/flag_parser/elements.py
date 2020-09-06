@@ -86,6 +86,8 @@ def customIndentedBlock(
 
 cli_id = Word(initChars=element_start_chars, bodyChars=element_body_chars)
 
+positional_name = Word(initChars=element_start_chars, bodyChars=element_body_chars, min=2)
+
 # short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
 # """A short flag has only a single dash and single character, e.g. `-m`"""
 # long_flag = originalTextFor(Literal('--') + cli_id)
@@ -236,8 +238,6 @@ Command: index         index sequences in the FASTA format
 
 flag_synonyms = delimitedList(flag_with_arg, delim=synonym_delim).setName(
     "FlagSynonyms"
-).setParseAction(lambda s, loc, toks:
-toks
 )
 """
 When the help lists multiple synonyms for a flag, e.g:

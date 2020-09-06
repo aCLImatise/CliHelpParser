@@ -33,7 +33,7 @@ def test_long_short_synonyms(parser):
 
 
 def test_long_short_desc(parser):
-    flag = parser.flag.parseString(
+    flag = parser.flag_block.parseString(
         dedent(
             """
         -i IDATTR, --idattr IDATTR
@@ -46,7 +46,7 @@ def test_long_short_desc(parser):
 
 
 def test_long_short_choices(parser):
-    flag = parser.flag.parseString(
+    flag = parser.flag_block.parseString(
         dedent(
             """
           -m {union,intersection-strict,intersection-nonempty}, --mode {union,intersection-strict,intersection-nonempty}
@@ -155,7 +155,7 @@ def test_choice(parser):
 
 
 def test_noarg(parser):
-    flag = parser.flag.parseString("-q, --quiet           suppress progress report")[0]
+    flag = parser.flag_block.parseString("-q, --quiet           suppress progress report")[0]
     assert flag.longest_synonym == "--quiet"
     assert len(flag.synonyms) == 2
     assert isinstance(flag.args, EmptyFlagArg)

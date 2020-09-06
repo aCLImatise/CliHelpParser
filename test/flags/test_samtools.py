@@ -9,7 +9,7 @@ def test_samtools_bedcov_j(parser):
     text = """
       -j                  do not include deletions (D) and ref skips (N) in bedcov computation
     """
-    flag = parser.flag.parseString(text)[0]
+    flag = parser.flag_block.parseString(text)[0]
     assert isinstance(flag, Flag)
     assert flag.synonyms[0] == "-j"
 
