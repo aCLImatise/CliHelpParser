@@ -87,8 +87,8 @@ def test_pisces_triple_long_flag_synonyms(parser):
 
 def test_pisces_triple_long_flag(parser):
     cmd = """
---minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>
-                     FLOAT MinimumFrequency to call a variant
+    --minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>
+                         FLOAT MinimumFrequency to call a variant
     """
     flag = parser.flag_block.parseString(cmd)[0]
 
@@ -105,8 +105,8 @@ def test_pisces_quad_flag_synonyms(parser):
 
 def test_pisces_quad_flag(parser):
     cmd = """
--c, --mindp, --mindepth, --mincoverage <INT>
-                         INT Minimum depth to call a variant
+    -c, --mindp, --mindepth, --mincoverage <INT>
+                             INT Minimum depth to call a variant
     """
     flag = parser.flag_block.parseString(cmd)[0]
 

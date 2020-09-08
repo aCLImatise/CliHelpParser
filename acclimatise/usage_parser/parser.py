@@ -35,13 +35,11 @@ class UsageParser(IndentParserMixin):
         ).setParseAction(visit_description_block)
 
         def visit_single_usage(s, loc, toks):
-            a = 1
             return [UsageInstance(items=list(toks), description=None)]
 
         self.single_usage = usage_example.copy().setParseAction(visit_single_usage)
 
         def visit_described_usage(s, loc, toks):
-            a = 1
             if len(toks) > 0 and isinstance(toks[-1], str):
                 description = toks[-1]
             else:
@@ -54,11 +52,21 @@ class UsageParser(IndentParserMixin):
         ).setParseAction(visit_described_usage)
 
         def visit_multi_usage(s, loc, toks):
-            a = 1
             return list(toks)
 
         self.multi_usage = (
-            LineEnd().suppress() + (self.update_indent() + self.described_usage)[1, ...]
+            LineEnd().suppress()
+            + (
+                IndentCheckpoint(
+                    # This indent ensures that every usage example is somewhat indented (more than column 1, at least),
+                    # and also sets the baseline from which the description block is measured
+                    self.indent() + self.described_usage
+                    # The pop here doesn't check that we have dedented, but rather it just resets the indentation so that
+                    # a new usage block can have a different indentation
+                    + self.pop_indent(),
+                    indent_stack=self.stack,
+                )
+            )[1, ...]
         ).setParseAction(visit_multi_usage)
 
         self.usage = (
@@ -105,16 +113,17 @@ class UsageParser(IndentParserMixin):
                         element.variable = True
 
                 instances.append(instance)
-                all_positionals += positional
+                # Convert these UsageElements into Positionals
+                all_positionals += [
+                    Positional(
+                        description="", position=i, name=el.text, optional=el.optional
+                    )
+                    for i, el in enumerate(positional)
+                ]
                 all_flags += flags
 
         return Command(
             command=cmd,
-            positional=[
-                Positional(
-                    description="", position=i, name=el.text, optional=el.optional
-                )
-                for i, el in enumerate(all_positionals)
-            ],
-            named=all_flags,
+            positional=Positional.deduplicate(all_positionals),
+            named=Flag.deduplicate(all_flags),
         )

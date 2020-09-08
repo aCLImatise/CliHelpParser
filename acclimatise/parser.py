@@ -42,26 +42,33 @@ class IndentParserMixin:
     def __init__(self):
         self.stack = [1]
 
-    def update_indent(self):
+    def pop_indent(self):
         def check_indent(s, l, t):
-            if l >= len(s):
-                return
-            curCol = col(l, s)
-            last_indent = self.stack[-1]
-            if curCol > last_indent:
-                # Option 1: this is an indent
-                self.stack.append(curCol)
-            elif curCol in self.stack:
-                # Option 1: this is a dedent that we've seen before
-                while curCol < self.stack[-1]:
-                    self.stack.pop()
-            elif curCol < last_indent:
-                # Option 3: this is a dedent that we haven't seen before
-                self.stack.pop()
-                self.stack.append(curCol)
-            return None
+            self.stack.pop()
 
-        return (Empty() + Empty()).setParseAction(check_indent).setName("Update")
+        return (Empty() + Empty()).setParseAction(check_indent).setName("Pop")
+
+    def push_indent(self):
+        def check_indent(s, l, t):
+            # if l >= len(s):
+            #     return
+            curCol = col(l, s)
+            self.stack.append(curCol)
+            # last_indent = self.stack[-1]
+            # if curCol > last_indent:
+            #     # Option 1: this is an indent
+            #     self.stack.append(curCol)
+            # elif curCol in self.stack:
+            #     # Option 1: this is a dedent that we've seen before
+            #     while curCol < self.stack[-1]:
+            #         self.stack.pop()
+            # elif curCol < last_indent:
+            #     # Option 3: this is a dedent that we haven't seen before
+            #     self.stack.pop()
+            #     self.stack.append(curCol)
+            # return None
+
+        return (Empty() + Empty()).setParseAction(check_indent).setName("Push")
 
     def peer_indent(self, allow_greater=False):
         """

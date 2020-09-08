@@ -16,7 +16,7 @@ def test_flag_arg(parser):
 
 
 def test_flag(parser):
-    result = parser.flag_block.parseString(
+    result = parser.flag.parseString(
         "-A INT        score for a sequence match, which scales options -TdBOELU unless overridden [1]"
     )[0]
     assert isinstance(result, Flag)
@@ -25,12 +25,12 @@ def test_flag(parser):
 
 
 def test_flag_b(parser):
-    result = parser.flag_block.parseString("-B INT        penalty for a mismatch [4]")
+    result = parser.flag.parseString("-B INT        penalty for a mismatch [4]")
     print(result)
 
 
 def test_multiarg_flag(parser):
-    result = parser.flag_block.parseString(
+    result = parser.flag.parseString(
         "-O INT[,INT]  gap open penalties for deletions and insertions [6,6]"
     )[0]
     assert isinstance(result, Flag)
@@ -113,14 +113,12 @@ Input/output options:
 
 
 def test_complex_optionals(parser):
-    s = dedent(
-        """
+    s = """
        -I FLOAT[,FLOAT[,INT[,INT]]]
                      specify the mean, standard deviation (10% of the mean if absent), max
                      (4 sigma from the mean if absent) and min of the insert size distribution.
                      FR orientation only. [inferred]
     """
-    )
     results = list(parser.flag_block.parseString(s))[0]
     assert isinstance(results, Flag)
     assert isinstance(results.args, OptionalFlagArg)

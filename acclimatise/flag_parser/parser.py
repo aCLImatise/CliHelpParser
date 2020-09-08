@@ -110,7 +110,7 @@ class CliParser(IndentParserMixin):
             )
         )
         """
-        The entire flag documentation, including all synonyms and description
+        The entire flag documentation, including all synonyms and one line of description
         """
 
         self.positional = (
@@ -171,7 +171,10 @@ class CliParser(IndentParserMixin):
         """
 
         self.indented_flag = IndentCheckpoint(
-            self.update_indent() + self.block_element, indent_stack=self.stack
+            # We require that each flag is indented, but we don't check for a dedent: this allows the next flag to
+            # have any indentation as long as it's more indented than the top level
+            self.indent() + self.block_element + self.pop_indent(),
+            indent_stack=self.stack,
         )
         """
         Each flag can actually be at any indentation level, but we need to update the indent stack whenever we find one,

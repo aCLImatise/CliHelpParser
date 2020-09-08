@@ -89,9 +89,7 @@ def test_samtools_merge_full(process, usage_parser):
     assert command.positional[1].name == "in1.bam"
 
     assert len(command.named) == 3
-    assert command.named[0].longest_synonym == "-nurlf"
-    assert command.named[1].longest_synonym == "-h"
-    assert command.named[2].longest_synonym == "-b"
+    assert command.all_synonyms == {"-nurlf", "-h", "-b"}
 
 
 def test_pisces_usage(usage_parser):
@@ -99,8 +97,7 @@ def test_pisces_usage(usage_parser):
     command = usage_parser.parse_usage(["pisces"], text)
     assert len(command.named) == 2
     assert len(command.positional) == 0
-    assert command.named[0].longest_synonym == "-bam"
-    assert command.named[1].longest_synonym == "-g"
+    assert command.all_synonyms == {"-bam", "-g"}
 
 
 def test_trailing_text(process, usage_parser):
