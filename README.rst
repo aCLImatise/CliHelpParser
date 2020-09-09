@@ -57,7 +57,8 @@ you'll end up with the following files in your current directory:
 These are representations of the command ``wc`` in 3 different formats. If you look at ``wc.wdl``, you'll see that it
 contains a WDL-compatible tool definition for ``wc``:
 
-.. code-block:: wdl
+.. code-block:: text
+
     version 1.0
     task Wc {
       input {
