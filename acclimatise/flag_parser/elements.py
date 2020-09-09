@@ -1,6 +1,8 @@
 """
 Re-usable parser elements that aren't tied to the parser object
 """
+from typing import List
+
 from pyparsing import *
 
 from acclimatise.model import *
@@ -83,6 +85,10 @@ def customIndentedBlock(
 
 
 cli_id = Word(initChars=element_start_chars, bodyChars=element_body_chars)
+
+positional_name = Word(
+    initChars=element_start_chars, bodyChars=element_body_chars, min=2
+)
 
 # short_flag = originalTextFor(Literal('-') + Word(alphanums + '@', max=1))
 # """A short flag has only a single dash and single character, e.g. `-m`"""
@@ -244,9 +250,20 @@ When the help lists multiple synonyms for a flag, e.g:
 # The description of the flag
 # e.g. for grep's `-o, --only-matching`, this is:
 # "Print only the matched (non-empty) parts of a matching line, with each such part on a separate output line."
-desc_line = originalTextFor(SkipTo(LineEnd())).setName(
-    "DescriptionLine"
-)  # .setParseAction(success))
+# desc_line = originalTextFor(SkipTo(LineEnd())).setName(
+#     "DescriptionLine"
+# )  # .setParseAction(success))
 # desc_line = originalTextFor(
 #     delimitedList(Regex("[^\s]+"), delim=" ", combine=True)
 # ).leaveWhitespace()
+
+
+def visit_description_line(s, loc, toks):
+    return toks[0].strip()
+
+
+description_line = (
+    SkipTo(LineEnd(), include=True)
+    .setParseAction(visit_description_line)
+    .setWhitespaceChars(" \t")
+).setName("DescriptionLine")

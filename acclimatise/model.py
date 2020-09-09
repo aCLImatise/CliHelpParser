@@ -8,6 +8,9 @@ import re
 import typing
 import unicodedata
 from abc import abstractmethod
+from collections import defaultdict
+from itertools import chain
+from operator import attrgetter
 
 import spacy
 from dataclasses import InitVar, dataclass, field
@@ -19,6 +22,12 @@ from acclimatise import cli_types
 from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.nlp import wordsegment
 from acclimatise.yaml import yaml
+
+
+def first(lst: typing.List, default):
+    if len(lst) == 0:
+        return default
+    return lst[0]
 
 
 def useless_name(name: typing.List[str]):
@@ -99,6 +108,13 @@ class Command:
 
         return depth
 
+    @property
+    def all_synonyms(self) -> typing.Set[str]:
+        """
+        Returns all flag synonyms for all flags in this command
+        """
+        return set(chain.from_iterable([flag.synonyms for flag in self.named]))
+
     def command_tree(self) -> typing.Generator["Command", None, None]:
         """
         Returns a generator over the entire command tree. e.g. if this command has 2 subcommands, each with 2
@@ -131,6 +147,13 @@ class Command:
     subcommands: typing.List["Command"] = field(default_factory=list)
     """
     A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
+    """
+
+    usage: typing.List["acclimatise.usage_parser.model.UsageInstance"] = field(
+        default_factory=list
+    )
+    """
+    Different usage examples provided by the help
     """
 
     help_flag: typing.Optional["Flag"] = None
@@ -224,6 +247,41 @@ class Positional(CliArgument):
     If true, this argument is not required
     """
 
+    @staticmethod
+    def deduplicate(
+        positionals: typing.Collection["Positional"],
+    ) -> typing.List["Positional"]:
+        key = attrgetter("name")
+        sort = sorted(positionals, key=key)
+        groups = itertools.groupby(sort, key=key)
+        ret = []
+        for key, group in groups:
+            grp = list(group)
+            ret.append(Positional.merge(grp))
+        return sorted(ret, key=attrgetter("position"))
+
+    @staticmethod
+    def merge(other: typing.List["Positional"]) -> "Positional":
+        """
+        Combine the information contained within two Positionals, and return the new Positional
+        """
+        return Positional(
+            position=first(
+                [pos.position for pos in other if pos.position is not None], -1
+            ),
+            name=first(
+                [
+                    pos.name
+                    for pos in other
+                    if pos.name is not None and len(pos.name) > 0
+                ],
+                None,
+            ),
+            # We want this to be optional if it is considered optional in any situation
+            optional=any([pos.optional for pos in other]),
+            description=max([pos.description for pos in other], key=len, default=None),
+        )
+
     def get_type(self) -> cli_types.CliType:
         # Try the the flag name, then the description in that order
 
@@ -260,6 +318,43 @@ class Flag(CliArgument):
     """
     If true, this flag is not required (the default)
     """
+
+    @staticmethod
+    def deduplicate(flags: typing.Collection["Flag"]) -> typing.List["Flag"]:
+        todo = list(flags[:])
+        clusters = []
+
+        while len(todo) > 0:
+            # Choose a flag, then find anything it intersects with
+            flag_i = todo.pop()
+            current_cluster = [flag_i]
+            current_synonyms = set(flag_i.synonyms)
+            to_remove = []
+
+            for j in range(len(todo)):
+                flag_j = todo[j]
+                if set(flag_j.synonyms).intersection(current_synonyms):
+                    to_remove.append(j)
+                    current_synonyms.update(flag_j.synonyms)
+                    current_cluster.append(flag_j)
+
+            clusters.append(current_cluster)
+
+        return [Flag.merge(cluster) for cluster in clusters]
+
+    @staticmethod
+    def merge(flags: typing.List["Flag"]) -> "Flag":
+        """
+        Combine the information contained within two Flags, and return the new Flag
+        """
+        return Flag(
+            # Take the longest description
+            description=max([flag.description for flag in flags], key=len),
+            # Just union the two lists
+            synonyms=list(set().union(*[flag.synonyms for flag in flags])),
+            args=first([flag.args for flag in flags if flag.args], EmptyFlagArg()),
+            optional=any([flag.optional for flag in flags]),
+        )
 
     def argument_text(self) -> typing.List[str]:
         return self.args.text()

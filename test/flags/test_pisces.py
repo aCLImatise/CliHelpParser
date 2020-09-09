@@ -27,7 +27,7 @@ def test_pisces_arg(parser):
                        time. This parameter is used by the Somatic 
                        Genotyping Model
     """
-    flag = parser.flag.parseString(cmd)[0]
+    flag = parser.flag_block.parseString(cmd)[0]
 
     assert len(flag.synonyms) == 2
     assert flag.description.startswith("FLOAT Target Frequency")
@@ -40,7 +40,7 @@ def test_pisces_arg_2(parser):
                              INT FilteredVariantQScore to report variant as 
                                filtered
     """
-    flag = parser.flag.parseString(cmd)[0]
+    flag = parser.flag_block.parseString(cmd)[0]
 
     assert len(flag.synonyms) == 2
     assert flag.description.startswith("INT FilteredVariantQScore ")
@@ -66,9 +66,16 @@ def test_pisces_indent_dedent(parser):
                                Stitcher output bam, but must be deliberately 
                                set for Gemini output.
     """
-    flags = parser.flags.parseString(cmd)
+    flags = parser.flag_block.parseString(cmd)
 
     assert len(flags) == 5
+
+    assert isinstance(flags[0].args, SimpleFlagArg)
+    assert flags[0].synonyms == ["-i", "--intervalpaths"]
+
+    assert isinstance(flags[3].args, SimpleFlagArg)
+    assert flags[3].synonyms == ["-d", "--debug"]
+    assert flags[3].description == "BOOL"
 
 
 def test_pisces_triple_long_flag_synonyms(parser):
@@ -80,10 +87,10 @@ def test_pisces_triple_long_flag_synonyms(parser):
 
 def test_pisces_triple_long_flag(parser):
     cmd = """
---minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>
-                     FLOAT MinimumFrequency to call a variant
+    --minvf, --minimumvariantfrequency, --minimumfrequency <FLOAT>
+                         FLOAT MinimumFrequency to call a variant
     """
-    flag = parser.flag.parseString(cmd)[0]
+    flag = parser.flag_block.parseString(cmd)[0]
 
     assert len(flag.synonyms) == 3
     assert flag.description.startswith("FLOAT MinimumFrequency")
@@ -98,10 +105,10 @@ def test_pisces_quad_flag_synonyms(parser):
 
 def test_pisces_quad_flag(parser):
     cmd = """
--c, --mindp, --mindepth, --mincoverage <INT>
-                         INT Minimum depth to call a variant
+    -c, --mindp, --mindepth, --mincoverage <INT>
+                             INT Minimum depth to call a variant
     """
-    flag = parser.flag.parseString(cmd)[0]
+    flag = parser.flag_block.parseString(cmd)[0]
 
     assert len(flag.synonyms) == 4
     assert flag.description.startswith("INT Minimum")

@@ -47,7 +47,7 @@ def test_flags(parser):
 
 
 def test_bwa_segmented_options(parser):
-    result = parser.flags.parseString(
+    result = parser.flag_block.parseString(
         """
        -A INT        score for a sequence match, which scales options -TdBOELU unless overridden [1]
        -B INT        penalty for a mismatch [4]
@@ -113,15 +113,13 @@ Input/output options:
 
 
 def test_complex_optionals(parser):
-    s = dedent(
-        """
+    s = """
        -I FLOAT[,FLOAT[,INT[,INT]]]
                      specify the mean, standard deviation (10% of the mean if absent), max
                      (4 sigma from the mean if absent) and min of the insert size distribution.
                      FR orientation only. [inferred]
     """
-    )
-    results = list(parser.flag.parseString(s))[0]
+    results = list(parser.flag_block.parseString(s))[0]
     assert isinstance(results, Flag)
     assert isinstance(results.args, OptionalFlagArg)
     assert results.args.names == ["FLOAT", "FLOAT", "INT", "INT"]
