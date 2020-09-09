@@ -6,7 +6,13 @@ from pkg_resources import resource_filename
 from acclimatise.converter.yml import YmlGenerator
 from acclimatise.execution.local import LocalExecutor
 from acclimatise.flag_parser.parser import CliParser
+from acclimatise.usage_parser.parser import UsageParser
 from acclimatise.yaml import yaml
+
+
+@pytest.fixture()
+def usage_parser():
+    return UsageParser()
 
 
 @pytest.fixture()

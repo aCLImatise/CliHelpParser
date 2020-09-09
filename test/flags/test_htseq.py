@@ -33,28 +33,24 @@ def test_long_short_synonyms(parser):
 
 
 def test_long_short_desc(parser):
-    flag = parser.flag.parseString(
-        dedent(
-            """
+    flag = parser.flag_block.parseString(
+        """
         -i IDATTR, --idattr IDATTR
                           GFF attribute to be used as feature ID (default,
                           suitable for Ensembl GTF files: gene_id)
         """
-        )
     )[0]
     print(flag)
 
 
 def test_long_short_choices(parser):
-    flag = parser.flag.parseString(
-        dedent(
-            """
+    flag = parser.flag_block.parseString(
+        """
           -m {union,intersection-strict,intersection-nonempty}, --mode {union,intersection-strict,intersection-nonempty}
                                 mode to handle reads overlapping more than one feature
                                 (choices: union, intersection-strict, intersection-
                                 nonempty; default: union)
         """
-        )
     )
 
 
@@ -85,9 +81,8 @@ def test_repeat_type(parser):
 
 
 def test_full_flags(parser):
-    results = parser.flag.scanString(
-        dedent(
-            """
+    results = parser.flags.parseString(
+        """
   -h, --help            show this help message and exit
   -f {sam,bam}, --format {sam,bam}
                         type of <alignment_file> data, either 'sam' or 'bam'
@@ -141,7 +136,6 @@ def test_full_flags(parser):
                         'XF')
   -q, --quiet           suppress progress report
 """
-        )
     )
     assert len(list(results)) == 15
 

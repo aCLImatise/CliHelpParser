@@ -1,5 +1,49 @@
 Changelog
 =========
+
+1.1.0 (2020-09-10)
+------------------
+
+User-Facing Changes
+*******************
+
+* Better distinction between description blocks and flags, allowing us to successfully parse flags of this form::
+
+    --use_strict (enforce strict mode)
+          type: bool  default: false
+    --es5_readonly (activate correct semantics for inheriting readonliness)
+          type: bool  default: true
+
+* Support parsing multiple usage blocks, and add the ``UsageInstance`` class, which provides access to all these usage examples in the help. For example after parsing the text below, we would have 4 ``UsageInstance`` instances. The instances are provided on ``Command.usage``::
+
+    Usage:
+      shell [options] -e string
+        execute string in V8
+      shell [options] file1 file2 ... filek
+        run JavaScript scripts in file1, file2, ..., filek
+      shell [options]
+      shell [options] --shell [file1 file2 ... filek]
+        run an interactive JavaScript shell
+
+* Add flag and positional de-duplication, ensuring we don't have duplicate options in the final ``Command``
+* Add the ``max_length`` parameter to ``parse_help``:  If the input text has more than this many lines, no attempt will be made to parse the file (as  it's too large, will likely take a long time, and there's probably an underlying problem if this has happened).        In this case, an empty Command will be returned
+* Enforce that a ``Positional`` must have at least 2-character names, in the parser
+* Enforce that a ``Positional`` must have a description, in the parser
+
+Internal Changes
+****************
+
+* Rewrite of both the flag and usage parser
+* Added more customizable indent tokens, meaning we no longer need the ``customIndentedBlock``
+* Refactor both the usage parser and the flag parser into subclasses of ``IndentParserMixin``, which provides useful common parsing logic that relates to indentation
+* Use ``MatchFirst`` instead of ``MatchLongest`` logic in most places in the parser. This should result in more consistent behaviour.
+* Add ``typeHLA.js`` text, which is derived from the ``bwa-kit`` container.
+
+Fixes
+*****
+
+* Always strip out newlines from the WDL description
+
 1.0.3 (2020-08-26)
 ------------------
 * Add a hard timeout to the ``DockerExecutor``, even if it's producing output, e.g. the ``yes`` command.
@@ -55,11 +99,8 @@ Features
 * Convert tests into a series of test case objects that can be used to parameterize each test function
 * Add the option to parallelize tests using pytest-parallel
 * Better conversion of symbols to variable names, for example "/" is now "slash" rather than "solidus"
-* Add logging to the high level functions like ``explore_command``, using the ``acclimatise`` logger. This should make
-tracking errors and progress a tad easier.
-* By default, re-use the best help command from the parent on the child. For example if we determine that
-``samtools --help`` is the most accurate help command for ``samtools``, then we use ``samtools sort --help`` without
-having to test out every possible flag here
+* Add logging to the high level functions like ``explore_command``, using the ``acclimatise`` logger. This should make tracking errors and progress a tad easier.
+* By default, re-use the best help command from the parent on the child. For example if we determine that ``samtools --help`` is the most accurate help command for ``samtools``, then we use ``samtools sort --help`` without having to test out every possible flag here
 * Add ``generated_using`` field to the ``Command`` class, which tracks the flag used to generate it
 
 Changes
@@ -90,8 +131,7 @@ Fixes
 * ``Command`` types now contain a ``help_text`` field which records the string that was used to generate them. This should enable efficient re-parsing, and can also be displayed downstream by BaseCamp
 * Rewrite tests into a parametrized, consolidated end-to-end test
 * Fix "OPTIONS" being considered a positional argument, when really it's a placeholder for flags
-* Remove positional arguments that precede the main command, so `dotnet Pisces.dll` will be removed from the entire
-command
+* Remove positional arguments that precede the main command, so ``dotnet Pisces.dll`` will be removed from the entire command
 
 0.1.2 (2020-05-15)
 ------------------

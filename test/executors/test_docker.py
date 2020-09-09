@@ -1,13 +1,15 @@
+import docker
 import pytest
 
-import docker
 from acclimatise.execution.docker import DockerExecutor
 
 
 def test_docker(bwamem_help):
     client = docker.from_env()
     container = client.containers.run(
-        "biocontainers/bwa:v0.7.17_cv1", entrypoint=["sleep", "999999999"], detach=True,
+        "biocontainers/bwa:v0.7.17_cv1",
+        entrypoint=["sleep", "999999999"],
+        detach=True,
     )
 
     exec = DockerExecutor(container)
@@ -23,7 +25,9 @@ def test_docker_kill():
     """
     client = docker.from_env(timeout=99999)
     container = client.containers.run(
-        "ubuntu:latest", entrypoint=["sleep", "999999999"], detach=True,
+        "ubuntu:latest",
+        entrypoint=["sleep", "999999999"],
+        detach=True,
     )
 
     exec = DockerExecutor(container)
@@ -54,7 +58,9 @@ def test_infinite_output():
     """
     client = docker.from_env(timeout=99999)
     container = client.containers.run(
-        "ubuntu:latest", entrypoint=["sleep", "999999999"], detach=True,
+        "ubuntu:latest",
+        entrypoint=["sleep", "999999999"],
+        detach=True,
     )
 
     exec = DockerExecutor(container)

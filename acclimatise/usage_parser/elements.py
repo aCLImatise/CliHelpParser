@@ -36,7 +36,11 @@ element_char = arg.copy()  # Word(initChars=element_start_chars, bodyChars=)
 
 mandatory_element = (
     element_char.copy()
-    .setParseAction(lambda s, loc, toks: UsageElement(text=toks[0],))
+    .setParseAction(
+        lambda s, loc, toks: UsageElement(
+            text=toks[0],
+        )
+    )
     .setName("MandatoryElement")
 )
 """
@@ -181,11 +185,27 @@ def visit_usage(s, loc, toks):
     return toks[0][0]
 
 
+usage_example = OneOrMore(usage_element, stopOn=LineEnd())
+"""
+Each usage example is a single line of text, e.g. 
+
+  shell [options] -e string
+"""
+
 usage = (
     LineStart()
     + Regex("usage:", flags=re.IGNORECASE).suppress()
-    + OneOrMore(usage_element, stopOn=LineEnd())
+    + OneOrMore(usage_example)
 )  # .setParseAction(visit_usage).setDebug()
+"""
+Each usage block can have one or more lines of different usage. e.g.
+
+Usage:
+  shell [options] -e string
+    execute string in V8
+  shell [options] file1 file2 ... filek
+    run JavaScript scripts in file1, file2, ..., filek
+"""
 
 
 # usage = Regex('usage:', flags=re.IGNORECASE).suppress() + delimitedList(usage_element, delim=Or([' ', '\n']))

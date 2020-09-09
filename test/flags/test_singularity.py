@@ -6,7 +6,7 @@ from acclimatise.flag_parser.parser import CliParser
 
 
 def test_singularity_style_flags(parser):
-    flag = parser.flag.parseString(
+    flag = parser.flag_block.parseString(
         "    -n|--name   Specify a custom container name (first priority)"
     )[0]
     assert len(flag.synonyms) == 2

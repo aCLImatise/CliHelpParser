@@ -15,7 +15,7 @@ from acclimatise.execution import Executor
 from acclimatise.execution.local import LocalExecutor
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import Command, Flag
-from acclimatise.usage_parser import parse_usage
+from acclimatise.usage_parser.parser import UsageParser
 
 logger = logging.getLogger("acclimatise")
 
@@ -44,21 +44,22 @@ def _combine_flags(
     return list(unique.values())
 
 
-def parse_help(
-    cmd: typing.Collection[str], text: str, parse_positionals=True
-) -> Command:
+def parse_help(cmd: typing.Collection[str], text: str, max_length=1000) -> Command:
     """
     Parse a string of help text into a Command. Use this if you already have run the executable and extracted the
     help text yourself
 
     :param cmd: List of arguments used to generate this help text, e.g. ['bwa', 'mem']
     :param text: The help text to parse
-    :param parse_positionals: If false, don't parse positional arguments
+    :param max_length: If the input text has more than this many lines, no attempt will be made to parse the file (as
+        it's too large, will likely take a long time, and there's probably an underlying problem if this has happened).
+        In this case, an empty Command will be returned
     """
-    help_command = CliParser(parse_positionals=parse_positionals).parse_command(
-        name=cmd, cmd=text
-    )
-    usage_command = parse_usage(cmd, text)
+    if len(text.splitlines()) > max_length:
+        return Command(list(cmd))
+
+    help_command = CliParser().parse_command(name=cmd, cmd=text)
+    usage_command = UsageParser().parse_usage(list(cmd), text)
 
     # Combine the two commands by picking from the help_command where possible, otherwise falling back on the usage
     fields = dict(
@@ -196,9 +197,11 @@ def explore_command(
     if command.depth < max_depth:
         # By default we use the best parent help-flag
         child_flags = flags if try_subcommand_flags else [command.generated_using]
-        for positional in command.positional:
+
+        # Try each *unique* positional
+        for positional in {positional.name for positional in command.positional}:
             subcommand = explore_command(
-                cmd=cmd + [positional.name],
+                cmd=cmd + [positional],
                 flags=child_flags,
                 parent=command,
                 max_depth=max_depth,
@@ -207,7 +210,6 @@ def explore_command(
             )
             if subcommand is not None:
                 command.subcommands.append(subcommand)
-
                 # If we had any subcommands then we probably don't have any positionals, or at least don't care about them
                 command.positional = []
 
