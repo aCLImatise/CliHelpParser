@@ -12,7 +12,7 @@ def test_unindented_flags(parser):
 -cdna             specify input files containing cDNA/EST sequences
 -protein          specify input files containing protein sequences
     """.strip()
-    flags = parser.flag_block.parseString(text)
+    flags = parser.flags.parseString(text)
     assert len(flags) == 3
     for flag in flags:
         assert isinstance(flag, Flag)

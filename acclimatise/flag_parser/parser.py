@@ -233,9 +233,10 @@ class CliParser(IndentParserMixin):
         When the block is introduced by a newline, we have to be quite strict about its contents
         """
 
-        self.unindented_flag_block = LineStart().suppress() + OneOrMore(
-            self.flag
-        )  # delimitedList(self.flag, delim='\n')
+        self.unindented_flag_block = LineStart().suppress() + (
+            self.flag + Optional(self.description_block)
+        )[1, ...].setParseAction(visit_flag_block)
+        # )  # delimitedList(self.flag, delim='\n')
         # self.unindented_flag_block.leaveWhitespace()
         self.unindented_flag_block.skipWhitespace = False
         """
@@ -249,7 +250,7 @@ class CliParser(IndentParserMixin):
         # A flag block can start with a colon, but then it must have 2 or more flags. If it starts with a newline it
         # only has to have one flag at least
         self.flags = (
-            self.colon_block | self.newline_block  # ^ self.unindented_flag_block
+            self.colon_block | self.newline_block | self.unindented_flag_block
         ).setName(
             "FlagList"
         )  # .leaveWhitespace()
