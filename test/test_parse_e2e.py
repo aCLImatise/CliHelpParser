@@ -1,3 +1,6 @@
+import random
+import string
+
 import pytest
 from pkg_resources import resource_filename
 
@@ -34,3 +37,26 @@ def test_all(test: HelpText):
 
     # Check the converters work
     convert_validate(cmd, explore=False)
+
+
+@pytest.mark.timeout(20)
+def test_long_text():
+    """
+    This tests the case where the parse function is handed an inordinate amount of text. In this case, we shouldn't
+    bother parsing, and just return an empty command
+    """
+    text = "\n".join(
+        [
+            "".join(
+                random.choices(
+                    string.ascii_letters + " ",
+                    weights=[1] * len(string.ascii_letters) + [5],
+                    k=100,
+                )
+            )
+            for i in range(2000)
+        ]
+    )
+    command = parse_help(["some", "command"], text=text)
+    assert len(command.positional) == 0
+    assert len(command.named) == 0
