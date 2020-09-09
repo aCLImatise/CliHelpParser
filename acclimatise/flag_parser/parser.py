@@ -173,7 +173,7 @@ class CliParser(IndentParserMixin):
         self.indented_flag = IndentCheckpoint(
             # We require that each flag is indented, but we don't check for a dedent: this allows the next flag to
             # have any indentation as long as it's more indented than the top level
-            self.indent() + self.block_element + self.pop_indent(),
+            self.indent() + self.block_element,
             indent_stack=self.stack,
         )
         """
@@ -196,7 +196,20 @@ class CliParser(IndentParserMixin):
             return ret
 
         self.flag_block = (
-            self.indented_flag + (self.indented_flag | self.description_block)[...]
+            IndentCheckpoint(
+                self.indented_flag
+                + (
+                    # We pop the indent if parsing a new flag, since we no longer care about the previous flag
+                    IndentCheckpoint(
+                        self.pop_indent() + self.indented_flag, indent_stack=self.stack
+                    )
+                    # We don't pop the indent until after if parsing a description block, since we need to know
+                    # that flag's indentation
+                    | IndentCheckpoint(self.description_block, indent_stack=self.stack)
+                )[...]
+                + self.pop_indent(),
+                indent_stack=self.stack,
+            )
         ).setParseAction(visit_flag_block)
         """
         A block of flags is one or more flags, each followed by a description block. 
