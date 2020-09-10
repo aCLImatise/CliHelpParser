@@ -21,6 +21,7 @@ from word2number import w2n
 from acclimatise import cli_types
 from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.nlp import wordsegment
+from acclimatise.usage_parser.model import UsageInstance
 from acclimatise.yaml import yaml
 
 
@@ -79,6 +80,21 @@ class Command:
                 if "--usage" in flag.synonyms:
                     self.usage_flag = flag
                     self.named.remove(flag)
+
+    @property
+    def outputs(self) -> typing.List["CliArgument"]:
+        """
+        Returns a list of inputs which are also outputs, for example the "-o" flag is normally an input (you have to
+        provide a filename), but also an output (you are interested in the contents of the file at that path after the
+        command has been run)
+        """
+        ret = []
+        for arg in itertools.chain(self.named, self.positional):
+            typ = arg.get_type()
+            # Yes this is a bit awkward, the output field should probably be on every type, defaulting to False
+            if isinstance(typ, cli_types.CliFileSystemType) and typ.output:
+                ret.append(arg)
+        return ret
 
     @property
     def as_filename(self) -> str:
@@ -149,9 +165,7 @@ class Command:
     A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
     """
 
-    usage: typing.List["acclimatise.usage_parser.model.UsageInstance"] = field(
-        default_factory=list
-    )
+    usage: typing.List["UsageInstance"] = field(default_factory=list)
     """
     Different usage examples provided by the help
     """

@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from dataclasses import dataclass
 
-from acclimatise.model import Flag, Positional
+from acclimatise import model
 
 
 @dataclass
@@ -47,19 +47,21 @@ class UsageInstance:
     """
 
     @property
-    def positionals(self) -> List[Positional]:
+    def positionals(self) -> List["model.Positional"]:
         """
         Return all the positional arguments that could be derived from this instance
         """
         return [
-            Positional(description="", position=i, name=el.text, optional=el.optional)
+            model.Positional(
+                description="", position=i, name=el.text, optional=el.optional
+            )
             for i, el in enumerate(self.items)
             if isinstance(el, UsageElement)
         ]
 
     @property
-    def flags(self) -> List[Flag]:
+    def flags(self) -> List["model.Flag"]:
         """
         Return all the flags that could be derived from this instance
         """
-        return [el for el in self.items if isinstance(el, Flag)]
+        return [el for el in self.items if isinstance(el, model.Flag)]

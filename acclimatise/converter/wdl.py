@@ -8,7 +8,16 @@ from typing import Generator, Iterable, List, Set, Tuple, Type
 
 from inflection import camelize
 from WDL._grammar import keywords
-from wdlgen import ArrayType, Input, ParameterMeta, PrimitiveType, Task, WdlType
+from wdlgen import (
+    ArrayType,
+    File,
+    Input,
+    Output,
+    ParameterMeta,
+    PrimitiveType,
+    Task,
+    WdlType,
+)
 
 from acclimatise import cli_types, model
 from acclimatise.converter import NamedArgument, WrapperGenerator
@@ -46,7 +55,7 @@ def flag_to_command_input(
     elif isinstance(named_flag, model.Positional):
         args.update(dict(optional=False, position=named_flag.position))
 
-    return Task.Command.CommandInput(**args)
+    return Task.Command.CommandInput.from_fields(**args)
 
 
 def lowest_common_type(types: Iterable[cli_types.CliType]):
@@ -174,6 +183,24 @@ class WdlGenerator(WrapperGenerator):
             )
         )
 
+    def make_outputs(self, names: List[NamedArgument]) -> List[Output]:
+        ret = [
+            # We default to always capturing stdout
+            Output(data_type=File, name="out_stdout", expression="stdout()")
+        ]
+        for arg in names:
+            typ = arg.arg.get_type()
+            if isinstance(typ, cli_types.CliFileSystemType) and typ.output:
+                ret.append(
+                    Output(
+                        data_type=self.type_to_wdl(typ),
+                        name="out_" + arg.name,
+                        expression="${{in_{}}}".format(arg.name),
+                    )
+                )
+
+        return ret
+
     def save_to_string(self, cmd: Command) -> str:
         inputs: List[CliArgument] = [*cmd.named] + (
             [] if self.ignore_positionals else [*cmd.positional]
@@ -185,6 +212,7 @@ class WdlGenerator(WrapperGenerator):
             command=self.make_command(cmd, names),
             version="1.0",
             inputs=self.make_inputs(names),
+            outputs=self.make_outputs(names),
             parameter_meta=self.make_parameter_meta(names),
         )
 

@@ -9,6 +9,8 @@ from cwl_utils.parser_v1_1 import (
     CommandInputParameter,
     CommandLineBinding,
     CommandLineTool,
+    CommandOutputBinding,
+    CommandOutputParameter,
 )
 from dataclasses import dataclass
 
@@ -16,15 +18,6 @@ from acclimatise import cli_types
 from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.yaml import yaml
-
-# def with_default_none(func, *args, **kwargs):
-#     """
-#     Calls a function, and inserts None for all arguments you didn't provide
-#     """
-#     spec = inspect.getfullargspec(func)
-#     defaults = {arg: None for arg in spec.args}
-#     defaults.pop("self", None)
-#     return func(*args, **{**defaults, **kwargs})
 
 
 @dataclass
@@ -62,6 +55,53 @@ class CwlGenerator(WrapperGenerator):
         else:
             raise Exception(f"Invalid type {typ}!")
 
+    def get_inputs(self, names: List[NamedArgument]) -> List[CommandInputParameter]:
+        ret = []
+        for arg in names:
+            assert arg.name != "", arg
+            ret.append(
+                CommandInputParameter(
+                    id="in_" + arg.name,
+                    type=self.to_cwl_type(arg.arg.get_type()),
+                    inputBinding=CommandLineBinding(
+                        position=arg.arg.position
+                        if isinstance(arg.arg, Positional)
+                        else None,
+                        prefix=arg.arg.longest_synonym
+                        if isinstance(arg.arg, Flag)
+                        else None,
+                    ),
+                    doc=arg.arg.description,
+                )
+            )
+
+        return ret
+
+    def get_outputs(self, names: List[NamedArgument]) -> List[CommandOutputParameter]:
+        ret = [
+            # We default to always capturing stdout
+            CommandOutputParameter(
+                id="out_stdout",
+                type="stdout",
+                doc="Standard output stream",
+            )
+        ]
+
+        for arg in names:
+            typ = arg.arg.get_type()
+            if isinstance(typ, cli_types.CliFileSystemType) and typ.output:
+                ret.append(
+                    CommandOutputParameter(
+                        id="out_" + arg.name,
+                        type=self.to_cwl_type(typ),
+                        doc=arg.arg.description,
+                        outputBinding=CommandOutputBinding(
+                            glob="$(inputs.in_{})".format(arg.name)
+                        ),
+                    )
+                )
+        return ret
+
     def command_to_tool(self, cmd: Command) -> CommandLineTool:
         """
         Outputs the CWL wrapper to the provided file
@@ -75,27 +115,10 @@ class CwlGenerator(WrapperGenerator):
             id=cmd.as_filename + ".cwl",
             baseCommand=list(cmd.command),
             cwlVersion="v1.1",
-            inputs=[],
-            outputs=[],
+            inputs=self.get_inputs(names),
+            outputs=self.get_outputs(names),
         )
 
-        for arg in names:
-            assert arg.name != "", arg
-            tool.inputs.append(
-                CommandInputParameter(
-                    id=arg.name,
-                    type=self.to_cwl_type(arg.arg.get_type()),
-                    inputBinding=CommandLineBinding(
-                        position=arg.arg.position
-                        if isinstance(arg.arg, Positional)
-                        else None,
-                        prefix=arg.arg.longest_synonym
-                        if isinstance(arg.arg, Flag)
-                        else None,
-                    ),
-                    doc=arg.arg.description,
-                )
-            )
         return tool
 
     @property

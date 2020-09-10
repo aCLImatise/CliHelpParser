@@ -10,7 +10,7 @@ setup(
         "miniwdl",
         "wordsegment",
         "inflection",
-        "illusional.wdlgen==0.2.10",
+        "illusional.wdlgen==0.3.0",
         "ruamel.yaml==0.16.5",
         "click",
         "cwltool",
