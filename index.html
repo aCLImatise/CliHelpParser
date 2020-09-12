@@ -95,6 +95,28 @@ you’ll end up with the following files in your current directory:</p>
 </ul>
 <p>These are representations of the command <code class="docutils literal notranslate"><span class="pre">wc</span></code> in 3 different formats. If you look at <code class="docutils literal notranslate"><span class="pre">wc.wdl</span></code>, you’ll see that it
 contains a WDL-compatible tool definition for <code class="docutils literal notranslate"><span class="pre">wc</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>version 1.0
+task Wc {
+  input {
+    Boolean bytes
+    Boolean chars
+    Boolean lines
+    String files__from
+    Boolean max_line_length
+    Boolean words
+  }
+  command &lt;&lt;&lt;
+    wc \
+      ~{true=&quot;--bytes&quot; false=&quot;&quot; bytes} \
+      ~{true=&quot;--chars&quot; false=&quot;&quot; chars} \
+      ~{true=&quot;--lines&quot; false=&quot;&quot; lines} \
+      ~{if defined(files__from) then (&quot;--files0-from &quot; +  &#39;&quot;&#39; + files__from + &#39;&quot;&#39;) else &quot;&quot;} \
+      ~{true=&quot;--max-line-length&quot; false=&quot;&quot; max_line_length} \
+      ~{true=&quot;--words&quot; false=&quot;&quot; words}
+  &gt;&gt;&gt;
+}
+</pre></div>
+</div>
 </div>
 </div>
 </div>

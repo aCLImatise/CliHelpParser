@@ -78,7 +78,7 @@ since some tools (such as bedtools) use different help flags for subcommands</p>
 
 <dl class="py function">
 <dt id="acclimatise.parse_help">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">parse_help</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">parse_positionals</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.parse_help" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">parse_help</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">max_length</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.parse_help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a string of help text into a Command. Use this if you already have run the executable and extracted the
 help text yourself</p>
 <dl class="field-list simple">
@@ -86,7 +86,9 @@ help text yourself</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cmd</strong> – List of arguments used to generate this help text, e.g. [‘bwa’, ‘mem’]</p></li>
 <li><p><strong>text</strong> – The help text to parse</p></li>
-<li><p><strong>parse_positionals</strong> – If false, don’t parse positional arguments</p></li>
+<li><p><strong>max_length</strong> – If the input text has more than this many lines, no attempt will be made to parse the file (as
+it’s too large, will likely take a long time, and there’s probably an underlying problem if this has happened).
+In this case, an empty Command will be returned</p></li>
 </ul>
 </dd>
 </dl>

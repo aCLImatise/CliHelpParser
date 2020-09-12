@@ -39,8 +39,14 @@
 <h2>Command<a class="headerlink" href="#command" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="acclimatise.model.Command">
-<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Command</code><span class="sig-paren">(</span><em class="sig-param">positional: List[Positional], named: List[Flag], command: List[str], parent: Optional[Command] = None, subcommands: List[Command] = &lt;factory&gt;, help_flag: Optional[Flag] = None, usage_flag: Optional[Flag] = None, version_flag: Optional[Flag] = None, help_text: Optional[str] = None, generated_using: Optional[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Command" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">acclimatise.model.</code><code class="sig-name descname">Command</code><span class="sig-paren">(</span><em class="sig-param">command: List[str], positional: List[Positional] = &lt;factory&gt;, named: List[Flag] = &lt;factory&gt;, parent: Optional[Command] = None, subcommands: List[Command] = &lt;factory&gt;, usage: List[UsageInstance] = &lt;factory&gt;, help_flag: Optional[Flag] = None, usage_flag: Optional[Flag] = None, version_flag: Optional[Flag] = None, help_text: Optional[str] = None, generated_using: Optional[str] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#acclimatise.model.Command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class representing an entire command or subcommand, e.g. <cite>bwa mem</cite> or <cite>grep</cite></p>
+<dl class="py method">
+<dt id="acclimatise.model.Command.all_synonyms">
+<em class="property">property </em><code class="sig-name descname">all_synonyms</code><a class="headerlink" href="#acclimatise.model.Command.all_synonyms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns all flag synonyms for all flags in this command</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="acclimatise.model.Command.as_filename">
 <em class="property">property </em><code class="sig-name descname">as_filename</code><a class="headerlink" href="#acclimatise.model.Command.as_filename" title="Permalink to this definition">¶</a></dt>
@@ -99,6 +105,14 @@ has depth 1, a sub-sub-command has depth 2 etc</p>
 <dd><p>All named arguments (flags) supported by this command</p>
 </dd></dl>
 
+<dl class="py method">
+<dt id="acclimatise.model.Command.outputs">
+<em class="property">property </em><code class="sig-name descname">outputs</code><a class="headerlink" href="#acclimatise.model.Command.outputs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of inputs which are also outputs, for example the “-o” flag is normally an input (you have to
+provide a filename), but also an output (you are interested in the contents of the file at that path after the
+command has been run)</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt id="acclimatise.model.Command.parent">
 <code class="sig-name descname">parent</code><em class="property">: Optional<span class="p">[</span><a class="reference internal" href="#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span></em><em class="property"> = None</em><a class="headerlink" href="#acclimatise.model.Command.parent" title="Permalink to this definition">¶</a></dt>
@@ -115,6 +129,12 @@ has depth 1, a sub-sub-command has depth 2 etc</p>
 <dt id="acclimatise.model.Command.subcommands">
 <code class="sig-name descname">subcommands</code><em class="property">: List<span class="p">[</span><a class="reference internal" href="#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span></em><a class="headerlink" href="#acclimatise.model.Command.subcommands" title="Permalink to this definition">¶</a></dt>
 <dd><p>A list of subcommands of this command, e.g. “bwa” has the subcommand “bwa mem”</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="acclimatise.model.Command.usage">
+<code class="sig-name descname">usage</code><em class="property">: List<span class="p">[</span>acclimatise.usage_parser.model.UsageInstance<span class="p">]</span></em><a class="headerlink" href="#acclimatise.model.Command.usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Different usage examples provided by the help</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -182,6 +202,12 @@ CliList.</p>
 CliList.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt id="acclimatise.model.Positional.merge">
+<em class="property">static </em><code class="sig-name descname">merge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#acclimatise.model.Positional" title="acclimatise.model.Positional">Positional</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.model.Positional" title="acclimatise.model.Positional">acclimatise.model.Positional</a><a class="headerlink" href="#acclimatise.model.Positional.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine the information contained within two Positionals, and return the new Positional</p>
+</dd></dl>
+
 <dl class="py attribute">
 <dt id="acclimatise.model.Positional.name">
 <code class="sig-name descname">name</code><em class="property">: str</em><a class="headerlink" href="#acclimatise.model.Positional.name" title="Permalink to this definition">¶</a></dt>
@@ -241,6 +267,12 @@ CliList.</p>
 <dt id="acclimatise.model.Flag.longest_synonym">
 <em class="property">property </em><code class="sig-name descname">longest_synonym</code><a class="headerlink" href="#acclimatise.model.Flag.longest_synonym" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the longest synonym this flag has. e.g. for <cite>-h, –help</cite>, it will return <cite>–help</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="acclimatise.model.Flag.merge">
+<em class="property">static </em><code class="sig-name descname">merge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">flags</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="#acclimatise.model.Flag" title="acclimatise.model.Flag">Flag</a><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#acclimatise.model.Flag" title="acclimatise.model.Flag">acclimatise.model.Flag</a><a class="headerlink" href="#acclimatise.model.Flag.merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine the information contained within two Flags, and return the new Flag</p>
 </dd></dl>
 
 <dl class="py attribute">
