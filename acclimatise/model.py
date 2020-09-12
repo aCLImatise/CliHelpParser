@@ -19,8 +19,10 @@ from spacy import tokens
 from word2number import w2n
 
 from acclimatise import cli_types
+from acclimatise.cli_types import CliFileSystemType, CliString
 from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.nlp import wordsegment
+from acclimatise.usage_parser.model import UsageInstance
 from acclimatise.yaml import yaml
 
 
@@ -79,6 +81,21 @@ class Command:
                 if "--usage" in flag.synonyms:
                     self.usage_flag = flag
                     self.named.remove(flag)
+
+    @property
+    def outputs(self) -> typing.List["CliArgument"]:
+        """
+        Returns a list of inputs which are also outputs, for example the "-o" flag is normally an input (you have to
+        provide a filename), but also an output (you are interested in the contents of the file at that path after the
+        command has been run)
+        """
+        ret = []
+        for arg in itertools.chain(self.named, self.positional):
+            typ = arg.get_type()
+            # Yes this is a bit awkward, the output field should probably be on every type, defaulting to False
+            if isinstance(typ, cli_types.CliFileSystemType) and typ.output:
+                ret.append(arg)
+        return ret
 
     @property
     def as_filename(self) -> str:
@@ -149,9 +166,7 @@ class Command:
     A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
     """
 
-    usage: typing.List["acclimatise.usage_parser.model.UsageInstance"] = field(
-        default_factory=list
-    )
+    usage: typing.List["UsageInstance"] = field(default_factory=list)
     """
     Different usage examples provided by the help
     """
@@ -389,14 +404,33 @@ class Flag(CliArgument):
     def get_type(self) -> cli_types.CliType:
         # Try the argument name, then the flag name, then the description in that order
         arg_type = self.args.get_type()
-        if arg_type is not None:
-            return arg_type
-
         flag_type = infer_type(self.full_name())
-        if flag_type is not None:
-            return flag_type
+        desc_type = infer_type(self.description)
 
-        return infer_type(self.description) or cli_types.CliString()
+        candidates = [
+            cand
+            for cand in [
+                arg_type,
+                flag_type,
+                desc_type,
+            ]
+            if cand is not None
+        ]
+        if len(candidates) == 0:
+            return CliString()
+
+        # TODO: make this sorting a bit better using CliType.representable
+        prioritised = sorted(
+            candidates,
+            key=lambda typ: (
+                not isinstance(typ, CliString),  # First, prioritise non-strings,
+                isinstance(typ, CliFileSystemType)
+                and typ.output,  # Next, prioritise output types
+            ),
+            reverse=True,
+        )
+
+        return prioritised[0]
 
     def full_name(self) -> str:
         """
@@ -471,9 +505,9 @@ int_re = re.compile(
 str_re = re.compile(r"\bstr(ing)?\b", flags=re.IGNORECASE)
 float_re = re.compile(r"\b(float|decimal)\b", flags=re.IGNORECASE)
 bool_re = re.compile(r"\bbool(ean)?\b", flags=re.IGNORECASE)
-file_re = re.compile(r"\b(file|path)\b", flags=re.IGNORECASE)
+file_re = re.compile(r"\b(file(name|path)?|path)\b", flags=re.IGNORECASE)
 input_re = re.compile(r"input", flags=re.IGNORECASE)
-output_re = re.compile(r"output", flags=re.IGNORECASE)
+output_re = re.compile(r"\bout(put)?\b", flags=re.IGNORECASE)
 dir_re = re.compile(r"\b(folder|directory)\b", flags=re.IGNORECASE)
 
 float_num_re = re.compile(
@@ -595,7 +629,9 @@ class OptionalFlagArg(FlagArg):
         return len(self.names)
 
     def get_type(self):
-        return cli_types.CliTuple([infer_type(arg) for arg in self.names])
+        return cli_types.CliTuple(
+            [infer_type(" ".join(wordsegment.segment(arg))) for arg in self.names]
+        )
 
 
 @yaml_object(yaml)
@@ -617,7 +653,7 @@ class SimpleFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        return infer_type(self.name) or cli_types.CliString()
+        return infer_type(" ".join(wordsegment.segment(self.name))) or None
 
 
 @yaml_object(yaml)
@@ -639,7 +675,10 @@ class RepeatFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        t = infer_type(self.name) or cli_types.CliString()
+        t = (
+            infer_type(" ".join(wordsegment.segment(self.name)))
+            or cli_types.CliString()
+        )
         return cli_types.CliList(t)
 
 

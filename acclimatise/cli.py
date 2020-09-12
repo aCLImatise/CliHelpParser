@@ -144,12 +144,11 @@ def pipe(cmd, pos, generate_names, case, format):
 
 
 @main.command(help="Output a representation of the internal grammar")
-@opt_pos
-def railroad(pos):
+def railroad():
     try:
         from pyparsing.diagram import to_railroad, railroad_to_html
 
-        parser = CliParser(pos)
+        parser = CliParser()
         railroad = to_railroad(parser.flags)
         sys.stdout.write(railroad_to_html(railroad))
     except ImportError:
