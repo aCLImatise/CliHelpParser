@@ -1,5 +1,25 @@
 Changelog
 =========
+1.2.0 (2020-09-13)
+-----------------
+User-Facing Changes
+******************
+* Add output generation for CWL and WDL
+
+Fixes
+*****
+* Fix the railroad diagrams not building
+
+Internal Changes
+****************
+* Upgrade wdlgen to 3.0.0
+* Delete `hash.py`, which was unused
+* Add `Command.outputs`, which is a property that returns all outputs
+* Add (rudimentary) prioritisation for types, ensuring we don't always choose the type derived from the argument (this is an initial attempt at #37)
+* Support more complex assertions for test cases, including the number of outputs
+* Small improvements to the infer_type regexes
+* Refactor test case assertions into the `HelpText` class
+
 1.1.1 (2020-09-10)
 ------------------
 
