@@ -35,13 +35,7 @@ def test_explore(test: HelpText):
     command = explore_command(test.cmd, max_depth=1)
 
     # Check we parsed correctly
-    assert len(command.subcommands) == test.subcommands
-    assert len(command.positional) == test.positional
-    assert len(command.named) == test.named
-
-    # Check this can be converted properly to all formats
-    convert_validate(command, explore=True)
-
+    test.run_assertions(command, explore=True)
 
 @skip_not_installed("dinosaur")
 @pytest.mark.timeout(360)

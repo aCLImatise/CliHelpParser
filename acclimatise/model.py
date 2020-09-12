@@ -485,9 +485,9 @@ int_re = re.compile(
 str_re = re.compile(r"\bstr(ing)?\b", flags=re.IGNORECASE)
 float_re = re.compile(r"\b(float|decimal)\b", flags=re.IGNORECASE)
 bool_re = re.compile(r"\bbool(ean)?\b", flags=re.IGNORECASE)
-file_re = re.compile(r"\b(file|path)\b", flags=re.IGNORECASE)
+file_re = re.compile(r"\b(file(name|path)?|path)\b", flags=re.IGNORECASE)
 input_re = re.compile(r"input", flags=re.IGNORECASE)
-output_re = re.compile(r"output", flags=re.IGNORECASE)
+output_re = re.compile(r"\bout(put)?\b", flags=re.IGNORECASE)
 dir_re = re.compile(r"\b(folder|directory)\b", flags=re.IGNORECASE)
 
 float_num_re = re.compile(
@@ -609,7 +609,7 @@ class OptionalFlagArg(FlagArg):
         return len(self.names)
 
     def get_type(self):
-        return cli_types.CliTuple([infer_type(arg) for arg in self.names])
+        return cli_types.CliTuple([infer_type(' '.join(wordsegment.segment(arg))) for arg in self.names])
 
 
 @yaml_object(yaml)
@@ -631,7 +631,7 @@ class SimpleFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        return infer_type(self.name) or cli_types.CliString()
+        return infer_type(' '.join(wordsegment.segment(self.name))) or None
 
 
 @yaml_object(yaml)
@@ -653,7 +653,7 @@ class RepeatFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        t = infer_type(self.name) or cli_types.CliString()
+        t = infer_type(' '.join(wordsegment.segment(self.name))) or cli_types.CliString()
         return cli_types.CliList(t)
 
 

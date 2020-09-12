@@ -5,17 +5,20 @@ import tempfile
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
-from typing import List
+from typing import List, Callable, Optional
+from itertools import chain
 
 import cwl_utils.parser_v1_1 as parser
 import pytest
 from cwltool.load_tool import fetch_document, resolve_and_validate_document
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from WDL import Error, parse_document
 
-from acclimatise import Command, WrapperGenerator
+from acclimatise import Command, WrapperGenerator, Flag
+from acclimatise.model import CliArgument
 from acclimatise.name_generation import NameGenerationError
 from acclimatise.yaml import yaml
+from acclimatise import cli_types
 
 logging.getLogger("cwltool").setLevel(30)
 
@@ -29,13 +32,60 @@ def skip_not_installed(executable: str):
     )
 
 
-@dataclass
+@dataclass(frozen=True)
 class HelpText:
     path: str
+    """Path to the test data file"""
     cmd: List[str]
-    positional: int
-    named: int
-    subcommands: int
+    """command-line used to generate this Command"""
+    positional: Optional[int] = None
+    """Number of positional args"""
+    named: Optional[int] = None
+    """Number of named args"""
+    subcommands: Optional[int] = None
+    """Number of subcommands"""
+    outputs: Optional[int] = None
+    """Number of outputs"""
+    output_assertions: List[Callable[[CliArgument], bool]] = field(default_factory=list)
+    """
+    A list of assertions that must return True for at least one output
+    """
+    assertions: List[Callable[[Command], bool]] = field(default_factory=list)
+    """
+    A list of assertions that must return True if the command passed. Used for misc
+    assertions that don't fit into the above fields
+    """
+
+    def run_assertions(self, cmd: Command, explore=False):
+        """
+        Run all assertions against the Command that was parsed
+        """
+        if explore:
+            # If we are exploring, we have distinguished between positionals and
+            # subcommands, so can make separate assertions
+            if self.positional is not None:
+                assert len(cmd.positional) == self.positional
+            if self.subcommands is not None:
+                assert len(cmd.subcommands) == self.subcommands
+        else:
+            # If we are not exploring, we haven't distinguished between positionals and
+            # subcommands, so we have to combine them
+            if self.positional is not None:
+                assert len(cmd.positional) == self.positional + self.subcommands
+
+        if self.named is not None:
+            assert len(cmd.named) == self.named
+        if self.outputs is not None:
+            assert len(cmd.outputs) == self.outputs
+        if self.output_assertions is not None:
+            for assertion in self.output_assertions:
+                assert any([assertion(out) for out in cmd.outputs])
+
+        for assertion in self.assertions:
+            assert assertion(cmd)
+
+        # Check the converters work
+        convert_validate(cmd, explore=explore)
 
 
 all_tests = [
@@ -46,6 +96,7 @@ all_tests = [
             positional=1,  # filek
             named=209,  # 208 flags with descriptions, and also "-e"
             subcommands=2,  # shell and d8
+            outputs=0
         ),
     ),
     pytest.param(
@@ -55,6 +106,7 @@ all_tests = [
             positional=0,
             named=0,
             subcommands=3,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -64,6 +116,7 @@ all_tests = [
             positional=2,
             named=4,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -73,6 +126,7 @@ all_tests = [
             positional=0,
             named=37,
             subcommands=0,
+            outputs=1
         ),
     ),
     pytest.param(
@@ -82,6 +136,7 @@ all_tests = [
             positional=0,
             named=29,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -91,6 +146,7 @@ all_tests = [
             positional=0,
             named=5,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -100,6 +156,7 @@ all_tests = [
             positional=1,
             named=2,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -109,6 +166,7 @@ all_tests = [
             positional=0,
             named=20,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -118,6 +176,7 @@ all_tests = [
             positional=0,
             named=15,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -127,6 +186,7 @@ all_tests = [
             positional=1,
             named=5,
             subcommands=0,
+            outputs=1
         ),
     ),
     pytest.param(
@@ -136,6 +196,7 @@ all_tests = [
             positional=1,
             named=4,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -145,6 +206,7 @@ all_tests = [
             positional=0,
             named=8,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -154,6 +216,7 @@ all_tests = [
             positional=0,
             named=20,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -163,6 +226,7 @@ all_tests = [
             positional=3,
             named=36,
             subcommands=0,
+            outputs=1 # -o
         ),
     ),
     pytest.param(
@@ -172,6 +236,7 @@ all_tests = [
             named=1,
             positional=2,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -181,6 +246,7 @@ all_tests = [
             named=0,
             positional=1,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -190,6 +256,11 @@ all_tests = [
             named=20,
             positional=2,
             subcommands=0,
+            outputs=1, # Should actually be 2: -c and -o, but we're currently failing -o
+            output_assertions=[
+            lambda out: '-c' in out.synonyms,
+                # lambda out: '-o' in out.synonyms,
+            ]
         ),
     ),
     pytest.param(
@@ -199,6 +270,7 @@ all_tests = [
             positional=0,
             named=1,
             subcommands=43,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -208,6 +280,8 @@ all_tests = [
             named=57,
             positional=0,
             subcommands=0,
+            outputs=1,
+            output_assertions=[lambda out: '--outfolder' in out.synonyms and out.get_type() == cli_types.CliDir(output=True)]
         ),
     ),
     pytest.param(
@@ -217,11 +291,13 @@ all_tests = [
             named=2,
             positional=1,
             subcommands=0,
+            outputs=0
         ),
     ),
     pytest.param(
         HelpText(
-            path="test_data/bwa.txt", cmd=["bwa"], named=0, positional=0, subcommands=14
+            path="test_data/bwa.txt", cmd=["bwa"], named=0, positional=0, subcommands=14,
+            outputs=0
         ),
     ),
     pytest.param(
@@ -231,6 +307,7 @@ all_tests = [
             positional=0,
             named=0,
             subcommands=29,
+            outputs=0
         ),
     ),
     # These last two are really strange, maybe I'll support them eventually
@@ -287,6 +364,8 @@ def validate_cwl(cwl: str, cmd: Command = None, explore: bool = True):
 
         if cmd:
             assert len(workflowobj["inputs"]) == len(cmd.positional) + len(cmd.named)
+            # We should have all the official outputs, plus stdout
+            assert len(workflowobj["outputs"]) == len(cmd.outputs) + 1
 
 
 def validate_wdl(wdl: str, cmd: Command = None, explore=True):
@@ -321,6 +400,8 @@ def validate_wdl(wdl: str, cmd: Command = None, explore=True):
         assert len(task.parameter_meta) == target, "{} vs {}".format(
             task.parameter_meta.keys(), cmd_names
         )
+        # We should have all the official outputs, plus stdout
+        assert len(task.outputs) == len(cmd.outputs) + 1
 
 
 def validate_yml(yml: str, cmd: Command = None, explore=True):
