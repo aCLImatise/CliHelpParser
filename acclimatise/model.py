@@ -19,6 +19,7 @@ from spacy import tokens
 from word2number import w2n
 
 from acclimatise import cli_types
+from acclimatise.cli_types import CliFileSystemType, CliString
 from acclimatise.name_generation import generate_name, segment_string
 from acclimatise.nlp import wordsegment
 from acclimatise.usage_parser.model import UsageInstance
@@ -403,14 +404,33 @@ class Flag(CliArgument):
     def get_type(self) -> cli_types.CliType:
         # Try the argument name, then the flag name, then the description in that order
         arg_type = self.args.get_type()
-        if arg_type is not None:
-            return arg_type
-
         flag_type = infer_type(self.full_name())
-        if flag_type is not None:
-            return flag_type
+        desc_type = infer_type(self.description)
 
-        return infer_type(self.description) or cli_types.CliString()
+        candidates = [
+            cand
+            for cand in [
+                arg_type,
+                flag_type,
+                desc_type,
+            ]
+            if cand is not None
+        ]
+        if len(candidates) == 0:
+            return CliString()
+
+        # TODO: make this sorting a bit better using CliType.representable
+        prioritised = sorted(
+            candidates,
+            key=lambda typ: (
+                not isinstance(typ, CliString),  # First, prioritise non-strings,
+                isinstance(typ, CliFileSystemType)
+                and typ.output,  # Next, prioritise output types
+            ),
+            reverse=True,
+        )
+
+        return prioritised[0]
 
     def full_name(self) -> str:
         """

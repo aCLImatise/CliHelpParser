@@ -195,7 +195,7 @@ class WdlGenerator(WrapperGenerator):
                     Output(
                         data_type=self.type_to_wdl(typ),
                         name="out_" + arg.name,
-                        expression="${{in_{}}}".format(arg.name),
+                        expression='"${{in_{}}}"'.format(arg.name),
                     )
                 )
 
