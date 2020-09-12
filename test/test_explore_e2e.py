@@ -37,6 +37,7 @@ def test_explore(test: HelpText):
     # Check we parsed correctly
     test.run_assertions(command, explore=True)
 
+
 @skip_not_installed("dinosaur")
 @pytest.mark.timeout(360)
 def test_explore_dinosaur():

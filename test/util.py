@@ -3,10 +3,10 @@ import os
 import shutil
 import tempfile
 from io import StringIO
+from itertools import chain
 from pathlib import Path
 from textwrap import dedent
-from typing import List, Callable, Optional
-from itertools import chain
+from typing import Callable, List, Optional
 
 import cwl_utils.parser_v1_1 as parser
 import pytest
@@ -14,11 +14,10 @@ from cwltool.load_tool import fetch_document, resolve_and_validate_document
 from dataclasses import dataclass, field
 from WDL import Error, parse_document
 
-from acclimatise import Command, WrapperGenerator, Flag
+from acclimatise import Command, Flag, WrapperGenerator, cli_types
 from acclimatise.model import CliArgument
 from acclimatise.name_generation import NameGenerationError
 from acclimatise.yaml import yaml
-from acclimatise import cli_types
 
 logging.getLogger("cwltool").setLevel(30)
 
@@ -96,7 +95,7 @@ all_tests = [
             positional=1,  # filek
             named=209,  # 208 flags with descriptions, and also "-e"
             subcommands=2,  # shell and d8
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -106,7 +105,7 @@ all_tests = [
             positional=0,
             named=0,
             subcommands=3,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -116,7 +115,7 @@ all_tests = [
             positional=2,
             named=4,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -126,7 +125,7 @@ all_tests = [
             positional=0,
             named=37,
             subcommands=0,
-            outputs=1
+            outputs=1,
         ),
     ),
     pytest.param(
@@ -136,7 +135,7 @@ all_tests = [
             positional=0,
             named=29,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -146,7 +145,7 @@ all_tests = [
             positional=0,
             named=5,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -156,7 +155,7 @@ all_tests = [
             positional=1,
             named=2,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -166,7 +165,7 @@ all_tests = [
             positional=0,
             named=20,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -176,7 +175,7 @@ all_tests = [
             positional=0,
             named=15,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -186,7 +185,7 @@ all_tests = [
             positional=1,
             named=5,
             subcommands=0,
-            outputs=1
+            outputs=1,
         ),
     ),
     pytest.param(
@@ -196,7 +195,7 @@ all_tests = [
             positional=1,
             named=4,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -206,7 +205,7 @@ all_tests = [
             positional=0,
             named=8,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -216,7 +215,7 @@ all_tests = [
             positional=0,
             named=20,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -226,7 +225,7 @@ all_tests = [
             positional=3,
             named=36,
             subcommands=0,
-            outputs=1 # -o
+            outputs=1,  # -o
         ),
     ),
     pytest.param(
@@ -236,7 +235,7 @@ all_tests = [
             named=1,
             positional=2,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -246,7 +245,7 @@ all_tests = [
             named=0,
             positional=1,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -256,11 +255,11 @@ all_tests = [
             named=20,
             positional=2,
             subcommands=0,
-            outputs=1, # Should actually be 2: -c and -o, but we're currently failing -o
+            outputs=1,  # Should actually be 2: -c and -o, but we're currently failing -o
             output_assertions=[
-            lambda out: '-c' in out.synonyms,
+                lambda out: "-c" in out.synonyms,
                 # lambda out: '-o' in out.synonyms,
-            ]
+            ],
         ),
     ),
     pytest.param(
@@ -270,7 +269,7 @@ all_tests = [
             positional=0,
             named=1,
             subcommands=43,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -281,7 +280,10 @@ all_tests = [
             positional=0,
             subcommands=0,
             outputs=1,
-            output_assertions=[lambda out: '--outfolder' in out.synonyms and out.get_type() == cli_types.CliDir(output=True)]
+            output_assertions=[
+                lambda out: "--outfolder" in out.synonyms
+                and out.get_type() == cli_types.CliDir(output=True)
+            ],
         ),
     ),
     pytest.param(
@@ -291,13 +293,17 @@ all_tests = [
             named=2,
             positional=1,
             subcommands=0,
-            outputs=0
+            outputs=0,
         ),
     ),
     pytest.param(
         HelpText(
-            path="test_data/bwa.txt", cmd=["bwa"], named=0, positional=0, subcommands=14,
-            outputs=0
+            path="test_data/bwa.txt",
+            cmd=["bwa"],
+            named=0,
+            positional=0,
+            subcommands=14,
+            outputs=0,
         ),
     ),
     pytest.param(
@@ -307,7 +313,7 @@ all_tests = [
             positional=0,
             named=0,
             subcommands=29,
-            outputs=0
+            outputs=0,
         ),
     ),
     # These last two are really strange, maybe I'll support them eventually

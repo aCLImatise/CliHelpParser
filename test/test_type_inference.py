@@ -1,15 +1,15 @@
 import pytest
 
 from acclimatise.cli_types import (
-    CliType,
     CliBoolean,
     CliDir,
     CliFile,
     CliFloat,
     CliInteger,
     CliString,
+    CliType,
 )
-from acclimatise.model import infer_type, CliArgument, Flag, SimpleFlagArg, EmptyFlagArg
+from acclimatise.model import CliArgument, EmptyFlagArg, Flag, SimpleFlagArg, infer_type
 
 
 @pytest.mark.parametrize(
@@ -47,19 +47,27 @@ def test_type_inference(string, typ):
     assert inferred_type == typ
 
 
-@pytest.mark.parametrize('flag,typ', [
+@pytest.mark.parametrize(
+    "flag,typ",
     [
-        Flag(
-            description='Filename to output the counts to instead of stdout.',
-            synonyms=['-c', '--counts_output'],
-            args=SimpleFlagArg('OUTPUT_FILENAME')
-        ), CliFile(output=True)
+        [
+            Flag(
+                description="Filename to output the counts to instead of stdout.",
+                synonyms=["-c", "--counts_output"],
+                args=SimpleFlagArg("OUTPUT_FILENAME"),
+            ),
+            CliFile(output=True),
+        ],
+        [
+            Flag(
+                description="redirect output to specified file\ndefault: undefined",
+                synonyms=["-o"],
+                args=EmptyFlagArg(),
+            ),
+            CliFile(output=True),
+        ],
     ],
-    [
-        Flag(description='redirect output to specified file\ndefault: undefined',
-             synonyms=['-o'], args=EmptyFlagArg()), CliFile(output=True)
-    ]
-])
+)
 def test_flag_type_inference(flag: CliArgument, typ: CliType):
     inferred_type = flag.get_type()
     assert inferred_type == typ

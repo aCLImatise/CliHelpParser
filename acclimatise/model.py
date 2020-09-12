@@ -609,7 +609,9 @@ class OptionalFlagArg(FlagArg):
         return len(self.names)
 
     def get_type(self):
-        return cli_types.CliTuple([infer_type(' '.join(wordsegment.segment(arg))) for arg in self.names])
+        return cli_types.CliTuple(
+            [infer_type(" ".join(wordsegment.segment(arg))) for arg in self.names]
+        )
 
 
 @yaml_object(yaml)
@@ -631,7 +633,7 @@ class SimpleFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        return infer_type(' '.join(wordsegment.segment(self.name))) or None
+        return infer_type(" ".join(wordsegment.segment(self.name))) or None
 
 
 @yaml_object(yaml)
@@ -653,7 +655,10 @@ class RepeatFlagArg(FlagArg):
         return 1
 
     def get_type(self):
-        t = infer_type(' '.join(wordsegment.segment(self.name))) or cli_types.CliString()
+        t = (
+            infer_type(" ".join(wordsegment.segment(self.name)))
+            or cli_types.CliString()
+        )
         return cli_types.CliList(t)
 
 
