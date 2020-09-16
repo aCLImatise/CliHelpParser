@@ -18,12 +18,12 @@ from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 from word2number import w2n
 
-from acclimatise import cli_types
-from acclimatise.cli_types import CliFileSystemType, CliString
-from acclimatise.name_generation import generate_name, segment_string
-from acclimatise.nlp import wordsegment
-from acclimatise.usage_parser.model import UsageInstance
-from acclimatise.yaml import yaml
+from aclimatise import cli_types
+from aclimatise.cli_types import CliFileSystemType, CliString
+from aclimatise.name_generation import generate_name, segment_string
+from aclimatise.nlp import wordsegment
+from aclimatise.usage_parser.model import UsageInstance
+from aclimatise.yaml import yaml
 
 
 def first(lst: typing.List, default):

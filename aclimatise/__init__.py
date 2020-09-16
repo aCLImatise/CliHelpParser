@@ -7,15 +7,15 @@ import dataclasses
 import psutil
 from pyparsing import ParseBaseException
 
-from acclimatise.converter import WrapperGenerator
-from acclimatise.converter.cwl import CwlGenerator
-from acclimatise.converter.wdl import WdlGenerator
-from acclimatise.converter.yml import YmlGenerator
-from acclimatise.execution import Executor
-from acclimatise.execution.local import LocalExecutor
-from acclimatise.flag_parser.parser import CliParser
-from acclimatise.model import Command, Flag
-from acclimatise.usage_parser.parser import UsageParser
+from aclimatise.converter import WrapperGenerator
+from aclimatise.converter.cwl import CwlGenerator
+from aclimatise.converter.wdl import WdlGenerator
+from aclimatise.converter.yml import YmlGenerator
+from aclimatise.execution import Executor
+from aclimatise.execution.local import LocalExecutor
+from aclimatise.flag_parser.parser import CliParser
+from aclimatise.model import Command, Flag
+from aclimatise.usage_parser.parser import UsageParser
 
 logger = logging.getLogger("acclimatise")
 

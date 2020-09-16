@@ -2,8 +2,8 @@ import re
 
 from pyparsing import *
 
-# from acclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
-from acclimatise.flag_parser.elements import (
+# from aclimatise.flag_parser.elements import cli_id, any_flag, long_flag, short_flag, flag_with
+from aclimatise.flag_parser.elements import (
     arg,
     argument_body_chars,
     customIndentedBlock,
@@ -13,7 +13,7 @@ from acclimatise.flag_parser.elements import (
     flag_with_arg,
     repeated_segment,
 )
-from acclimatise.model import (
+from aclimatise.model import (
     Command,
     EmptyFlagArg,
     Flag,
@@ -21,7 +21,7 @@ from acclimatise.model import (
     Positional,
     SimpleFlagArg,
 )
-from acclimatise.usage_parser.model import UsageElement
+from aclimatise.usage_parser.model import UsageElement
 
 
 def delimited_item(open, el, close):

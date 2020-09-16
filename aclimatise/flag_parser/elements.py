@@ -5,7 +5,7 @@ from typing import List
 
 from pyparsing import *
 
-from acclimatise.model import *
+from aclimatise.model import *
 
 #: Characters that can start a CLI element, e.g. "-@"
 element_start_chars = alphanums + "@"

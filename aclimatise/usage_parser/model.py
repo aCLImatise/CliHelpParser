@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from dataclasses import dataclass
 
-from acclimatise import model
+from aclimatise import model
 
 
 @dataclass

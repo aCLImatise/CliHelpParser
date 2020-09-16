@@ -7,8 +7,8 @@ from typing import Iterable, Tuple
 
 import click
 
-from acclimatise import WrapperGenerator, best_cmd, explore_command, parse_help
-from acclimatise.flag_parser.parser import CliParser
+from aclimatise import WrapperGenerator, best_cmd, explore_command, parse_help
+from aclimatise.flag_parser.parser import CliParser
 
 # Some common options
 opt_pos = click.option(

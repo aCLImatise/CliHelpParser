@@ -6,8 +6,8 @@ from typing import Generator, Iterable, List, Set, TextIO, Tuple, Type
 
 from dataclasses import dataclass
 
-from acclimatise.model import CliArgument, Command, Flag
-from acclimatise.name_generation import (
+from aclimatise.model import CliArgument, Command, Flag
+from aclimatise.name_generation import (
     NameGenerationError,
     choose_unique_name,
     generate_name,
