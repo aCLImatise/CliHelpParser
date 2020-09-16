@@ -1,4 +1,4 @@
-from acclimatise.execution.local import LocalExecutor
+from aclimatise.execution.local import LocalExecutor
 
 from ..util import skip_not_installed
 

@@ -3,8 +3,8 @@ Test the casing (snake_case vs camelCase) used by the converters
 """
 import pytest
 
-from acclimatise.converter import WrapperGenerator
-from acclimatise.model import EmptyFlagArg, Flag
+from aclimatise.converter import WrapperGenerator
+from aclimatise.model import EmptyFlagArg, Flag
 
 
 def test_camel_short(camel_gen):

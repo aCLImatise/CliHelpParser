@@ -2,7 +2,7 @@ import shutil
 
 import pytest
 
-from acclimatise.flag_parser.parser import CliParser
+from aclimatise.flag_parser.parser import CliParser
 
 
 def test_singularity_style_flags(parser):

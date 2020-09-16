@@ -1,8 +1,8 @@
 """
 Tests for the name generation of single flags
 """
-from acclimatise.converter.wdl import WdlGenerator
-from acclimatise.model import EmptyFlagArg, Flag, Positional, SimpleFlagArg
+from aclimatise.converter.wdl import WdlGenerator
+from aclimatise.model import EmptyFlagArg, Flag, Positional, SimpleFlagArg
 
 
 def test_samtools_dict_output():

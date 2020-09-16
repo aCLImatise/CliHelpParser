@@ -1,8 +1,8 @@
 """
 Tests certain groups of flags used together
 """
-from acclimatise.converter import WrapperGenerator
-from acclimatise.model import EmptyFlagArg, Flag, SimpleFlagArg
+from aclimatise.converter import WrapperGenerator
+from aclimatise.model import EmptyFlagArg, Flag, SimpleFlagArg
 
 
 def test_bedtools_window_sm():

@@ -1,6 +1,6 @@
 import pytest
 
-from acclimatise.cli_types import (
+from aclimatise.cli_types import (
     CliBoolean,
     CliDir,
     CliFile,
@@ -9,7 +9,7 @@ from acclimatise.cli_types import (
     CliString,
     CliType,
 )
-from acclimatise.model import CliArgument, EmptyFlagArg, Flag, SimpleFlagArg, infer_type
+from aclimatise.model import CliArgument, EmptyFlagArg, Flag, SimpleFlagArg, infer_type
 
 
 @pytest.mark.parametrize(

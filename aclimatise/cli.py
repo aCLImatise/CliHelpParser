@@ -1,5 +1,5 @@
 """
-Code relating to the command line interface to acclimatise
+Code relating to the command line interface to aCLImatise
 """
 import sys
 from pathlib import Path

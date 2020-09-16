@@ -117,7 +117,7 @@ class WrapperGenerator:
         """
         Choose names for a list of flags. This needs to be done in one go because there is a risk of duplicate
         variable names otherwise
-        :param length: See :py:func:`acclimatise.name_generation.generate_name`
+        :param length: See :py:func:`from aclimatise.name_generation.generate_name`
         """
         options = list(
             zip_longest(

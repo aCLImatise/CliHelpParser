@@ -1,6 +1,6 @@
 import pytest
 
-from acclimatise.flag_parser.parser import CliParser
+from aclimatise.flag_parser.parser import CliParser
 
 
 @pytest.fixture

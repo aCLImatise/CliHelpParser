@@ -17,7 +17,7 @@ from aclimatise.flag_parser.parser import CliParser
 from aclimatise.model import Command, Flag
 from aclimatise.usage_parser.parser import UsageParser
 
-logger = logging.getLogger("acclimatise")
+logger = logging.getLogger("aclimatise")
 
 default_executor = LocalExecutor()
 

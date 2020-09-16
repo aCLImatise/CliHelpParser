@@ -5,8 +5,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from acclimatise import explore_command
-from acclimatise.model import Command, Positional
+from aclimatise import explore_command
+from aclimatise.model import Command, Positional
 
 from .util import (
     HelpText,
@@ -75,8 +75,8 @@ def test_repeat_positionals():
     )
     child = Command(command=[])
 
-    with patch("acclimatise.explore_command", new=lambda *args, **kwargs: child):
-        with patch("acclimatise.best_cmd", new=Mock(return_value=parent)) as mocked:
+    with patch("aclimatise.explore_command", new=lambda *args, **kwargs: child):
+        with patch("aclimatise.best_cmd", new=Mock(return_value=parent)) as mocked:
             explore_command([])
 
             # We should only call best_command once, since there's only one unique positional

@@ -4,7 +4,7 @@ Test all the test data files
 import pytest
 from pkg_resources import resource_filename
 
-from acclimatise import WrapperGenerator, parse_help
+from aclimatise import WrapperGenerator, parse_help
 
 from ..util import HelpText, all_tests, convert_validate, validate_cwl, validate_wdl
 

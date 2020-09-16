@@ -1,4 +1,4 @@
-from acclimatise.model import Flag
+from aclimatise.model import Flag
 
 
 def test_podchecker_flags(parser):

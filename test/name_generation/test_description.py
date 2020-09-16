@@ -1,7 +1,7 @@
 """
 Tests the generate_name function, which converts a paragraph of text into a variable name
 """
-from acclimatise.name_generation import generate_name, preprocess
+from aclimatise.name_generation import generate_name, preprocess
 
 
 def test_bwa_mem_t():

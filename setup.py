@@ -22,7 +22,7 @@ setup(
         "dataclasses",
     ],
     python_requires=">=3.6",
-    entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},
+    entry_points={"console_scripts": ["aclimatise = aclimatise.cli:main"]},
     extras_require={
         "dev": [
             "pytest",
