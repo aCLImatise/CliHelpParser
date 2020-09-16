@@ -35,27 +35,27 @@
             
   <div class="section" id="command-line-interface">
 <h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="acclimatise">
-<h2>acclimatise<a class="headerlink" href="#acclimatise" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>acclimatise <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
+<div class="section" id="aclimatise">
+<h2>aclimatise<a class="headerlink" href="#aclimatise" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>aclimatise <span class="o">[</span>OPTIONS<span class="o">]</span> COMMAND <span class="o">[</span>ARGS<span class="o">]</span>...
 </pre></div>
 </div>
-<div class="section" id="acclimatise-explore">
-<h3>explore<a class="headerlink" href="#acclimatise-explore" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="aclimatise-explore">
+<h3>explore<a class="headerlink" href="#aclimatise-explore" title="Permalink to this headline">¶</a></h3>
 <p>Run an executable and explore all subcommands</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>acclimatise explore <span class="o">[</span>OPTIONS<span class="o">]</span> CMD...
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>aclimatise explore <span class="o">[</span>OPTIONS<span class="o">]</span> CMD...
 </pre></div>
 </div>
 <p class="rubric">Options</p>
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-pos">
-<span id="cmdoption-acclimatise-explore-no-pos"></span><code class="sig-name descname">--pos</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-pos</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-explore-pos" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-pos">
+<span id="cmdoption-aclimatise-explore-no-pos"></span><code class="sig-name descname">--pos</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-pos</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-pos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Include (default) or don’t include positional arguments, for example because the help formatting has some misleading sections that look like positional arguments</p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-c">
-<span id="cmdoption-acclimatise-explore-case"></span><code class="sig-name descname">-c</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--case</code><code class="sig-prename descclassname"> &lt;case&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-explore-c" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-c">
+<span id="cmdoption-aclimatise-explore-case"></span><code class="sig-name descname">-c</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--case</code><code class="sig-prename descclassname"> &lt;case&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-explore-c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Which case to use for variable names. If not set, defaults to the language defaults: snake_case for CWL and snake_case for WDL</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options</dt>
@@ -65,20 +65,20 @@
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-g">
-<span id="cmdoption-acclimatise-explore-generate-names"></span><code class="sig-name descname">-g</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--generate-names</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-explore-g" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-g">
+<span id="cmdoption-aclimatise-explore-generate-names"></span><code class="sig-name descname">-g</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--generate-names</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-g" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rather than using the long flag to generate the argument name, generate them automatically using the flag description. Generally helpful if there are no long flags, only short flags.</p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-d">
-<span id="cmdoption-acclimatise-explore-depth"></span><code class="sig-name descname">-d</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--depth</code><code class="sig-prename descclassname"> &lt;depth&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-explore-d" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-d">
+<span id="cmdoption-aclimatise-explore-depth"></span><code class="sig-name descname">-d</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--depth</code><code class="sig-prename descclassname"> &lt;depth&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-explore-d" title="Permalink to this definition">¶</a></dt>
 <dd><p>How many levels of subcommands we should look for. Depth 2 means commands can be 3 levels deep, such as <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">foreach</span></code></p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-f">
-<span id="cmdoption-acclimatise-explore-format"></span><code class="sig-name descname">-f</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--format</code><code class="sig-prename descclassname"> &lt;formats&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-explore-f" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-f">
+<span id="cmdoption-aclimatise-explore-format"></span><code class="sig-name descname">-f</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--format</code><code class="sig-prename descclassname"> &lt;formats&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-explore-f" title="Permalink to this definition">¶</a></dt>
 <dd><p>The language in which to output the CLI wrapper</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options</dt>
@@ -88,53 +88,53 @@
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-o">
-<span id="cmdoption-acclimatise-explore-out-dir"></span><code class="sig-name descname">-o</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--out-dir</code><code class="sig-prename descclassname"> &lt;out_dir&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-explore-o" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-o">
+<span id="cmdoption-aclimatise-explore-out-dir"></span><code class="sig-name descname">-o</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--out-dir</code><code class="sig-prename descclassname"> &lt;out_dir&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-explore-o" title="Permalink to this definition">¶</a></dt>
 <dd><p>Directory in which to put the output files</p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-l">
-<span id="cmdoption-acclimatise-explore-help-flag"></span><code class="sig-name descname">-l</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--help-flag</code><code class="sig-prename descclassname"> &lt;help_flag&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-explore-l" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-l">
+<span id="cmdoption-aclimatise-explore-help-flag"></span><code class="sig-name descname">-l</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--help-flag</code><code class="sig-prename descclassname"> &lt;help_flag&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-explore-l" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flag to append to the end of the command to make it output help text</p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-subcommands">
-<span id="cmdoption-acclimatise-explore-no-subcommands"></span><code class="sig-name descname">--subcommands</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-subcommands</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-explore-subcommands" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-subcommands">
+<span id="cmdoption-aclimatise-explore-no-subcommands"></span><code class="sig-name descname">--subcommands</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-subcommands</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-subcommands" title="Permalink to this definition">¶</a></dt>
 <dd><p>Look for subcommands</p>
 </dd></dl>
 
 <p class="rubric">Arguments</p>
 <dl class="std option">
-<dt id="cmdoption-acclimatise-explore-arg-CMD">
-<span id="cmdoption-acclimatise-explore-arg-cmd"></span><code class="sig-name descname">CMD</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-explore-arg-CMD" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-explore-arg-CMD">
+<span id="cmdoption-aclimatise-explore-arg-cmd"></span><code class="sig-name descname">CMD</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-arg-CMD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Required argument(s)</p>
 </dd></dl>
 
 </div>
-<div class="section" id="acclimatise-pipe">
-<h3>pipe<a class="headerlink" href="#acclimatise-pipe" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="aclimatise-pipe">
+<h3>pipe<a class="headerlink" href="#aclimatise-pipe" title="Permalink to this headline">¶</a></h3>
 <p>Read a command help from stdin and output a tool definition to stdout</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>acclimatise pipe <span class="o">[</span>OPTIONS<span class="o">]</span> CMD...
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>aclimatise pipe <span class="o">[</span>OPTIONS<span class="o">]</span> CMD...
 </pre></div>
 </div>
 <p class="rubric">Options</p>
 <dl class="std option">
-<dt id="cmdoption-acclimatise-pipe-pos">
-<span id="cmdoption-acclimatise-pipe-no-pos"></span><code class="sig-name descname">--pos</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-pos</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-pipe-pos" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-pipe-pos">
+<span id="cmdoption-aclimatise-pipe-no-pos"></span><code class="sig-name descname">--pos</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-pos</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-pipe-pos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Include (default) or don’t include positional arguments, for example because the help formatting has some misleading sections that look like positional arguments</p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-pipe-g">
-<span id="cmdoption-acclimatise-pipe-generate-names"></span><code class="sig-name descname">-g</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--generate-names</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-pipe-g" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-pipe-g">
+<span id="cmdoption-aclimatise-pipe-generate-names"></span><code class="sig-name descname">-g</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--generate-names</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-pipe-g" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rather than using the long flag to generate the argument name, generate them automatically using the flag description. Generally helpful if there are no long flags, only short flags.</p>
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-pipe-c">
-<span id="cmdoption-acclimatise-pipe-case"></span><code class="sig-name descname">-c</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--case</code><code class="sig-prename descclassname"> &lt;case&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-pipe-c" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-pipe-c">
+<span id="cmdoption-aclimatise-pipe-case"></span><code class="sig-name descname">-c</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--case</code><code class="sig-prename descclassname"> &lt;case&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-pipe-c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Which case to use for variable names. If not set, defaults to the language defaults: snake_case for CWL and snake_case for WDL</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options</dt>
@@ -144,8 +144,8 @@
 </dd></dl>
 
 <dl class="std option">
-<dt id="cmdoption-acclimatise-pipe-f">
-<span id="cmdoption-acclimatise-pipe-format"></span><code class="sig-name descname">-f</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--format</code><code class="sig-prename descclassname"> &lt;format&gt;</code><a class="headerlink" href="#cmdoption-acclimatise-pipe-f" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-pipe-f">
+<span id="cmdoption-aclimatise-pipe-format"></span><code class="sig-name descname">-f</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--format</code><code class="sig-prename descclassname"> &lt;format&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-pipe-f" title="Permalink to this definition">¶</a></dt>
 <dd><p>The language in which to output the CLI wrapper</p>
 <dl class="field-list simple">
 <dt class="field-odd">Options</dt>
@@ -156,8 +156,8 @@
 
 <p class="rubric">Arguments</p>
 <dl class="std option">
-<dt id="cmdoption-acclimatise-pipe-arg-CMD">
-<span id="cmdoption-acclimatise-pipe-arg-cmd"></span><code class="sig-name descname">CMD</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-acclimatise-pipe-arg-CMD" title="Permalink to this definition">¶</a></dt>
+<dt id="cmdoption-aclimatise-pipe-arg-CMD">
+<span id="cmdoption-aclimatise-pipe-arg-cmd"></span><code class="sig-name descname">CMD</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-pipe-arg-CMD" title="Permalink to this definition">¶</a></dt>
 <dd><p>Required argument(s)</p>
 </dd></dl>
 

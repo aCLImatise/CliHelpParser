@@ -3,38 +3,38 @@ Data Model
 
 Command
 -------
-.. autoclass:: acclimatise.model.Command
+.. autoclass:: aclimatise.model.Command
     :members:
 
 Command Inputs
 --------------
-.. autoclass:: acclimatise.model.CliArgument
+.. autoclass:: aclimatise.model.CliArgument
     :members:
-.. autoclass:: acclimatise.model.Positional
+.. autoclass:: aclimatise.model.Positional
     :members:
-.. autoclass:: acclimatise.model.Flag
+.. autoclass:: aclimatise.model.Flag
     :members:
-.. autoclass:: acclimatise.model.FlagSynonym
+.. autoclass:: aclimatise.model.FlagSynonym
     :members:
 
 Flag Arguments
 --------------
-.. autoclass:: acclimatise.model.FlagArg
+.. autoclass:: aclimatise.model.FlagArg
     :members:
-.. autoclass:: acclimatise.model.EmptyFlagArg
+.. autoclass:: aclimatise.model.EmptyFlagArg
     :members:
-.. autoclass:: acclimatise.model.OptionalFlagArg
+.. autoclass:: aclimatise.model.OptionalFlagArg
     :members:
-.. autoclass:: acclimatise.model.SimpleFlagArg
+.. autoclass:: aclimatise.model.SimpleFlagArg
     :members:
-.. autoclass:: acclimatise.model.RepeatFlagArg
+.. autoclass:: aclimatise.model.RepeatFlagArg
     :members:
-.. autoclass:: acclimatise.model.ChoiceFlagArg
+.. autoclass:: aclimatise.model.ChoiceFlagArg
     :members:
 
 Argument Types
 --------------
-.. automodule:: acclimatise.cli_types
+.. automodule:: aclimatise.cli_types
    :members:
    :undoc-members:
    :show-inheritance:

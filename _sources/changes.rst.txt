@@ -1,5 +1,12 @@
 Changelog
 =========
+2.0.0 (2020-09-16)
+------------------
+* Rename the package from ``acclimatise`` to ``aclimatise``, to be consistent with the naming elsewhere. This is a breaking
+change, and will require you to ``pip install aclimatise`` from now on.
+* Similarly, rename the module to ``aclimatise``. This will require you to ``import aclimatise``
+* Rename the CLI utility from ``acclimatise`` to ``aclimatise``.
+
 1.2.0 (2020-09-13)
 -----------------
 User-Facing Changes

@@ -33,14 +33,14 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-acclimatise">
-<span id="python-api"></span><h1>Python API<a class="headerlink" href="#module-acclimatise" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-aclimatise">
+<span id="python-api"></span><h1>Python API<a class="headerlink" href="#module-aclimatise" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt id="acclimatise.best_cmd">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">best_cmd</code><span class="sig-paren">(</span><em class="sig-param">cmd: List[str], flags: Iterable[str] = (['--help'], ['-h'], [], ['--usage']), executor: acclimatise.execution.Executor = &lt;acclimatise.execution.local.LocalExecutor object&gt;</em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.best_cmd" title="Permalink to this definition">¶</a></dt>
+<dt id="aclimatise.best_cmd">
+<code class="sig-prename descclassname">aclimatise.</code><code class="sig-name descname">best_cmd</code><span class="sig-paren">(</span><em class="sig-param">cmd: List[str], flags: Iterable[str] = (['--help'], ['-h'], [], ['--usage']), executor: aclimatise.execution.Executor = &lt;aclimatise.execution.local.LocalExecutor object&gt;</em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#aclimatise.model.Command" title="aclimatise.model.Command">aclimatise.model.Command</a><a class="headerlink" href="#aclimatise.best_cmd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine the best Command instance for a given command line tool, by trying many
 different help flags, such as –help and -h, then return the Command. Use this if you know the command you want to
-parse, but you don’t know which flags it responds to with help text. Unlike <code class="xref py py-func docutils literal notranslate"><span class="pre">aclimatise.explore_command()</span></code>,
+parse, but you don’t know which flags it responds to with help text. Unlike <a class="reference internal" href="#aclimatise.explore_command" title="aclimatise.explore_command"><code class="xref py py-func docutils literal notranslate"><span class="pre">aclimatise.explore_command()</span></code></a>,
 this doesn’t even attempt to parse subcommands.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -55,8 +55,8 @@ this doesn’t even attempt to parse subcommands.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="acclimatise.explore_command">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">explore_command</code><span class="sig-paren">(</span><em class="sig-param">cmd: List[str], flags: Iterable[str] = (['--help'], ['-h'], [], ['--usage']), parent: Optional[acclimatise.model.Command] = None, max_depth: int = 2, try_subcommand_flags=True, executor: acclimatise.execution.Executor = &lt;acclimatise.execution.local.LocalExecutor object&gt;</em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><span class="p">]</span><a class="headerlink" href="#acclimatise.explore_command" title="Permalink to this definition">¶</a></dt>
+<dt id="aclimatise.explore_command">
+<code class="sig-prename descclassname">aclimatise.</code><code class="sig-name descname">explore_command</code><span class="sig-paren">(</span><em class="sig-param">cmd: List[str], flags: Iterable[str] = (['--help'], ['-h'], [], ['--usage']), parent: Optional[aclimatise.model.Command] = None, max_depth: int = 2, try_subcommand_flags=True, executor: aclimatise.execution.Executor = &lt;aclimatise.execution.local.LocalExecutor object&gt;</em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span><a class="reference internal" href="model.html#aclimatise.model.Command" title="aclimatise.model.Command">aclimatise.model.Command</a><span class="p">]</span><a class="headerlink" href="#aclimatise.explore_command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a command to start with, builds a model of this command and all its subcommands (if they exist).
 Use this if you know the command you want to parse, you don’t know which flags it responds to with help text, and
 you want to include subcommands.</p>
@@ -77,8 +77,8 @@ since some tools (such as bedtools) use different help flags for subcommands</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="acclimatise.parse_help">
-<code class="sig-prename descclassname">acclimatise.</code><code class="sig-name descname">parse_help</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">max_length</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#acclimatise.model.Command" title="acclimatise.model.Command">acclimatise.model.Command</a><a class="headerlink" href="#acclimatise.parse_help" title="Permalink to this definition">¶</a></dt>
+<dt id="aclimatise.parse_help">
+<code class="sig-prename descclassname">aclimatise.</code><code class="sig-name descname">parse_help</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmd</span><span class="p">:</span> <span class="n">Collection<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">text</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">max_length</span><span class="o">=</span><span class="default_value">1000</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="model.html#aclimatise.model.Command" title="aclimatise.model.Command">aclimatise.model.Command</a><a class="headerlink" href="#aclimatise.parse_help" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a string of help text into a Command. Use this if you already have run the executable and extracted the
 help text yourself</p>
 <dl class="field-list simple">
