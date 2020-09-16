@@ -1,16 +1,16 @@
-Acclimatise
+aCLImatise
 ***********
 For the full documentation, refer to the `Github Pages Website
 <https://aclimatise.github.io/CliHelpParser/>`_.
 
 ======================================================================
 
-Acclimatise is a Python library and command-line utility for parsing the help output
+aCLImatise is a Python library and command-line utility for parsing the help output
 of a command-line tool and then outputting a description of the tool in a more
 structured format, for example a
 `Common Workflow Language tool definition <https://www.commonwl.org/v1.1/CommandLineTool.html>`_.
 
-Currently Acclimatise supports both `CWL <https://www.commonwl.org/>`_ and
+Currently aCLImatise supports both `CWL <https://www.commonwl.org/>`_ and
 `WDL <https://openwdl.org/>`_ outputs, but other formats will be considered in the future, especially pull
 requests to support them.
 
@@ -47,7 +47,7 @@ utility. Running ``wc --help`` returns:
    Full documentation at: <http://www.gnu.org/software/coreutils/wc>
    or available locally via: info '(coreutils) wc invocation'
 
-If you run ``acclimatise explore wc``, which means "parse the wc command and all subcommands",
+If you run ``aclimatise explore wc``, which means "parse the wc command and all subcommands",
 you'll end up with the following files in your current directory:
 
 * ``wc.cwl``
