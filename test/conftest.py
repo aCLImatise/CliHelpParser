@@ -3,11 +3,11 @@ from textwrap import dedent
 import pytest
 from pkg_resources import resource_filename
 
-from acclimatise.converter.yml import YmlGenerator
-from acclimatise.execution.local import LocalExecutor
-from acclimatise.flag_parser.parser import CliParser
-from acclimatise.usage_parser.parser import UsageParser
-from acclimatise.yaml import yaml
+from aclimatise.converter.yml import YmlGenerator
+from aclimatise.execution.local import LocalExecutor
+from aclimatise.flag_parser.parser import CliParser
+from aclimatise.usage_parser.parser import UsageParser
+from aclimatise.yaml import yaml
 
 
 @pytest.fixture()

@@ -1,7 +1,7 @@
 from io import StringIO
 
-from acclimatise import parse_help
-from acclimatise.yaml import yaml
+from aclimatise import parse_help
+from aclimatise.yaml import yaml
 
 
 def test_round_trip(bwamem_help):

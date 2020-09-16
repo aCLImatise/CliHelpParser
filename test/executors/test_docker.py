@@ -1,7 +1,7 @@
 import docker
 import pytest
 
-from acclimatise.execution.docker import DockerExecutor
+from aclimatise.execution.docker import DockerExecutor
 
 
 def test_docker(bwamem_help):

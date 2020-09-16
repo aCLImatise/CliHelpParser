@@ -1,6 +1,6 @@
 import pytest
 
-from acclimatise.converter import WrapperGenerator
+from aclimatise.converter import WrapperGenerator
 
 
 @pytest.fixture()

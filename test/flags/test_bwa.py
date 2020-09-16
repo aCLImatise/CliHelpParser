@@ -3,9 +3,9 @@ from textwrap import dedent
 
 import pytest
 
-from acclimatise import parse_help
-from acclimatise.flag_parser import elements
-from acclimatise.model import Flag, FlagSynonym, OptionalFlagArg
+from aclimatise import parse_help
+from aclimatise.flag_parser import elements
+from aclimatise.model import Flag, FlagSynonym, OptionalFlagArg
 
 
 def test_flag_arg(parser):

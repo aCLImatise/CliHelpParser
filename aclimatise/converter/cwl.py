@@ -14,10 +14,10 @@ from cwl_utils.parser_v1_1 import (
 )
 from dataclasses import dataclass
 
-from acclimatise import cli_types
-from acclimatise.converter import NamedArgument, WrapperGenerator
-from acclimatise.model import CliArgument, Command, Flag, Positional
-from acclimatise.yaml import yaml
+from aclimatise import cli_types
+from aclimatise.converter import NamedArgument, WrapperGenerator
+from aclimatise.model import CliArgument, Command, Flag, Positional
+from aclimatise.yaml import yaml
 
 
 @dataclass

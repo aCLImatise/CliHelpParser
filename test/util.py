@@ -14,10 +14,10 @@ from cwltool.load_tool import fetch_document, resolve_and_validate_document
 from dataclasses import dataclass, field
 from WDL import Error, parse_document
 
-from acclimatise import Command, Flag, WrapperGenerator, cli_types
-from acclimatise.model import CliArgument
-from acclimatise.name_generation import NameGenerationError
-from acclimatise.yaml import yaml
+from aclimatise import Command, Flag, WrapperGenerator, cli_types
+from aclimatise.model import CliArgument
+from aclimatise.name_generation import NameGenerationError
+from aclimatise.yaml import yaml
 
 logging.getLogger("cwltool").setLevel(30)
 

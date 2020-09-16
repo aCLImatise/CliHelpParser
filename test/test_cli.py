@@ -8,7 +8,7 @@ import pytest
 from click.testing import CliRunner
 from packaging import version
 
-from acclimatise.cli import main
+from aclimatise.cli import main
 
 from .util import validate_cwl, validate_wdl
 

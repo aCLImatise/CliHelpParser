@@ -2,18 +2,14 @@ from itertools import chain
 
 import pytest
 
-from acclimatise.flag_parser.elements import (
-    arg_expression,
-    flag_with_arg,
-    list_type_arg,
-)
-from acclimatise.model import Flag, RepeatFlagArg, SimpleFlagArg
-from acclimatise.usage_parser.elements import (  # short_flag_list,
+from aclimatise.flag_parser.elements import arg_expression, flag_with_arg, list_type_arg
+from aclimatise.model import Flag, RepeatFlagArg, SimpleFlagArg
+from aclimatise.usage_parser.elements import (  # short_flag_list,
     stack,
     usage,
     usage_element,
 )
-from acclimatise.usage_parser.model import UsageElement
+from aclimatise.usage_parser.model import UsageElement
 
 
 def test_bwa():

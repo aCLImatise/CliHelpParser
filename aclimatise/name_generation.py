@@ -10,7 +10,7 @@ from num2words import num2words
 from spacy.tokens import Token
 from word2number import w2n
 
-from acclimatise.nlp import nlp, wordsegment
+from aclimatise.nlp import nlp, wordsegment
 
 
 class NameGenerationError(Exception):

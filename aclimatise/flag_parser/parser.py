@@ -3,8 +3,8 @@ from operator import attrgetter
 
 import regex
 
-from acclimatise.flag_parser.elements import *
-from acclimatise.parser import IndentCheckpoint, IndentParserMixin
+from aclimatise.flag_parser.elements import *
+from aclimatise.parser import IndentCheckpoint, IndentParserMixin
 
 
 def pick(*args):

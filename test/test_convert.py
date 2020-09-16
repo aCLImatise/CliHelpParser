@@ -2,7 +2,7 @@ import itertools
 import tempfile
 from pathlib import Path
 
-from acclimatise import explore_command
+from aclimatise import explore_command
 
 from .util import convert_validate, skip_not_installed
 

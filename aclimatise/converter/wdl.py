@@ -19,10 +19,10 @@ from wdlgen import (
     WdlType,
 )
 
-from acclimatise import cli_types, model
-from acclimatise.converter import NamedArgument, WrapperGenerator
-from acclimatise.model import CliArgument, Command, Flag, Positional
-from acclimatise.nlp import wordsegment
+from aclimatise import cli_types, model
+from aclimatise.converter import NamedArgument, WrapperGenerator
+from aclimatise.model import CliArgument, Command, Flag, Positional
+from aclimatise.nlp import wordsegment
 
 #: A regex, borrowed from MiniWDL, that ma
 WDL_IDENT = re.compile(r"[a-zA-Z][a-zA-Z0-9_]*")

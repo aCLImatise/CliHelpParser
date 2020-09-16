@@ -5,9 +5,9 @@ from typing import Generator, List
 
 from dataclasses import dataclass
 
-from acclimatise.converter import WrapperGenerator
-from acclimatise.model import Command
-from acclimatise.yaml import yaml
+from aclimatise.converter import WrapperGenerator
+from aclimatise.model import Command
+from aclimatise.yaml import yaml
 
 
 @dataclass

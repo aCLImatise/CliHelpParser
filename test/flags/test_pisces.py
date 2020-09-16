@@ -2,9 +2,9 @@ from textwrap import dedent
 
 from pkg_resources import resource_filename
 
-from acclimatise.flag_parser import elements
-from acclimatise.flag_parser.parser import CliParser
-from acclimatise.model import SimpleFlagArg
+from aclimatise.flag_parser import elements
+from aclimatise.flag_parser.parser import CliParser
+from aclimatise.model import SimpleFlagArg
 
 
 def test_pisces_flag(parser):

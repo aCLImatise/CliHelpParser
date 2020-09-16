@@ -6,8 +6,8 @@ from textwrap import dedent
 
 import pytest
 
-from acclimatise.flag_parser import elements
-from acclimatise.model import EmptyFlagArg, FlagSynonym, RepeatFlagArg
+from aclimatise.flag_parser import elements
+from aclimatise.model import EmptyFlagArg, FlagSynonym, RepeatFlagArg
 
 
 def test_short(parser):

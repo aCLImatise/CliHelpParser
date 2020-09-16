@@ -2,7 +2,7 @@ import shutil
 
 import pytest
 
-from acclimatise.model import Flag
+from aclimatise.model import Flag
 
 
 def test_samtools_bedcov_j(parser):
