@@ -6,6 +6,8 @@ from aclimatise import explore_command
 
 from .util import convert_validate, skip_not_installed
 
+# Note: the parse and explore tests run conversion tests already. These tests are for specific edge cases
+
 
 def test_premade_samtools(samtools_cmd):
     """

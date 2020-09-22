@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import subprocess
 import tempfile
 from io import StringIO
 from itertools import chain
@@ -366,13 +367,18 @@ def validate_cwl(cwl: str, cmd: Command = None, explore: bool = True):
         tmpdir = Path(tmpdir)
         tmpfile = tmpdir / parsed["id"]
         tmpfile.write_text(cwl)
-        loading_context, workflowobj, uri = fetch_document(str(tmpfile))
-        resolve_and_validate_document(loading_context, workflowobj, uri)
+
+        # cwltool doesn't have an official Python API, so run it as a subprocess
+        subprocess.run(["cwltool", "--validate", tmpfile])
+
+        # We don't want this to be an actual field hierarchy
+        path = Path(parsed["id"])
+        assert len(path.parts) == 1
 
         if cmd:
-            assert len(workflowobj["inputs"]) == len(cmd.positional) + len(cmd.named)
+            assert len(parsed["inputs"]) == len(cmd.positional) + len(cmd.named)
             # We should have all the official outputs, plus stdout
-            assert len(workflowobj["outputs"]) == len(cmd.outputs) + 1
+            assert len(parsed["outputs"]) == len(cmd.outputs) + 1
 
 
 def validate_wdl(wdl: str, cmd: Command = None, explore=True):
