@@ -3,9 +3,7 @@ import wordsegment
 
 
 def prevent_sentence_boundary_detection(doc):
-    print(doc)
     for token in doc:
-        # This will entirely disable spaCy's sentence detection
         token.is_sent_start = False
     return doc
 
