@@ -131,6 +131,6 @@ class CwlGenerator(WrapperGenerator):
         return io.getvalue()
 
     def save_to_file(self, cmd: Command, path: Path) -> None:
-        map = self.command_to_tool(cmd).save(base_url=str(path))
+        map = self.command_to_tool(cmd).save()
         with path.open("w") as fp:
             yaml.dump(map, fp)
