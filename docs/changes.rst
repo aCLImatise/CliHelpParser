@@ -1,5 +1,11 @@
 Changelog
 =========
+2.1.1 (2020-09-)
+----------------
+* Add `bedtools random` as a test case
+* Use a simple metric to exclude flags unless they have a somewhat valid description text
+*
+
 2.0.0 (2020-09-16)
 ------------------
 * Rename the package from ``acclimatise`` to ``aclimatise``, to be consistent with the naming elsewhere. This is a breaking change, and will require you to ``pip install aclimatise`` from now on.

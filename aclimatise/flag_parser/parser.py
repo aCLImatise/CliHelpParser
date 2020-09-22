@@ -4,6 +4,7 @@ from operator import attrgetter
 import regex
 
 from aclimatise.flag_parser.elements import *
+from aclimatise.nlp import is_sentence
 from aclimatise.parser import IndentCheckpoint, IndentParserMixin
 
 
@@ -182,7 +183,7 @@ class CliParser(IndentParserMixin):
         """
 
         def visit_flag_block(s, loc, toks):
-            ret: List[Flag] = []
+            ret: List[CliArgument] = []
 
             # The tokens are a mix of flags and lines of text. Append the text to the previous flag
             for tok in toks:
@@ -193,6 +194,8 @@ class CliParser(IndentParserMixin):
                     if len(ret[-1].description) > 0:
                         ret[-1].description += "\n"
                     ret[-1].description += tok
+
+            ret = [flag for flag in ret if is_sentence(flag.description)]
             return ret
 
         self.flag_block = (
