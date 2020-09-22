@@ -1,10 +1,11 @@
 Changelog
 =========
-2.1.1 (2020-09-)
+2.1.0 (2020-09-22)
 ----------------
 * Add `bedtools random` as a test case
-* Use a simple metric to exclude flags unless they have a somewhat valid description text
-*
+* Use a simple metric to exclude flags unless they have a somewhat valid description text, this should result in less false-positive flags being detected
+* Fixed the `id` field in the CWL tool definitions including some path elements (like `..`)
+* Use `cwltool` as a command-line tool instead of via the Python API (it is supposed to be more stable)
 
 2.0.0 (2020-09-16)
 ------------------
