@@ -318,6 +318,16 @@ all_tests = [
             outputs=0,
         ),
     ),
+    pytest.param(
+        HelpText(
+            path="test_data/bedtools_random.txt",
+            cmd=["bedtools", "random"],
+            positional=0,
+            named=4,
+            subcommands=0,
+            outputs=0,
+        ),
+    ),
     # These last two are really strange, maybe I'll support them eventually
     pytest.param(
         HelpText(

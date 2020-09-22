@@ -3,7 +3,7 @@ from typing import List
 
 from pyparsing import *
 
-from aclimatise.flag_parser.elements import customIndentedBlock, description_line
+from aclimatise.flag_parser.elements import description_line
 from aclimatise.parser import IndentCheckpoint, IndentParserMixin
 from aclimatise.usage_parser.elements import usage_example
 from aclimatise.usage_parser.model import UsageElement, UsageInstance

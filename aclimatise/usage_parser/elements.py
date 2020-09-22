@@ -6,7 +6,6 @@ from pyparsing import *
 from aclimatise.flag_parser.elements import (
     arg,
     argument_body_chars,
-    customIndentedBlock,
     delimited_body_chars,
     element_body_chars,
     element_start_chars,
