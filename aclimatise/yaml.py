@@ -1,3 +1,4 @@
-from ruamel.yaml import YAML, yaml_object
+from ruamel.yaml import YAML
 
+# This is a general YAML serializer
 yaml = YAML()

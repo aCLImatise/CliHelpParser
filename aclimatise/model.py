@@ -83,6 +83,13 @@ class Command:
                     self.named.remove(flag)
 
     @property
+    def should_convert(self) -> bool:
+        """
+        If true, this is worth converting to a tool definition
+        """
+        return (len(self.positional) + len(self.named)) == 0
+
+    @property
     def outputs(self) -> typing.List["CliArgument"]:
         """
         Returns a list of inputs which are also outputs, for example the "-o" flag is normally an input (you have to

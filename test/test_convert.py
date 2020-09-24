@@ -1,12 +1,43 @@
 import itertools
 import tempfile
+from io import StringIO
 from pathlib import Path
 
 from aclimatise import explore_command
+from aclimatise.converter.yml import YmlGenerator
+from aclimatise.yaml import yaml
 
 from .util import convert_validate, skip_not_installed
 
 # Note: the parse and explore tests run conversion tests already. These tests are for specific edge cases
+
+
+def test_concise_dump(samtools_cmd):
+    """
+    Test that a round trip dump results in no subcommands
+    """
+    assert len(samtools_cmd.subcommands) > 0
+    gen = YmlGenerator(dump_associations=False)
+    io = StringIO()
+    serial = gen.save_to_string(samtools_cmd)
+    io.write(serial)
+    io.seek(0)
+    parsed = yaml.load(io)
+    assert len(parsed.subcommands) == 0
+
+
+def test_verbose_dump(samtools_cmd):
+    """
+    Test that a round trip dump results in retaining subcommands
+    """
+    assert len(samtools_cmd.subcommands) > 0
+    gen = YmlGenerator(dump_associations=True)
+    io = StringIO()
+    serial = gen.save_to_string(samtools_cmd)
+    io.write(serial)
+    io.seek(0)
+    parsed = yaml.load(io)
+    assert len(parsed.subcommands) > 0
 
 
 def test_premade_samtools(samtools_cmd):
