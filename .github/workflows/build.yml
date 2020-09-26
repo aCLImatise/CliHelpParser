@@ -114,3 +114,9 @@ jobs:
           publish_dir: docs/_build/html
           publish_branch: gh-pages
           enable_jekyll: false
+
+      - name: Update Basecamp
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPOACCESSTOKEN }}
+          event-type: aclimatise-update

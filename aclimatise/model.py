@@ -18,6 +18,7 @@ from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 from word2number import w2n
 
+import aclimatise
 from aclimatise import cli_types
 from aclimatise.cli_types import CliFileSystemType, CliString
 from aclimatise.name_generation import generate_name, segment_string
@@ -81,6 +82,37 @@ class Command:
                 if "--usage" in flag.synonyms:
                     self.usage_flag = flag
                     self.named.remove(flag)
+
+    def __getitem__(self, item: str) -> "Command":
+        """
+        If present, returns a subcommand with the following name. For example, samtools_cmd['sort'] will return the
+        "samtools sort" command
+        """
+        for sub in self.subcommands:
+            if sub.command == [*self.command, item]:
+                return sub
+        raise KeyError(
+            "{} does not have a subcommand {}".format(" ".join(self.command), item)
+        )
+
+    def reanalyse(self, parent: "Command" = None) -> "Command":
+        """
+        Re-analyses the entire command tree using the existing help text but the current parser, and returns the new tree
+        """
+        if len(self.subcommands) > 0:
+            return Command(
+                generated_using=self.generated_using,
+                help_text=self.help_text,
+                command=self.command,
+                subcommands=[cmd.reanalyse(self) for cmd in self.subcommands],
+                parent=parent,
+            )
+        else:
+            replacement = aclimatise.parse_help(cmd=self.command, text=self.help_text)
+            replacement.parent = parent
+            replacement.help_text = self.help_text
+            replacement.generated_using = self.generated_using
+            return replacement
 
     @property
     def outputs(self) -> typing.List["CliArgument"]:
