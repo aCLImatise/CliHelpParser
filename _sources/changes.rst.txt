@@ -1,5 +1,10 @@
 Changelog
 =========
+2.2.0 (2020-09-26)
+------------------
+* Add ``command.reanalyse()``, which re-analyses the help text stored in the command, using the current parser
+* Add ``command['sort']`` which lets you access subcommands by name
+
 2.1.0 (2020-09-22)
 ----------------
 * Add `bedtools random` as a test case
