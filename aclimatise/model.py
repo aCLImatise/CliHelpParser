@@ -228,6 +228,11 @@ class Command:
     Optionally, the flag that was used to generate this command. Often this will be the same as the help_flag
     """
 
+    docker_image: typing.Optional[str] = None
+    """
+    If available, a docker image in which to run this command
+    """
+
 
 @yaml_object(yaml)
 @dataclass(unsafe_hash=True)
