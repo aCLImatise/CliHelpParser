@@ -6,7 +6,7 @@ Changelog
 * Add ``command['sort']`` which lets you access subcommands by name
 
 2.1.0 (2020-09-22)
-----------------
+------------------
 * Add `bedtools random` as a test case
 * Use a simple metric to exclude flags unless they have a somewhat valid description text, this should result in less false-positive flags being detected
 * Fixed the `id` field in the CWL tool definitions including some path elements (like `..`)
@@ -19,9 +19,9 @@ Changelog
 * Rename the CLI utility from ``acclimatise`` to ``aclimatise``.
 
 1.2.0 (2020-09-13)
------------------
+------------------
 User-Facing Changes
-******************
+*******************
 * Add output generation for CWL and WDL
 
 Fixes

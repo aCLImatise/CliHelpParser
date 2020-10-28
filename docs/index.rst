@@ -16,6 +16,7 @@ Welcome to aCLImatise's documentation!
    model
    grammar
    changes
+   aCLImatise Base Camp <https://aclimatise.github.io/BaseCamp/>
 
 .. include:: ../README.rst
 
