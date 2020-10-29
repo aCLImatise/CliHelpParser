@@ -4,7 +4,7 @@ import string
 import pytest
 from pkg_resources import resource_filename
 
-from aclimatise import parse_help
+from aclimatise.integration import parse_help
 
 from .util import (
     HelpText,
