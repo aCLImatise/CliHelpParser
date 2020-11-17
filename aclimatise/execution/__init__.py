@@ -14,7 +14,7 @@ class Executor(abc.ABC):
     """
 
     def __init__(
-        self, timeout: int = 10, raise_on_timout=False, max_length: Optional[int] = None
+        self, timeout: int = 10, raise_on_timout=False, max_length: Optional[int] = 1000
     ):
         """
         :param timeout: Amount of inactivity before the execution will be killed
@@ -36,7 +36,6 @@ class Executor(abc.ABC):
         else:
             return ""
 
-    @abc.abstractmethod
     def explore(
         self,
         command: List[str],
@@ -45,5 +44,13 @@ class Executor(abc.ABC):
     ) -> Command:
         """
         Given a command to start with, builds a model of this command and all its subcommands (if they exist)
+        """
+        # If the executor doesn't implement a specific exploration technique, we just execute and ignore subcommands
+        return self.execute(command)
+
+    @abc.abstractmethod
+    def execute(self, command: List[str]) -> Command:
+        """
+        Convert a single executable to a Command object, without considering subcommands
         """
         pass

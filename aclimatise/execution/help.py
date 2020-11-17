@@ -35,7 +35,7 @@ class CliHelpExecutor(Executor):
     ) -> Optional[Command]:
 
         logger.info("Exploring {}".format(" ".join(command)))
-        best = self.best_cmd(command)
+        best = self.execute(command)
 
         # Check if this is a valid subcommand
         if parent:
@@ -74,7 +74,7 @@ class CliHelpExecutor(Executor):
 
         return best
 
-    def best_cmd(
+    def execute(
         self,
         cmd: List[str],
     ) -> Command:

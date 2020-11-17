@@ -26,7 +26,7 @@ class ManPageExecutor(Executor):
         self.subcommand_sep = subcommand_sep
         self.man_flags = man_flags
 
-    def execute(self, command: List[str], separator: str = "-") -> str:
+    def execute_with_sep(self, command: List[str], separator: str = "-") -> str:
         """
         Returns the man page text for the provided command, using the provided subcommand separator, or an empty string
         if this man page doesn't exist
@@ -44,17 +44,15 @@ class ManPageExecutor(Executor):
 
         return ""
 
-    def explore(
-        self, command: List[str], max_depth: int = 2, parent: Optional[Command] = None
-    ) -> Command:
+    def execute(self, command: List[str]) -> Command:
         if len(command) == 1:
             return parse_help(
-                command, self.execute(command), max_length=self.max_length
+                command, self.execute_with_sep(command), max_length=self.max_length
             )
         else:
             commands = []
             for sep in self.subcommand_sep:
-                man_text = self.execute(command, sep)
+                man_text = self.execute_with_sep(command, sep)
                 commands.append(
                     parse_help(command, man_text, max_length=self.max_length)
                 )
