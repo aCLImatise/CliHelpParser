@@ -13,7 +13,7 @@ jobs:
       - name: apt dependencies, and fix the `man` pages
         run: |
           rm /etc/dpkg/dpkg.cfg.d/docker
-          apt-get update && apt install -y --reinstall man coreutils manpages build-essential git
+          apt-get update && apt install -y --reinstall man coreutils manpages build-essential git git-man
           mandb --create
 
       - uses: actions/setup-dotnet@v1.7.2
