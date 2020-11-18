@@ -10,8 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: apt dependencies
-        run: apt-get update && apt install build-essential man -y
+      - name: apt dependencies, and fix the `man` pages
+        run: |
+          rm /etc/dpkg/dpkg.cfg.d/docker
+          apt-get update && apt install -y --reinstall man coreutils manpages build-essential
+          mandb --create
 
       - uses: actions/setup-dotnet@v1.7.2
         with:
