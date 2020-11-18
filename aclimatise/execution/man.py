@@ -37,7 +37,10 @@ class ManPageExecutor(Executor):
 
         sub_man = separator.join(command)
         result = subprocess.run(
-            ["man", *self.man_flags, sub_man], env=env, capture_output=True
+            ["man", *self.man_flags, sub_man],
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         if result.returncode == 0:
             return result.stdout.decode()
