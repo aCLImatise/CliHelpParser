@@ -1,3 +1,4 @@
+import abc
 import copy
 import logging
 from typing import Iterable, List, Optional
@@ -35,7 +36,8 @@ class CliHelpExecutor(Executor):
     ) -> Optional[Command]:
 
         logger.info("Exploring {}".format(" ".join(command)))
-        best = self.execute(command)
+        best = self.convert(command)
+        best.parent = parent
 
         # Check if this is a valid subcommand
         if parent:
@@ -43,7 +45,6 @@ class CliHelpExecutor(Executor):
                 logger.info(
                     "{} seems to be a valid subcommand".format(" ".join(command))
                 )
-                best.parent = parent
             else:
                 logger.info(
                     "{} does not seem to be a valid subcommand".format(
@@ -74,7 +75,14 @@ class CliHelpExecutor(Executor):
 
         return best
 
-    def execute(
+    @abc.abstractmethod
+    def execute(self, cmd: List[str]) -> str:
+        """
+        Executes the provided command and returns a string containing the output
+        """
+        pass
+
+    def convert(
         self,
         cmd: List[str],
     ) -> Command:

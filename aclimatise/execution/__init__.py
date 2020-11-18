@@ -46,10 +46,10 @@ class Executor(abc.ABC):
         Given a command to start with, builds a model of this command and all its subcommands (if they exist)
         """
         # If the executor doesn't implement a specific exploration technique, we just execute and ignore subcommands
-        return self.execute(command)
+        return self.convert(command)
 
     @abc.abstractmethod
-    def execute(self, command: List[str]) -> Command:
+    def convert(self, command: List[str]) -> Command:
         """
         Convert a single executable to a Command object, without considering subcommands
         """
