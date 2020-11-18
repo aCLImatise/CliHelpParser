@@ -9,8 +9,9 @@ from click.testing import CliRunner
 from packaging import version
 
 from aclimatise.cli import main
+from aclimatise.yaml import yaml
 
-from .util import validate_cwl, validate_wdl
+from .util import skip_not_installed, validate_cwl, validate_wdl
 
 
 @pytest.fixture()
@@ -42,9 +43,7 @@ def test_pipe_cwl(runner, htseq_help):
     validate_cwl(result.output)
 
 
-@pytest.mark.skipif(
-    not shutil.which("htseq-count"), reason="htseq-count is not installed"
-)
+@skip_not_installed("htseq-count")
 def test_explore_htseq(runner, caplog):
     caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
@@ -53,7 +52,19 @@ def test_explore_htseq(runner, caplog):
         assert len(list(Path(tempdir).iterdir())) == 3
 
 
-@pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
+@skip_not_installed("ls")
+@skip_not_installed("man")
+def test_explore_ls_man(runner, caplog):
+    caplog.set_level(100000)
+    with tempfile.TemporaryDirectory() as tempdir:
+        result = runner.invoke(main, ["explore", "ls", "--man", "--out-dir", tempdir])
+        cli_worked(result)
+        with (Path(tempdir) / "ls.yml").open() as fp:
+            parsed = yaml.load(fp)
+            assert parsed.help_text.startswith("LS(1)")
+
+
+@skip_not_installed("samtools")
 def test_explore_samtools(runner, caplog):
     caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
@@ -64,7 +75,7 @@ def test_explore_samtools(runner, caplog):
         assert len(list(Path(tempdir).iterdir())) > 20
 
 
-@pytest.mark.skipif(not shutil.which("samtools"), reason="samtools is not installed")
+@skip_not_installed("samtools")
 def test_explore_samtools_no_subcommands(runner, caplog):
     caplog.set_level(100000)
     with tempfile.TemporaryDirectory() as tempdir:
