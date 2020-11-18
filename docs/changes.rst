@@ -1,5 +1,14 @@
 Changelog
 =========
+
+3.0.0 (2020-11-)
+----------------
+* Rework of executors
+    * `explore` is now a method on the executor object
+    * Add a `man`-page executor
+    * `aclimatise.explore` is now deprecated
+
+
 2.2.0 (2020-09-26)
 ------------------
 * Add ``command.reanalyse()``, which re-analyses the help text stored in the command, using the current parser
