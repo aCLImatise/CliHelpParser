@@ -9,7 +9,7 @@ def test_git():
     cmd = ManPageExecutor(max_length=99999).explore(
         ["git"],
     )
-    assert len(cmd.subcommands) > 20
+    assert len(cmd.positional) > 20
 
 
 @skip_not_installed("git")

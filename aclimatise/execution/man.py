@@ -44,7 +44,7 @@ class ManPageExecutor(Executor):
 
         return ""
 
-    def execute(self, command: List[str]) -> Command:
+    def convert(self, command: List[str]) -> Command:
         if len(command) == 1:
             return parse_help(
                 command, self.execute_with_sep(command), max_length=self.max_length
