@@ -34,7 +34,12 @@ def is_sentence(text: str, threshold: float = 0.8) -> bool:
     """
 
     doc = no_sentences(text)
-    sentence = list(doc.sents)[0]
+    sents = list(doc.sents)
+
+    if len(sents) == 0:
+        return False
+
+    sentence = sents[0]
     non_word_count = 0
     word_count = 0
     for tok in sentence:

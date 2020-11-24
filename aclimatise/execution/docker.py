@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from docker.utils.socket import consume_socket_output, demux_adaptor, frames_iter
 
-from . import Executor
+from aclimatise.execution.help import CliHelpExecutor
 
 
 def read_socket(sock, timeout: int = None) -> Tuple[bytes, bytes]:
@@ -35,7 +35,7 @@ def read_socket(sock, timeout: int = None) -> Tuple[bytes, bytes]:
     return tuple(out)
 
 
-class DockerExecutor(Executor):
+class DockerExecutor(CliHelpExecutor):
     """
     An executor that runs the commands on an already-running docker Container (not an Image!)
     """

@@ -20,6 +20,7 @@ setup(
         "word2number",
         "psutil",
         "dataclasses",
+        "deprecated",
     ],
     python_requires=">=3.6",
     entry_points={"console_scripts": ["aclimatise = aclimatise.cli:main"]},

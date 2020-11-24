@@ -114,6 +114,36 @@ class Command:
             replacement.generated_using = self.generated_using
             return replacement
 
+    def valid_subcommand(self, compare_depth=1) -> bool:
+        """
+        Returns true if command is a valid subcommand, relative to its parent
+        """
+        parent = self.ancestor(compare_depth)
+
+        # Recursively call this on all ancestors
+        if parent.parent is not None and not self.valid_subcommand(compare_depth + 1):
+            return False
+
+        # This isn't a subcommand if it has the same input text as the parent
+        if self.help_text and self.help_text == parent.help_text:
+            return False
+
+        # This isn't a subcommand if it has no flags
+        if len(self.positional) + len(self.named) == 0:
+            return False
+
+        # This isn't a subcommand if it shares any positional with the parent command
+        for pos_a, pos_b in zip(parent.positional, self.positional):
+            if pos_a == pos_b:
+                return False
+
+        # This isn't a subcommand if it shares any flags with the parent command
+        for flag_a, flag_b in zip(parent.named, self.named):
+            if flag_a == flag_b:
+                return False
+
+        return True
+
     @property
     def outputs(self) -> typing.List["CliArgument"]:
         """
@@ -156,6 +186,36 @@ class Command:
             depth += 1
 
         return depth
+
+    def ancestor(self, levels: int = 1) -> typing.Optional["Command"]:
+        """
+        Returns the ancestor of the command `levels` steps up the family tree. For example, `cmd.ancestor(1)` is
+        equivalent to `cmd.parent`. `cmd.ancestor(2)` is equivalent to `cmd.parent.parent`.
+        """
+        cmd = self
+        for i in range(levels):
+            cmd = cmd.parent
+            if cmd is None:
+                break
+
+        return cmd
+
+    @staticmethod
+    def best(commands: typing.Collection["Command"]) -> "Command":
+        """
+        Given a list of commands generated from the same executable, but with different flags, determine the best one
+        and return it
+        :param commands:
+        :return:
+        """
+        # Currently we just return the command with the most flags
+        return max(
+            commands,
+            key=lambda com: (
+                len(com.named) + len(com.positional),
+                # len(com.help_text) if com.help_text else 0,
+            ),
+        )
 
     @property
     def all_synonyms(self) -> typing.Set[str]:
@@ -402,6 +462,28 @@ class Flag(CliArgument):
             args=first([flag.args for flag in flags if flag.args], EmptyFlagArg()),
             optional=any([flag.optional for flag in flags]),
         )
+
+    @staticmethod
+    def combine(
+        flag_lists: typing.Iterable[typing.Iterable["Flag"]],
+    ) -> typing.Iterable["Flag"]:
+        """
+        Combines the flags from several sources, choosing the first one preferentially
+        """
+        lookup = {}
+
+        # Build a list of flags, but only ever choose the first instance of a synonym
+        for flags in flag_lists:
+            for flag in flags:
+                for synonym in flag.synonyms:
+                    stripped = synonym.lstrip("-")
+                    if stripped not in lookup:
+                        lookup[stripped] = flag
+
+        # Now, make them unique by description
+        unique = {flag.longest_synonym: flag for flag in lookup.values()}
+
+        return list(unique.values())
 
     def argument_text(self) -> typing.List[str]:
         return self.args.text()

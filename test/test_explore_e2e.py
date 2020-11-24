@@ -75,9 +75,21 @@ def test_repeat_positionals():
     )
     child = Command(command=[])
 
-    with patch("aclimatise.explore_command", new=lambda *args, **kwargs: child):
-        with patch("aclimatise.best_cmd", new=Mock(return_value=parent)) as mocked:
-            explore_command([])
+    count = 0
 
-            # We should only call best_command once, since there's only one unique positional
-            assert mocked.call_count == 1
+    def mock_convert(*args, **kwargs):
+        nonlocal count
+        if count == 0:
+            count += 1
+            return parent
+        return child
+
+    # with patch("aclimatise.execution.help.CliHelpExecutor.explore", new=lambda *args, **kwargs: child):
+    with patch(
+        "aclimatise.execution.help.CliHelpExecutor.convert",
+        new=Mock(side_effect=mock_convert),
+    ) as mocked:
+        explore_command([])
+
+        # We should only call convert twice, once for the parent and once for the child, since there's only one unique positional
+        assert mocked.call_count == 2

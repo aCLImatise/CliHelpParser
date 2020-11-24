@@ -3,8 +3,8 @@ from textwrap import dedent
 
 import pytest
 
-from aclimatise import parse_help
 from aclimatise.flag_parser import elements
+from aclimatise.integration import parse_help
 from aclimatise.model import Flag, FlagSynonym, OptionalFlagArg
 
 

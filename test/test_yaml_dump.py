@@ -1,6 +1,6 @@
 from io import StringIO
 
-from aclimatise import parse_help
+from aclimatise.integration import parse_help
 from aclimatise.yaml import yaml
 
 
