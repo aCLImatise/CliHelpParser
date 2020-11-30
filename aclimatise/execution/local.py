@@ -10,7 +10,7 @@ from typing import List
 
 import psutil
 
-from . import Executor
+from aclimatise.execution.help import CliHelpExecutor
 
 
 def kill_proc_tree(pid, sig=signal.SIGTERM, include_parent=True):
@@ -29,7 +29,7 @@ def kill_proc_tree(pid, sig=signal.SIGTERM, include_parent=True):
         p.send_signal(sig)
 
 
-class LocalExecutor(Executor):
+class LocalExecutor(CliHelpExecutor):
     def __init__(self, popen_args: dict = {}, **kwargs):
         super().__init__(**kwargs)
         self.popen_args = popen_args

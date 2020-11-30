@@ -7,18 +7,12 @@ from typing import Iterable, Tuple
 
 import click
 
-from aclimatise import WrapperGenerator, best_cmd, explore_command, parse_help
+from aclimatise import WrapperGenerator, explore_command, parse_help
+from aclimatise.execution.local import LocalExecutor
+from aclimatise.execution.man import ManPageExecutor
 from aclimatise.flag_parser.parser import CliParser
 
 # Some common options
-opt_pos = click.option(
-    "--pos/--no-pos",
-    default=True,
-    help=(
-        "Include (default) or don't include positional arguments, for example because the help formatting has some "
-        "misleading sections that look like positional arguments"
-    ),
-)
 opt_generate_names = click.option(
     "--generate-names",
     "-g",
@@ -48,9 +42,14 @@ def main():
 
 @main.command(help="Run an executable and explore all subcommands")
 @opt_cmd
-@opt_pos
 @opt_case
 @opt_generate_names
+@click.option(
+    "--man",
+    "-m",
+    is_flag=True,
+    help="Parse the help using its man page, rather than by executing the command. This will fail if the man page doesn't exist",
+)
 @click.option(
     "--depth",
     "-d",
@@ -91,25 +90,28 @@ def explore(
     subcommands: bool,
     case: str,
     generate_names: bool,
-    pos: bool,
+    man: bool,
     help_flag: str,
     depth: int = None,
 ):
-    # Optionally parse subcommands
-    kwargs = {}
-    if help_flag is not None:
-        kwargs["flags"] = [[help_flag]]
+    # We only support these two executors via CLI because the docker executor would require some additional config
+    if man:
+        exec = ManPageExecutor()
+    else:
+        kwargs = {}
+        if help_flag is not None:
+            kwargs["flags"] = [[help_flag]]
+        exec = LocalExecutor(**kwargs)
 
     if subcommands:
-        command = explore_command(list(cmd), max_depth=depth, **kwargs)
+        command = exec.explore(list(cmd), max_depth=depth)
     else:
-        command = best_cmd(list(cmd), **kwargs)
+        command = exec.convert(list(cmd))
 
     for format in formats:
         converter_cls = WrapperGenerator.choose_converter(format)
         converter = converter_cls(
             generate_names=generate_names,
-            ignore_positionals=not pos,
             case=case,
         )
         list(converter.generate_tree(command, out_dir))
@@ -119,7 +121,6 @@ def explore(
     help="Read a command help from stdin and output a tool definition to stdout"
 )
 @opt_cmd
-@opt_pos
 @opt_generate_names
 @opt_case
 @click.option(
@@ -129,14 +130,13 @@ def explore(
     default="cwl",
     help="The language in which to output the CLI wrapper",
 )
-def pipe(cmd, pos, generate_names, case, format):
+def pipe(cmd, generate_names, case, format):
     stdin = "".join(sys.stdin.readlines())
     command = parse_help(cmd, stdin)
 
     converter_cls = WrapperGenerator.choose_converter(format)
     converter = converter_cls(
         generate_names=generate_names,
-        ignore_positionals=not pos,
         case=case,
     )
     output = converter.save_to_string(command)
