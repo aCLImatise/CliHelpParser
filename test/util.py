@@ -11,6 +11,7 @@ from typing import Callable, List, Optional
 
 import cwl_utils.parser_v1_1 as parser
 import pytest
+from cwl_utils.parser_v1_0 import DockerRequirement
 from cwltool.load_tool import fetch_document, resolve_and_validate_document
 from dataclasses import dataclass, field
 from WDL import Error, parse_document

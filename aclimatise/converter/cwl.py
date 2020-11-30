@@ -114,7 +114,7 @@ class CwlGenerator(WrapperGenerator):
 
         hints = []
         if cmd.docker_image is not None:
-            hints.append(DockerRequirement())
+            hints.append(DockerRequirement(dockerPull=cmd.docker_image))
 
         tool = CommandLineTool(
             id=cmd.as_filename + ".cwl",
@@ -122,6 +122,7 @@ class CwlGenerator(WrapperGenerator):
             cwlVersion="v1.1",
             inputs=self.get_inputs(names),
             outputs=self.get_outputs(names),
+            hints=hints,
         )
 
         return tool
