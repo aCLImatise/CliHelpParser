@@ -11,6 +11,7 @@ from cwl_utils.parser_v1_1 import (
     CommandLineTool,
     CommandOutputBinding,
     CommandOutputParameter,
+    DockerRequirement,
 )
 from dataclasses import dataclass
 
@@ -111,12 +112,17 @@ class CwlGenerator(WrapperGenerator):
         )
         names = self.choose_variable_names(inputs)
 
+        hints = []
+        if cmd.docker_image is not None:
+            hints.append(DockerRequirement(dockerPull=cmd.docker_image))
+
         tool = CommandLineTool(
             id=cmd.as_filename + ".cwl",
             baseCommand=list(cmd.command),
             cwlVersion="v1.1",
             inputs=self.get_inputs(names),
             outputs=self.get_outputs(names),
+            hints=hints,
         )
 
         return tool

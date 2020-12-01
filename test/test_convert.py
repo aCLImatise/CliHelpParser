@@ -2,7 +2,13 @@ import itertools
 import tempfile
 from pathlib import Path
 
+from cwl_utils.parser_v1_0 import DockerRequirement
+from WDL import parse_document
+
 from aclimatise import explore_command
+from aclimatise.converter.cwl import CwlGenerator
+from aclimatise.converter.wdl import WdlGenerator
+from aclimatise.yaml import yaml
 
 from .util import convert_validate, skip_not_installed
 
@@ -44,3 +50,23 @@ def test_explore_samtools_pl(yaml_converter):
             filenames.add(path.name)
 
         assert filenames == {"samtools.yml", "samtools.pl.yml"}
+
+
+def test_docker_conversion(bedtools_cmd):
+    intersect = bedtools_cmd["intersect"]
+    container = "quay.io/biocontainers/bedtools:2.29.2--hc088bd4_0"
+    intersect.docker_image = container
+    with tempfile.NamedTemporaryFile() as cwl_file:
+        CwlGenerator().save_to_file(intersect, path=Path(cwl_file.name))
+        cwl_file.seek(0)
+        parsed_cwl = yaml.load(cwl_file)
+        assert any(
+            [
+                hint["class"] == "DockerRequirement" and hint["dockerPull"] == container
+                for hint in parsed_cwl["hints"]
+            ]
+        )
+
+    wdl = WdlGenerator().save_to_string(intersect)
+    parsed_wdl = parse_document(wdl).tasks[0]
+    assert parsed_wdl.runtime["docker"].literal.value == container

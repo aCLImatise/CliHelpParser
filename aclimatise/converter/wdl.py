@@ -206,6 +206,8 @@ class WdlGenerator(WrapperGenerator):
             [] if self.ignore_positionals else [*cmd.positional]
         )
         names = self.choose_variable_names(inputs)
+        runtime = Task.Runtime()
+        runtime.add_docker(cmd.docker_image)
 
         tool = Task(
             name=self.make_task_name(cmd),
@@ -214,6 +216,7 @@ class WdlGenerator(WrapperGenerator):
             inputs=self.make_inputs(names),
             outputs=self.make_outputs(names),
             parameter_meta=self.make_parameter_meta(names),
+            runtime=runtime,
         )
 
         return tool.get_string()
