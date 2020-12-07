@@ -8,7 +8,7 @@ from pyparsing import *
 from aclimatise.model import *
 
 #: Characters that delimit flag synonyms
-synonym_delim_chars = " ,|/"
+synonym_delim_chars = ",|/"
 #: Characters that can start a CLI element, e.g. "-@"
 element_start_chars = alphanums + "@"
 #: Characters that can be in the middle of a CLI element, e.g. "-some-arg"
@@ -148,10 +148,8 @@ flag_with_arg.skipWhitespace = True
 """e.g. `--max-count=NUM`"""
 
 synonym_delim = (
-    Optional(White())
-    + Char(synonym_delim_chars)
-    + Optional(White()).setParseAction(noop).leaveWhitespace()
-)
+    White() ^ (Optional(White()) + Char(synonym_delim_chars) + Optional(White()))
+).leaveWhitespace()
 """
 The character used to separate synonyms of a flag. Depending on the help text this might be a comma, pipe or space
 """
