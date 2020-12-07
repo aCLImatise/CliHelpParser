@@ -7,14 +7,16 @@ from pyparsing import *
 
 from aclimatise.model import *
 
+#: Characters that delimit flag synonyms
+synonym_delim_chars = ",|/"
 #: Characters that can start a CLI element, e.g. "-@"
 element_start_chars = alphanums + "@"
 #: Characters that can be in the middle of a CLI element, e.g. "-some-arg"
-element_body_chars = element_start_chars + "-_./\\"
+element_body_chars = element_start_chars + "-_."
 #: Characters that can only be used in arguments for flags e.g. "<file.fa|file.fa.gz>"
 argument_body_chars = element_body_chars + "|"
 #: Characters that can be in the middle of an argument that has brackets around it, e.g. "-arg <argument with space>"
-delimited_body_chars = argument_body_chars + " "
+delimited_body_chars = argument_body_chars + r" \/"
 
 NL = OneOrMore(LineEnd().setWhitespaceChars("\t ").suppress()).setName("Newline")
 
@@ -145,8 +147,9 @@ flag_with_arg = (
 flag_with_arg.skipWhitespace = True
 """e.g. `--max-count=NUM`"""
 
-# TODO: this should be smarter, accepting ' ' or '| ' or '|' etc
-synonym_delim = Word(" ,|", max=2).setParseAction(noop).leaveWhitespace()
+synonym_delim = (
+    White() ^ (Optional(White()) + Char(synonym_delim_chars) + Optional(White()))
+).leaveWhitespace()
 """
 The character used to separate synonyms of a flag. Depending on the help text this might be a comma, pipe or space
 """

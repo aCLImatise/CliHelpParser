@@ -3,10 +3,20 @@ Changelog
 
 3.0.0 (2020-11-)
 ----------------
+Breaking Changes
+****************
 * Rework of executors
     * `explore` is now a method on the executor object
     * Add a `man`-page executor
     * `aclimatise.explore` is now deprecated
+
+New Features
+************
+* Add ``docker_image`` field to ``Command``
+
+Bug Fixes
+*********
+* Support ``/`` as a synonym delimiter (`#67 <https://github.com/aCLImatise/CliHelpParser/issues/67>`_)
 
 
 2.2.0 (2020-09-26)
