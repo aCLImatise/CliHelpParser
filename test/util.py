@@ -91,6 +91,16 @@ class HelpText:
 all_tests = [
     pytest.param(
         HelpText(
+            path="test_data/bowtie2_build.txt",
+            cmd=["bowtie2-build"],
+            positional=2,
+            named=19,
+            subcommands=0,
+            outputs=0,
+        ),
+    ),
+    pytest.param(
+        HelpText(
             path="test_data/typeHLA.txt",
             cmd=["typeHLA.js"],
             positional=1,  # filek
