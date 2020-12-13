@@ -306,6 +306,11 @@ class CliArgument:
     Description of the function of this argument
     """
 
+    optional: bool
+    """
+    If true, this argument is not required
+    """
+
     @abstractmethod
     def argument_name(self) -> typing.List[str]:
         return []
@@ -339,6 +344,11 @@ class Positional(CliArgument):
         """
         return self.name
 
+    def __post_init__(self):
+        if self.optional is None:
+            # Positionals are mandatory by default
+            self.optional = False
+
     position: int
     """
     The position in the command line that this argument must occupy
@@ -352,11 +362,6 @@ class Positional(CliArgument):
     description: str
     """
     A description of the function of this argument
-    """
-
-    optional: bool = False
-    """
-    If true, this argument is not required
     """
 
     @staticmethod
@@ -426,10 +431,10 @@ class Flag(CliArgument):
     Describes the arguments to this flag, e.g. ``-n 1`` has a single numeric argument
     """
 
-    optional: bool = True
-    """
-    If true, this flag is not required (the default)
-    """
+    def __post_init__(self):
+        if self.optional is None:
+            # Flags are optional by default
+            self.optional = True
 
     @staticmethod
     def deduplicate(flags: typing.Collection["Flag"]) -> typing.List["Flag"]:

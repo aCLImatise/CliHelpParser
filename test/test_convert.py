@@ -2,12 +2,14 @@ import itertools
 import tempfile
 from pathlib import Path
 
+import pytest
 from cwl_utils.parser_v1_0 import DockerRequirement
 from WDL import parse_document
 
 from aclimatise import explore_command
 from aclimatise.converter.cwl import CwlGenerator
 from aclimatise.converter.wdl import WdlGenerator
+from aclimatise.model import CliArgument, Flag, SimpleFlagArg
 from aclimatise.yaml import yaml
 
 from .util import convert_validate, skip_not_installed
@@ -70,3 +72,39 @@ def test_docker_conversion(bedtools_cmd):
     wdl = WdlGenerator().save_to_string(intersect)
     parsed_wdl = parse_document(wdl).tasks[0]
     assert parsed_wdl.runtime["docker"].literal.value == container
+
+
+@pytest.mark.parametrize(
+    "flag,cwltype,wdltype",
+    [
+        [
+            Flag(
+                synonyms=["--some-flag"],
+                optional=True,
+                args=SimpleFlagArg("string"),
+                description="",
+            ),
+            "string?",
+            "String?",
+        ],
+        [
+            Flag(
+                synonyms=["--some-flag"],
+                optional=False,
+                args=SimpleFlagArg("string"),
+                description="",
+            ),
+            "string",
+            "String",
+        ],
+    ],
+)
+def test_types_conversion(flag: CliArgument, cwltype: str, wdltype: str):
+    """
+    Test that types are being correctly translated from aCLImatise types to CWL and WDL
+    """
+    assert CwlGenerator.arg_to_cwl_type(flag) == cwltype
+    assert (
+        WdlGenerator.type_to_wdl(flag.get_type(), optional=flag.optional).get_string()
+        == wdltype
+    )
