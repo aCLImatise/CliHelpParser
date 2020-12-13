@@ -1,9 +1,6 @@
-import inspect
-import tempfile
-from io import IOBase, StringIO, TextIOBase
-from os import PathLike
+from io import StringIO
 from pathlib import Path
-from typing import Generator, List, Union
+from typing import List
 
 from cwl_utils.parser_v1_1 import (
     CommandInputParameter,

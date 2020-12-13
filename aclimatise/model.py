@@ -6,22 +6,18 @@ import enum
 import itertools
 import re
 import typing
-import unicodedata
 from abc import abstractmethod
-from collections import defaultdict
 from itertools import chain
 from operator import attrgetter
 
-import spacy
-from dataclasses import InitVar, dataclass, field
-from ruamel.yaml import YAML, yaml_object
-from spacy import tokens
+from dataclasses import dataclass, field
+from ruamel.yaml import yaml_object
 from word2number import w2n
 
 import aclimatise
 from aclimatise import cli_types
 from aclimatise.cli_types import CliFileSystemType, CliString
-from aclimatise.name_generation import generate_name, segment_string
+from aclimatise.name_generation import segment_string
 from aclimatise.nlp import wordsegment
 from aclimatise.usage_parser.model import UsageInstance
 from aclimatise.yaml import yaml

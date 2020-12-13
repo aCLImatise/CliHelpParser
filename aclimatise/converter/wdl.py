@@ -2,9 +2,7 @@
 Functions for generating WDL from the CLI data model
 """
 import re
-from os import PathLike
-from pathlib import Path
-from typing import Generator, Iterable, List, Set, Tuple, Type
+from typing import Iterable, List, Set, Tuple
 
 from inflection import camelize
 from WDL._grammar import keywords

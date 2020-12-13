@@ -3,7 +3,6 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from cwl_utils.parser_v1_0 import DockerRequirement
 from WDL import parse_document
 
 from aclimatise import explore_command
