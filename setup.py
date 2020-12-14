@@ -21,6 +21,7 @@ setup(
         "psutil",
         "dataclasses",
         "deprecated",
+        "attrs",
     ],
     python_requires=">=3.6",
     entry_points={"console_scripts": ["aclimatise = aclimatise.cli:main"]},

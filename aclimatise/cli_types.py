@@ -13,6 +13,36 @@ class CliType:
     A data type used in the command-line
     """
 
+    @staticmethod
+    def lowest_common_type(types: typing.Iterable["CliType"]) -> "CliType":
+        type_set: typing.Set[typing.Type[CliType]] = {type(t) for t in types}
+
+        if len(type_set) == 1:
+            # If there is only one type, use it
+            return next(iter(types))
+
+        if len(type_set) == 2 and CliInteger in type_set and CliFloat in type_set:
+            # If they're all numeric, they can be represented as floats
+            return CliFloat()
+
+        if {
+            CliDir,
+            CliDict,
+            CliFile,
+            CliTuple,
+            CliList,
+        } & type_set:
+            # These complex types cannot be represented in a simpler way
+            raise Exception(
+                "There is no common type between {}".format(
+                    ", ".join([str(typ) for typ in type_set])
+                )
+            )
+
+        else:
+            # Most of the time, strings can be used to represent primitive types
+            return CliString()
+
     @property
     def representable(self) -> set:
         """
