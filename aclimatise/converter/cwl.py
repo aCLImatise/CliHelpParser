@@ -13,6 +13,7 @@ from cwl_utils.parser_v1_1 import (
 from dataclasses import dataclass
 
 from aclimatise import cli_types
+from aclimatise.cli_types import CliType
 from aclimatise.converter import NamedArgument, WrapperGenerator
 from aclimatise.model import CliArgument, Command, Flag, Positional
 from aclimatise.yaml import yaml
@@ -31,7 +32,7 @@ class CwlGenerator(WrapperGenerator):
         return "_".join([word.lower() for word in words])
 
     @staticmethod
-    def type_to_cwl_type(typ: cli_types.CliType):
+    def type_to_cwl_type(typ: cli_types.CliType) -> str:
         """
         Calculate the CWL type for a CLI type
         """
@@ -52,10 +53,7 @@ class CwlGenerator(WrapperGenerator):
         elif isinstance(typ, cli_types.CliList):
             return CwlGenerator.type_to_cwl_type(typ.value) + "[]"
         elif isinstance(typ, cli_types.CliTuple):
-            # TODO: fix this, an array of types in CWL is a union, not a list of tuple fields
-            return [
-                CwlGenerator.type_to_cwl_type(subtype) for subtype in set(typ.values)
-            ]
+            return CwlGenerator.type_to_cwl_type(CliType.lowest_common_type(typ.values))
         else:
             raise Exception(f"Invalid type {typ}!")
 
