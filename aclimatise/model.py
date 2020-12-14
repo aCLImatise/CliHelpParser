@@ -10,6 +10,7 @@ from abc import abstractmethod
 from itertools import chain
 from operator import attrgetter
 
+import attr
 from dataclasses import dataclass, field
 from ruamel.yaml import yaml_object
 from word2number import w2n
@@ -291,7 +292,7 @@ class Command:
 
 
 @yaml_object(yaml)
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True)
 class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
@@ -302,7 +303,7 @@ class CliArgument:
     Description of the function of this argument
     """
 
-    optional: bool
+    optional: bool = False
     """
     If true, this argument is not required
     """
@@ -328,7 +329,7 @@ class CliArgument:
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s(auto_attribs=True, kw_only=True)
 class Positional(CliArgument):
     """
     A positional command-line argument. This probably means that it is required, and has no arguments like flags do
@@ -339,11 +340,6 @@ class Positional(CliArgument):
         Getting the full name for a positional argument is easy - it's just the parameter name
         """
         return self.name
-
-    def __post_init__(self):
-        if self.optional is None:
-            # Positionals are mandatory by default
-            self.optional = False
 
     position: int
     """
@@ -406,10 +402,15 @@ class Positional(CliArgument):
 
 
 @yaml_object(yaml)
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, kw_only=True)
 class Flag(CliArgument):
     """
     Represents one single flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
+    """
+
+    optional: bool = True
+    """
+    If true, this argument is not required
     """
 
     synonyms: typing.List[str]
@@ -431,6 +432,7 @@ class Flag(CliArgument):
         if self.optional is None:
             # Flags are optional by default
             self.optional = True
+        super().__post_init__()
 
     @staticmethod
     def deduplicate(flags: typing.Collection["Flag"]) -> typing.List["Flag"]:

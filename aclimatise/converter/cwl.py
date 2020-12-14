@@ -110,7 +110,7 @@ class CwlGenerator(WrapperGenerator):
                 ret.append(
                     CommandOutputParameter(
                         id="out_" + arg.name,
-                        type=self.to_cwl_type(typ),
+                        type=self.arg_to_cwl_type(arg.arg),
                         doc=arg.arg.description,
                         outputBinding=CommandOutputBinding(
                             glob="$(inputs.in_{})".format(arg.name)
