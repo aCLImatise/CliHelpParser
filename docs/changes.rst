@@ -9,6 +9,7 @@ Breaking Changes
     * `explore` is now a method on the executor object
     * Add a `man`-page executor
     * `aclimatise.explore` is now deprecated
+* Replaces ``dataclasses`` with ``attrs`` throughout
 
 New Features
 ************
