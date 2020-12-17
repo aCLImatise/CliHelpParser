@@ -18,13 +18,13 @@ from aclimatise.name_generation import (
 )
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class NamedArgument:
     arg: CliArgument
     name: str
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class WrapperGenerator:
     """
     Abstract base class for a class that converts a Command object into a string that defines a tool

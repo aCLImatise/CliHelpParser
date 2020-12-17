@@ -7,7 +7,7 @@ from enum import Enum
 import attr
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliType:
     """
     A data type used in the command-line
@@ -55,7 +55,7 @@ class CliType:
     _representable = set()
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliEnum(CliType):
     """
     One of a list of possible options
@@ -67,7 +67,7 @@ class CliEnum(CliType):
     """
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliFloat(CliType):
     """
     Takes a floating-point value
@@ -76,7 +76,7 @@ class CliFloat(CliType):
     pass
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliInteger(CliType):
     """
     Takes an integer value
@@ -85,7 +85,7 @@ class CliInteger(CliType):
     _representable = {CliFloat}
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliString(CliType):
     """
     Takes a string value
@@ -94,7 +94,7 @@ class CliString(CliType):
     pass
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliBoolean(CliType):
     """
     Takes a boolean value
@@ -103,7 +103,7 @@ class CliBoolean(CliType):
     pass
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliFileSystemType(CliType):
     """
     Takes a directory / file path
@@ -115,7 +115,7 @@ class CliFileSystemType(CliType):
     """
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliDir(CliFileSystemType):
     """
     Takes a directory path
@@ -124,7 +124,7 @@ class CliDir(CliFileSystemType):
     pass
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliFile(CliFileSystemType):
     """
     Takes a file path
@@ -133,7 +133,7 @@ class CliFile(CliFileSystemType):
     pass
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliDict(CliType):
     """
     Takes a dictionary value
@@ -150,7 +150,7 @@ class CliDict(CliType):
     """
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliList(CliType):
     """
     Takes a list value
@@ -162,7 +162,7 @@ class CliList(CliType):
     """
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliTuple(CliType):
     """
     Takes a list of values with a fixed length, possibly each with different types

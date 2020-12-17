@@ -5,7 +5,7 @@ import attr
 from aclimatise import model
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class UsageElement:
     text: str
     """
@@ -34,7 +34,7 @@ class UsageElement:
     """
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class UsageInstance:
     items: List[UsageElement]
     """

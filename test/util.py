@@ -33,7 +33,7 @@ def skip_not_installed(executable: str):
     )
 
 
-@attr.s(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class HelpText:
     path: str
     """Path to the test data file"""

@@ -19,7 +19,7 @@ from aclimatise.model import CliArgument, Command, Flag, Positional
 from aclimatise.yaml import yaml
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class CwlGenerator(WrapperGenerator):
     case = "snake"
 

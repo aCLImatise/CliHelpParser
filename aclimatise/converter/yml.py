@@ -10,7 +10,7 @@ from aclimatise.model import Command
 from aclimatise.yaml import yaml
 
 
-@attr.s
+@attr.s(auto_attribs=True)
 class YmlGenerator(WrapperGenerator):
     """
     Internal YML format
