@@ -1,11 +1,8 @@
-import inspect
-import tempfile
-from dataclasses import dataclass
-from io import IOBase, StringIO, TextIOBase
-from os import PathLike
+from io import StringIO
 from pathlib import Path
-from typing import Generator, List
+from typing import List
 
+import attr
 from cwl_utils.parser_v1_1 import (
     CommandInputParameter,
     CommandLineBinding,
@@ -16,6 +13,7 @@ from cwl_utils.parser_v1_1 import (
 )
 
 from aclimatise import cli_types
+from aclimatise.cli_types import CliType
 from aclimatise.converter import NamedArgument, WrapperGenerator
 from aclimatise.model import CliArgument, Command, Flag, Positional
 from aclimatise.yaml import yaml
@@ -34,7 +32,10 @@ class CwlGenerator(WrapperGenerator):
         return "_".join([word.lower() for word in words])
 
     @staticmethod
-    def to_cwl_type(typ: cli_types.CliType):
+    def type_to_cwl_type(typ: cli_types.CliType) -> str:
+        """
+        Calculate the CWL type for a CLI type
+        """
         if isinstance(typ, cli_types.CliFile):
             return "File"
         elif isinstance(typ, cli_types.CliDir):
@@ -50,11 +51,24 @@ class CwlGenerator(WrapperGenerator):
         elif isinstance(typ, cli_types.CliEnum):
             return "string"
         elif isinstance(typ, cli_types.CliList):
-            return CwlGenerator.to_cwl_type(typ.value) + "[]"
+            return CwlGenerator.type_to_cwl_type(typ.value) + "[]"
         elif isinstance(typ, cli_types.CliTuple):
-            return [CwlGenerator.to_cwl_type(subtype) for subtype in set(typ.values)]
+            return CwlGenerator.type_to_cwl_type(CliType.lowest_common_type(typ.values))
         else:
             raise Exception(f"Invalid type {typ}!")
+
+    @staticmethod
+    def arg_to_cwl_type(arg: CliArgument) -> str:
+        """
+        Calculate the CWL type for an entire argument
+        """
+        typ = arg.get_type()
+        cwl_type = CwlGenerator.type_to_cwl_type(typ)
+
+        if arg.optional and not cwl_type.endswith("[]"):
+            return cwl_type + "?"
+        else:
+            return cwl_type
 
     def get_inputs(self, names: List[NamedArgument]) -> List[CommandInputParameter]:
         ret = []
@@ -63,7 +77,7 @@ class CwlGenerator(WrapperGenerator):
             ret.append(
                 CommandInputParameter(
                     id="in_" + arg.name,
-                    type=self.to_cwl_type(arg.arg.get_type()),
+                    type=self.arg_to_cwl_type(arg.arg),
                     inputBinding=CommandLineBinding(
                         position=arg.arg.position
                         if isinstance(arg.arg, Positional)
@@ -94,7 +108,7 @@ class CwlGenerator(WrapperGenerator):
                 ret.append(
                     CommandOutputParameter(
                         id="out_" + arg.name,
-                        type=self.to_cwl_type(typ),
+                        type=self.arg_to_cwl_type(arg.arg),
                         doc=arg.arg.description,
                         outputBinding=CommandOutputBinding(
                             glob="$(inputs.in_{})".format(arg.name)

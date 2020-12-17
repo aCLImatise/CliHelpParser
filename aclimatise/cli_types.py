@@ -2,15 +2,46 @@
 Contains the objects that represent a "type" of data a flag argument might store
 """
 import typing
-from dataclasses import dataclass
 from enum import Enum
 
+import attr
 
-@attr.s(unsafe_hash=True)
+
+@attr.s(frozen=True)
 class CliType:
     """
     A data type used in the command-line
     """
+
+    @staticmethod
+    def lowest_common_type(types: typing.Iterable["CliType"]) -> "CliType":
+        type_set: typing.Set[typing.Type[CliType]] = {type(t) for t in types}
+
+        if len(type_set) == 1:
+            # If there is only one type, use it
+            return next(iter(types))
+
+        if len(type_set) == 2 and CliInteger in type_set and CliFloat in type_set:
+            # If they're all numeric, they can be represented as floats
+            return CliFloat()
+
+        if {
+            CliDir,
+            CliDict,
+            CliFile,
+            CliTuple,
+            CliList,
+        } & type_set:
+            # These complex types cannot be represented in a simpler way
+            raise Exception(
+                "There is no common type between {}".format(
+                    ", ".join([str(typ) for typ in type_set])
+                )
+            )
+
+        else:
+            # Most of the time, strings can be used to represent primitive types
+            return CliString()
 
     @property
     def representable(self) -> set:
@@ -24,7 +55,7 @@ class CliType:
     _representable = set()
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliEnum(CliType):
     """
     One of a list of possible options
@@ -36,7 +67,7 @@ class CliEnum(CliType):
     """
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliFloat(CliType):
     """
     Takes a floating-point value
@@ -45,7 +76,7 @@ class CliFloat(CliType):
     pass
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliInteger(CliType):
     """
     Takes an integer value
@@ -54,7 +85,7 @@ class CliInteger(CliType):
     _representable = {CliFloat}
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliString(CliType):
     """
     Takes a string value
@@ -63,7 +94,7 @@ class CliString(CliType):
     pass
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliBoolean(CliType):
     """
     Takes a boolean value
@@ -72,7 +103,7 @@ class CliBoolean(CliType):
     pass
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliFileSystemType(CliType):
     """
     Takes a directory / file path
@@ -84,7 +115,7 @@ class CliFileSystemType(CliType):
     """
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliDir(CliFileSystemType):
     """
     Takes a directory path
@@ -93,7 +124,7 @@ class CliDir(CliFileSystemType):
     pass
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliFile(CliFileSystemType):
     """
     Takes a file path
@@ -102,7 +133,7 @@ class CliFile(CliFileSystemType):
     pass
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliDict(CliType):
     """
     Takes a dictionary value
@@ -119,7 +150,7 @@ class CliDict(CliType):
     """
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliList(CliType):
     """
     Takes a list value
@@ -131,7 +162,7 @@ class CliList(CliType):
     """
 
 
-@attr.s(unsafe_hash=True)
+@attr.s(frozen=True)
 class CliTuple(CliType):
     """
     Takes a list of values with a fixed length, possibly each with different types

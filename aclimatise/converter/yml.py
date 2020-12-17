@@ -1,8 +1,9 @@
-from dataclasses import dataclass
 from io import StringIO
 from os import PathLike
 from pathlib import Path
 from typing import Generator, List
+
+import attr
 
 from aclimatise.converter import WrapperGenerator
 from aclimatise.model import Command

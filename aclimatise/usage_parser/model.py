@@ -1,5 +1,6 @@
-from dataclasses import dataclass
 from typing import List, Optional
+
+import attr
 
 from aclimatise import model
 

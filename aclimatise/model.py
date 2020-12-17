@@ -6,22 +6,18 @@ import enum
 import itertools
 import re
 import typing
-import unicodedata
 from abc import abstractmethod
-from collections import defaultdict
-from dataclasses import InitVar, dataclass, field
 from itertools import chain
 from operator import attrgetter
 
-import spacy
-from ruamel.yaml import YAML, yaml_object
-from spacy import tokens
+import attr
+from ruamel.yaml import yaml_object
 from word2number import w2n
 
 import aclimatise
 from aclimatise import cli_types
 from aclimatise.cli_types import CliFileSystemType, CliString
-from aclimatise.name_generation import generate_name, segment_string
+from aclimatise.name_generation import segment_string
 from aclimatise.nlp import wordsegment
 from aclimatise.usage_parser.model import UsageInstance
 from aclimatise.yaml import yaml
@@ -238,12 +234,12 @@ class Command:
     The command line used to invoke this command, e.g. ["bwa", "mem"]
     """
 
-    positional: typing.List["Positional"] = field(default_factory=list)
+    positional: typing.List["Positional"] = attr.ib(factory=list)
     """
     All positional arguments supported by this command
     """
 
-    named: typing.List["Flag"] = field(default_factory=list)
+    named: typing.List["Flag"] = attr.ib(factory=list)
     """
     All named arguments (flags) supported by this command
     """
@@ -253,12 +249,12 @@ class Command:
     The parent command, if this is a subcommand
     """
 
-    subcommands: typing.List["Command"] = field(default_factory=list)
+    subcommands: typing.List["Command"] = attr.ib(factory=list)
     """
     A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
     """
 
-    usage: typing.List["UsageInstance"] = field(default_factory=list)
+    usage: typing.List["UsageInstance"] = attr.ib(factory=list)
     """
     Different usage examples provided by the help
     """
@@ -295,7 +291,7 @@ class Command:
 
 
 @yaml_object(yaml)
-@attr.s(unsafe_hash=True)
+@attr.s(auto_attribs=True)
 class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
@@ -304,6 +300,11 @@ class CliArgument:
     description: str
     """
     Description of the function of this argument
+    """
+
+    optional: bool = False
+    """
+    If true, this argument is not required
     """
 
     @abstractmethod
@@ -327,7 +328,7 @@ class CliArgument:
 
 
 @yaml_object(yaml)
-@attr.s
+@attr.s(auto_attribs=True, kw_only=True)
 class Positional(CliArgument):
     """
     A positional command-line argument. This probably means that it is required, and has no arguments like flags do
@@ -352,11 +353,6 @@ class Positional(CliArgument):
     description: str
     """
     A description of the function of this argument
-    """
-
-    optional: bool = False
-    """
-    If true, this argument is not required
     """
 
     @staticmethod
@@ -405,10 +401,15 @@ class Positional(CliArgument):
 
 
 @yaml_object(yaml)
-@attr.s(unsafe_hash=True)
+@attr.s(auto_attribs=True, kw_only=True)
 class Flag(CliArgument):
     """
     Represents one single flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
+    """
+
+    optional: bool = True
+    """
+    If true, this argument is not required
     """
 
     synonyms: typing.List[str]
@@ -426,10 +427,11 @@ class Flag(CliArgument):
     Describes the arguments to this flag, e.g. ``-n 1`` has a single numeric argument
     """
 
-    optional: bool = True
-    """
-    If true, this flag is not required (the default)
-    """
+    def __post_init__(self):
+        if self.optional is None:
+            # Flags are optional by default
+            self.optional = True
+        super().__post_init__()
 
     @staticmethod
     def deduplicate(flags: typing.Collection["Flag"]) -> typing.List["Flag"]:

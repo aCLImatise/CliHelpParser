@@ -2,9 +2,7 @@
 Functions for generating WDL from the CLI data model
 """
 import re
-from os import PathLike
-from pathlib import Path
-from typing import Generator, Iterable, List, Set, Tuple, Type
+from typing import Iterable, List, Set, Tuple
 
 from inflection import camelize
 from WDL._grammar import keywords
@@ -58,38 +56,6 @@ def flag_to_command_input(
     return Task.Command.CommandInput.from_fields(**args)
 
 
-def lowest_common_type(types: Iterable[cli_types.CliType]):
-    type_set = {type(t) for t in types}
-
-    if len(type_set) == 1:
-        # If there is only one type, use it
-        return type_set.pop()
-
-    if (
-        len(type_set) == 2
-        and cli_types.CliInteger in type_set
-        and cli_types.CliFloat in type_set
-    ):
-        # If they're all numeric, they can be represented as floats
-        return cli_types.CliFloat()
-
-    if {
-        cli_types.CliDir,
-        cli_types.CliDict,
-        cli_types.CliFile,
-        cli_types.CliTuple,
-        cli_types.CliList,
-    } & type_set:
-        # These complex types cannot be represented in a simpler way
-        raise Exception(
-            "There is no common type between {}".format(", ".join(type_set))
-        )
-
-    else:
-        # Most of the time, strings can be used to represent primitive types
-        return cli_types.CliString()
-
-
 class WdlGenerator(WrapperGenerator):
     @property
     def suffix(self) -> str:
@@ -130,7 +96,9 @@ class WdlGenerator(WrapperGenerator):
             else:
                 return WdlType(
                     ArrayType(
-                        cls.type_to_wdl(lowest_common_type(typ.values)),
+                        cls.type_to_wdl(
+                            cli_types.CliType.lowest_common_type(typ.values)
+                        ),
                         requires_multiple=not optional,
                     )
                 )
