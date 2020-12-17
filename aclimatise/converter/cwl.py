@@ -1,5 +1,6 @@
 import inspect
 import tempfile
+from dataclasses import dataclass
 from io import IOBase, StringIO, TextIOBase
 from os import PathLike
 from pathlib import Path
@@ -13,7 +14,6 @@ from cwl_utils.parser_v1_1 import (
     CommandOutputParameter,
     DockerRequirement,
 )
-from dataclasses import dataclass
 
 from aclimatise import cli_types
 from aclimatise.converter import NamedArgument, WrapperGenerator
@@ -21,7 +21,7 @@ from aclimatise.model import CliArgument, Command, Flag, Positional
 from aclimatise.yaml import yaml
 
 
-@dataclass
+@attr.s
 class CwlGenerator(WrapperGenerator):
     case = "snake"
 

@@ -1,11 +1,10 @@
-from typing import List, Optional
-
 from dataclasses import dataclass
+from typing import List, Optional
 
 from aclimatise import model
 
 
-@dataclass
+@attr.s
 class UsageElement:
     text: str
     """
@@ -34,7 +33,7 @@ class UsageElement:
     """
 
 
-@dataclass
+@attr.s
 class UsageInstance:
     items: List[UsageElement]
     """

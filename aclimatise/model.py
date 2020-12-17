@@ -9,11 +9,11 @@ import typing
 import unicodedata
 from abc import abstractmethod
 from collections import defaultdict
+from dataclasses import InitVar, dataclass, field
 from itertools import chain
 from operator import attrgetter
 
 import spacy
-from dataclasses import InitVar, dataclass, field
 from ruamel.yaml import YAML, yaml_object
 from spacy import tokens
 from word2number import w2n
@@ -53,7 +53,7 @@ def useless_name(name: typing.List[str]):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class Command:
     """
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
@@ -295,7 +295,7 @@ class Command:
 
 
 @yaml_object(yaml)
-@dataclass(unsafe_hash=True)
+@attr.s(unsafe_hash=True)
 class CliArgument:
     """
     A generic parent class for both named and positional CLI arguments
@@ -327,7 +327,7 @@ class CliArgument:
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class Positional(CliArgument):
     """
     A positional command-line argument. This probably means that it is required, and has no arguments like flags do
@@ -405,7 +405,7 @@ class Positional(CliArgument):
 
 
 @yaml_object(yaml)
-@dataclass(unsafe_hash=True)
+@attr.s(unsafe_hash=True)
 class Flag(CliArgument):
     """
     Represents one single flag, with all synonyms for it, and all arguments, e.g. `-h, --help`
@@ -592,7 +592,7 @@ class Flag(CliArgument):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class FlagSynonym:
     """
     Internal class for storing the arguments for a single synonym
@@ -676,7 +676,7 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class FlagArg(abc.ABC):
     """
     The data model for the argument or arguments for a flag, for example a flag might have no arguments, it might have
@@ -706,7 +706,7 @@ class FlagArg(abc.ABC):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class EmptyFlagArg(FlagArg):
     """
     A flag that has no arguments, e.g. `--quiet` that is either present or not present
@@ -720,7 +720,7 @@ class EmptyFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class OptionalFlagArg(FlagArg):
     """
     When the flag has multiple arguments, some of which are optional, e.g.
@@ -754,7 +754,7 @@ class OptionalFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class SimpleFlagArg(FlagArg):
     """
     When a flag has one single argument, e.g. `-e PATTERN`, where PATTERN is the argument
@@ -776,7 +776,7 @@ class SimpleFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class RepeatFlagArg(FlagArg):
     """
     When a flag accepts 1 or more arguments, e.g. `--samout SAMOUTS [SAMOUTS ...]`
@@ -802,7 +802,7 @@ class RepeatFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s
 class ChoiceFlagArg(FlagArg):
     """
     When a flag accepts one option from a list of options, e.g. `-s {yes,no,reverse}`

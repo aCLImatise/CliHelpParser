@@ -1,16 +1,15 @@
+from dataclasses import dataclass
 from io import StringIO
 from os import PathLike
 from pathlib import Path
 from typing import Generator, List
-
-from dataclasses import dataclass
 
 from aclimatise.converter import WrapperGenerator
 from aclimatise.model import Command
 from aclimatise.yaml import yaml
 
 
-@dataclass
+@attr.s
 class YmlGenerator(WrapperGenerator):
     """
     Internal YML format

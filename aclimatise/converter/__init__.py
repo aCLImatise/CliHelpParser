@@ -4,7 +4,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Generator, Iterable, List, Set, TextIO, Tuple, Type
 
-from dataclasses import dataclass
+import attr
 
 from aclimatise.model import CliArgument, Command, Flag
 from aclimatise.name_generation import (
@@ -18,13 +18,13 @@ from aclimatise.name_generation import (
 )
 
 
-@dataclass
+@attr.s
 class NamedArgument:
     arg: CliArgument
     name: str
 
 
-@dataclass
+@attr.s
 class WrapperGenerator:
     """
     Abstract base class for a class that converts a Command object into a string that defines a tool
