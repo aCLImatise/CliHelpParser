@@ -20,7 +20,7 @@ from aclimatise.cli_types import CliFileSystemType, CliString
 from aclimatise.name_generation import segment_string
 from aclimatise.nlp import wordsegment
 from aclimatise.usage_parser.model import UsageInstance
-from aclimatise.yaml import yaml
+from aclimatise.yaml import AttrYamlMixin, yaml
 
 
 def first(lst: typing.List, default):
@@ -49,8 +49,10 @@ def useless_name(name: typing.List[str]):
 
 
 @yaml_object(yaml)
-@attr.s(auto_attribs=True)
-class Command:
+@attr.s(
+    auto_attribs=True,
+)
+class Command(AttrYamlMixin):
     """
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
     """
@@ -292,7 +294,7 @@ class Command:
 
 @yaml_object(yaml)
 @attr.s(auto_attribs=True)
-class CliArgument:
+class CliArgument(AttrYamlMixin):
     """
     A generic parent class for both named and positional CLI arguments
     """
@@ -594,7 +596,7 @@ class Flag(CliArgument):
 
 @yaml_object(yaml)
 @attr.s(auto_attribs=True)
-class FlagSynonym:
+class FlagSynonym(AttrYamlMixin):
     """
     Internal class for storing the arguments for a single synonym
     """
@@ -678,7 +680,7 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
 
 @yaml_object(yaml)
 @attr.s(auto_attribs=True)
-class FlagArg(abc.ABC):
+class FlagArg(abc.ABC, AttrYamlMixin):
     """
     The data model for the argument or arguments for a flag, for example a flag might have no arguments, it might have
     one argument, it might accept one option from a list of options, or it might accept an arbitrary number of inputs

@@ -6,9 +6,11 @@ from enum import Enum
 
 import attr
 
+from aclimatise.yaml import AttrYamlMixin
+
 
 @attr.s(auto_attribs=True, frozen=True)
-class CliType:
+class CliType(AttrYamlMixin):
     """
     A data type used in the command-line
     """

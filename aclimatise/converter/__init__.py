@@ -16,16 +16,21 @@ from aclimatise.name_generation import (
     name_to_camel,
     name_to_snake,
 )
+from aclimatise.yaml import AttrYamlMixin
 
 
-@attr.s(auto_attribs=True)
-class NamedArgument:
+@attr.s(
+    auto_attribs=True,
+)
+class NamedArgument(AttrYamlMixin):
     arg: CliArgument
     name: str
 
 
-@attr.s(auto_attribs=True)
-class WrapperGenerator:
+@attr.s(
+    auto_attribs=True,
+)
+class WrapperGenerator(AttrYamlMixin):
     """
     Abstract base class for a class that converts a Command object into a string that defines a tool
     wrapper in a certain workflow language

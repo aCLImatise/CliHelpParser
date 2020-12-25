@@ -3,10 +3,11 @@ from typing import List, Optional
 import attr
 
 from aclimatise import model
+from aclimatise.yaml import AttrYamlMixin
 
 
 @attr.s(auto_attribs=True)
-class UsageElement:
+class UsageElement(AttrYamlMixin):
     text: str
     """
     The name of this element, as defined in the usage section
@@ -35,7 +36,7 @@ class UsageElement:
 
 
 @attr.s(auto_attribs=True)
-class UsageInstance:
+class UsageInstance(AttrYamlMixin):
     items: List[UsageElement]
     """
     The string of elements that make up a valid command invocation
