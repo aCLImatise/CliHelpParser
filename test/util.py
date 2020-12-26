@@ -9,11 +9,11 @@ from pathlib import Path
 from textwrap import dedent
 from typing import Callable, List, Optional
 
+import attr
 import cwl_utils.parser_v1_1 as parser
 import pytest
 from cwl_utils.parser_v1_0 import DockerRequirement
 from cwltool.load_tool import fetch_document, resolve_and_validate_document
-from dataclasses import dataclass, field
 from WDL import Error, parse_document
 
 from aclimatise import Command, Flag, WrapperGenerator, cli_types
@@ -33,7 +33,7 @@ def skip_not_installed(executable: str):
     )
 
 
-@dataclass(frozen=True)
+@attr.s(auto_attribs=True, frozen=True)
 class HelpText:
     path: str
     """Path to the test data file"""
@@ -47,11 +47,11 @@ class HelpText:
     """Number of subcommands"""
     outputs: Optional[int] = None
     """Number of outputs"""
-    output_assertions: List[Callable[[CliArgument], bool]] = field(default_factory=list)
+    output_assertions: List[Callable[[CliArgument], bool]] = attr.ib(factory=list)
     """
     A list of assertions that must return True for at least one output
     """
-    assertions: List[Callable[[Command], bool]] = field(default_factory=list)
+    assertions: List[Callable[[Command], bool]] = attr.ib(factory=list)
     """
     A list of assertions that must return True if the command passed. Used for misc
     assertions that don't fit into the above fields

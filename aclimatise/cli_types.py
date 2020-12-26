@@ -4,11 +4,13 @@ Contains the objects that represent a "type" of data a flag argument might store
 import typing
 from enum import Enum
 
-from dataclasses import dataclass
+import attr
+
+from aclimatise.yaml import AttrYamlMixin
 
 
-@dataclass(unsafe_hash=True)
-class CliType:
+@attr.s(auto_attribs=True, frozen=True)
+class CliType(AttrYamlMixin):
     """
     A data type used in the command-line
     """
@@ -55,7 +57,7 @@ class CliType:
     _representable = set()
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliEnum(CliType):
     """
     One of a list of possible options
@@ -67,7 +69,7 @@ class CliEnum(CliType):
     """
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliFloat(CliType):
     """
     Takes a floating-point value
@@ -76,7 +78,7 @@ class CliFloat(CliType):
     pass
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliInteger(CliType):
     """
     Takes an integer value
@@ -85,7 +87,7 @@ class CliInteger(CliType):
     _representable = {CliFloat}
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliString(CliType):
     """
     Takes a string value
@@ -94,7 +96,7 @@ class CliString(CliType):
     pass
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliBoolean(CliType):
     """
     Takes a boolean value
@@ -103,7 +105,7 @@ class CliBoolean(CliType):
     pass
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliFileSystemType(CliType):
     """
     Takes a directory / file path
@@ -115,7 +117,7 @@ class CliFileSystemType(CliType):
     """
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliDir(CliFileSystemType):
     """
     Takes a directory path
@@ -124,7 +126,7 @@ class CliDir(CliFileSystemType):
     pass
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliFile(CliFileSystemType):
     """
     Takes a file path
@@ -133,7 +135,7 @@ class CliFile(CliFileSystemType):
     pass
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliDict(CliType):
     """
     Takes a dictionary value
@@ -150,7 +152,7 @@ class CliDict(CliType):
     """
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliList(CliType):
     """
     Takes a list value
@@ -162,7 +164,7 @@ class CliList(CliType):
     """
 
 
-@dataclass(unsafe_hash=True)
+@attr.s(auto_attribs=True, frozen=True)
 class CliTuple(CliType):
     """
     Takes a list of values with a fixed length, possibly each with different types

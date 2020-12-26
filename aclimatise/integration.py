@@ -1,6 +1,6 @@
 import typing
 
-import dataclasses
+import attr
 
 from aclimatise.flag_parser.parser import CliParser
 from aclimatise.model import Command, Flag
@@ -32,7 +32,7 @@ def parse_help(cmd: typing.Collection[str], text: str, max_length=1000) -> Comma
         # Combine the flags from both help and usage
         named=list(Flag.combine([help_command.named, usage_command.named])),
     )
-    for field in dataclasses.fields(Command):
+    for field in attr.fields(Command):
         fields[field.name] = (
             fields.get(field.name)
             or getattr(help_command, field.name)

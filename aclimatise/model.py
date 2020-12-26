@@ -11,7 +11,6 @@ from itertools import chain
 from operator import attrgetter
 
 import attr
-from dataclasses import dataclass, field
 from ruamel.yaml import yaml_object
 from word2number import w2n
 
@@ -21,7 +20,7 @@ from aclimatise.cli_types import CliFileSystemType, CliString
 from aclimatise.name_generation import segment_string
 from aclimatise.nlp import wordsegment
 from aclimatise.usage_parser.model import UsageInstance
-from aclimatise.yaml import yaml
+from aclimatise.yaml import AttrYamlMixin, yaml
 
 
 def first(lst: typing.List, default):
@@ -50,13 +49,15 @@ def useless_name(name: typing.List[str]):
 
 
 @yaml_object(yaml)
-@dataclass
-class Command:
+@attr.s(
+    auto_attribs=True,
+)
+class Command(AttrYamlMixin):
     """
     Class representing an entire command or subcommand, e.g. `bwa mem` or `grep`
     """
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         # Store certain special flags in their own fields
         if self.help_flag is None:
             for flag in self.named:
@@ -235,12 +236,12 @@ class Command:
     The command line used to invoke this command, e.g. ["bwa", "mem"]
     """
 
-    positional: typing.List["Positional"] = field(default_factory=list)
+    positional: typing.List["Positional"] = attr.ib(factory=list)
     """
     All positional arguments supported by this command
     """
 
-    named: typing.List["Flag"] = field(default_factory=list)
+    named: typing.List["Flag"] = attr.ib(factory=list)
     """
     All named arguments (flags) supported by this command
     """
@@ -250,12 +251,12 @@ class Command:
     The parent command, if this is a subcommand
     """
 
-    subcommands: typing.List["Command"] = field(default_factory=list)
+    subcommands: typing.List["Command"] = attr.ib(factory=list)
     """
     A list of subcommands of this command, e.g. "bwa" has the subcommand "bwa mem"
     """
 
-    usage: typing.List["UsageInstance"] = field(default_factory=list)
+    usage: typing.List["UsageInstance"] = attr.ib(factory=list)
     """
     Different usage examples provided by the help
     """
@@ -293,7 +294,7 @@ class Command:
 
 @yaml_object(yaml)
 @attr.s(auto_attribs=True)
-class CliArgument:
+class CliArgument(AttrYamlMixin):
     """
     A generic parent class for both named and positional CLI arguments
     """
@@ -428,11 +429,10 @@ class Flag(CliArgument):
     Describes the arguments to this flag, e.g. ``-n 1`` has a single numeric argument
     """
 
-    def __post_init__(self):
+    def __attrs_post_init__(self):
         if self.optional is None:
             # Flags are optional by default
             self.optional = True
-        super().__post_init__()
 
     @staticmethod
     def deduplicate(flags: typing.Collection["Flag"]) -> typing.List["Flag"]:
@@ -595,8 +595,8 @@ class Flag(CliArgument):
 
 
 @yaml_object(yaml)
-@dataclass
-class FlagSynonym:
+@attr.s(auto_attribs=True)
+class FlagSynonym(AttrYamlMixin):
     """
     Internal class for storing the arguments for a single synonym
     """
@@ -679,8 +679,8 @@ def infer_type(string) -> typing.Optional[cli_types.CliType]:
 
 
 @yaml_object(yaml)
-@dataclass
-class FlagArg(abc.ABC):
+@attr.s(auto_attribs=True)
+class FlagArg(abc.ABC, AttrYamlMixin):
     """
     The data model for the argument or arguments for a flag, for example a flag might have no arguments, it might have
     one argument, it might accept one option from a list of options, or it might accept an arbitrary number of inputs
@@ -709,7 +709,7 @@ class FlagArg(abc.ABC):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s(auto_attribs=True)
 class EmptyFlagArg(FlagArg):
     """
     A flag that has no arguments, e.g. `--quiet` that is either present or not present
@@ -723,7 +723,7 @@ class EmptyFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s(auto_attribs=True)
 class OptionalFlagArg(FlagArg):
     """
     When the flag has multiple arguments, some of which are optional, e.g.
@@ -757,7 +757,7 @@ class OptionalFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s(auto_attribs=True)
 class SimpleFlagArg(FlagArg):
     """
     When a flag has one single argument, e.g. `-e PATTERN`, where PATTERN is the argument
@@ -779,7 +779,7 @@ class SimpleFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s(auto_attribs=True)
 class RepeatFlagArg(FlagArg):
     """
     When a flag accepts 1 or more arguments, e.g. `--samout SAMOUTS [SAMOUTS ...]`
@@ -805,7 +805,7 @@ class RepeatFlagArg(FlagArg):
 
 
 @yaml_object(yaml)
-@dataclass
+@attr.s(auto_attribs=True)
 class ChoiceFlagArg(FlagArg):
     """
     When a flag accepts one option from a list of options, e.g. `-s {yes,no,reverse}`

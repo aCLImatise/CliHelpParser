@@ -2,6 +2,7 @@ from io import StringIO
 from pathlib import Path
 from typing import List
 
+import attr
 from cwl_utils.parser_v1_1 import (
     CommandInputParameter,
     CommandLineBinding,
@@ -10,7 +11,6 @@ from cwl_utils.parser_v1_1 import (
     CommandOutputParameter,
     DockerRequirement,
 )
-from dataclasses import dataclass
 
 from aclimatise import cli_types
 from aclimatise.cli_types import CliType
@@ -19,7 +19,7 @@ from aclimatise.model import CliArgument, Command, Flag, Positional
 from aclimatise.yaml import yaml
 
 
-@dataclass
+@attr.s(auto_attribs=True)
 class CwlGenerator(WrapperGenerator):
     case = "snake"
 

@@ -19,7 +19,6 @@ setup(
         "num2words",
         "word2number",
         "psutil",
-        "dataclasses",
         "deprecated",
         "attrs",
     ],

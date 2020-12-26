@@ -4,7 +4,7 @@ from os import PathLike
 from pathlib import Path
 from typing import Generator, Iterable, List, Set, TextIO, Tuple, Type
 
-from dataclasses import dataclass
+import attr
 
 from aclimatise.model import CliArgument, Command, Flag
 from aclimatise.name_generation import (
@@ -16,16 +16,21 @@ from aclimatise.name_generation import (
     name_to_camel,
     name_to_snake,
 )
+from aclimatise.yaml import AttrYamlMixin
 
 
-@dataclass
-class NamedArgument:
+@attr.s(
+    auto_attribs=True,
+)
+class NamedArgument(AttrYamlMixin):
     arg: CliArgument
     name: str
 
 
-@dataclass
-class WrapperGenerator:
+@attr.s(
+    auto_attribs=True,
+)
+class WrapperGenerator(AttrYamlMixin):
     """
     Abstract base class for a class that converts a Command object into a string that defines a tool
     wrapper in a certain workflow language
