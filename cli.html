@@ -6,13 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Command Line Interface &#8212; aCLImatise 0.0.16 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Data Model" href="model.html" />
@@ -48,12 +47,6 @@
 </div>
 <p class="rubric">Options</p>
 <dl class="std option">
-<dt id="cmdoption-aclimatise-explore-pos">
-<span id="cmdoption-aclimatise-explore-no-pos"></span><code class="sig-name descname">--pos</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-pos</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Include (default) or don’t include positional arguments, for example because the help formatting has some misleading sections that look like positional arguments</p>
-</dd></dl>
-
-<dl class="std option">
 <dt id="cmdoption-aclimatise-explore-c">
 <span id="cmdoption-aclimatise-explore-case"></span><code class="sig-name descname">-c</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--case</code><code class="sig-prename descclassname"> &lt;case&gt;</code><a class="headerlink" href="#cmdoption-aclimatise-explore-c" title="Permalink to this definition">¶</a></dt>
 <dd><p>Which case to use for variable names. If not set, defaults to the language defaults: snake_case for CWL and snake_case for WDL</p>
@@ -68,6 +61,12 @@
 <dt id="cmdoption-aclimatise-explore-g">
 <span id="cmdoption-aclimatise-explore-generate-names"></span><code class="sig-name descname">-g</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--generate-names</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-g" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rather than using the long flag to generate the argument name, generate them automatically using the flag description. Generally helpful if there are no long flags, only short flags.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt id="cmdoption-aclimatise-explore-m">
+<span id="cmdoption-aclimatise-explore-man"></span><code class="sig-name descname">-m</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--man</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-explore-m" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the help using its man page, rather than by executing the command. This will fail if the man page doesn’t exist</p>
 </dd></dl>
 
 <dl class="std option">
@@ -120,12 +119,6 @@
 </pre></div>
 </div>
 <p class="rubric">Options</p>
-<dl class="std option">
-<dt id="cmdoption-aclimatise-pipe-pos">
-<span id="cmdoption-aclimatise-pipe-no-pos"></span><code class="sig-name descname">--pos</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--no-pos</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-pipe-pos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Include (default) or don’t include positional arguments, for example because the help formatting has some misleading sections that look like positional arguments</p>
-</dd></dl>
-
 <dl class="std option">
 <dt id="cmdoption-aclimatise-pipe-g">
 <span id="cmdoption-aclimatise-pipe-generate-names"></span><code class="sig-name descname">-g</code><code class="sig-prename descclassname"></code><code class="sig-prename descclassname">, </code><code class="sig-name descname">--generate-names</code><code class="sig-prename descclassname"></code><a class="headerlink" href="#cmdoption-aclimatise-pipe-g" title="Permalink to this definition">¶</a></dt>
@@ -228,7 +221,7 @@
       &copy;2020, Michael Milton.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
