@@ -401,6 +401,20 @@ def validate_cwl(cwl: str, cmd: Command = None, explore: bool = True):
             # We should have all the official outputs, plus stdout
             assert len(parsed["outputs"]) == len(cmd.outputs) + 1
 
+def validate_janis(janis: str, cmd: Command=None):
+    fn = "temp-janis"
+    if cmd and cmd.as_filename:
+        fn = cmd.as_filename
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmpdir =Path(tmpdir)
+        tmpfile = tmpdir / (fn + ".py")
+        tmpfile.write_text(janis)
+
+        # just run the python file, and if it succeeds we're sweet
+        result = subprocess.run(["python", tmpfile])
+        assert result.returncode == 0
+
+
 
 def validate_wdl(wdl: str, cmd: Command = None, explore=True):
     """
