@@ -1,17 +1,18 @@
 import typing
 
+from deprecated import deprecated
+
 from aclimatise.converter import WrapperGenerator
 from aclimatise.converter.cwl import CwlGenerator
+from aclimatise.converter.janis import JanisGenerator
 from aclimatise.converter.wdl import WdlGenerator
 from aclimatise.converter.yml import YmlGenerator
-from aclimatise.converter.janis import JanisGenerator
 from aclimatise.execution import Executor
 from aclimatise.execution.docker import DockerExecutor
 from aclimatise.execution.local import LocalExecutor
 from aclimatise.execution.man import ManPageExecutor
 from aclimatise.integration import parse_help
 from aclimatise.model import Command, Flag
-from deprecated import deprecated
 
 default_executor = LocalExecutor()
 
