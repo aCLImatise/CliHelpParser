@@ -40,6 +40,7 @@ __all__ = [
     CwlGenerator,
     WdlGenerator,
     YmlGenerator,
+    JanisGenerator,
     LocalExecutor,
     DockerExecutor,
     ManPageExecutor,
