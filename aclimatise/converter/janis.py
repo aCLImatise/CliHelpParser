@@ -9,7 +9,7 @@ from aclimatise.model import CliArgument, Command, Flag, Positional
 class JanisGenerator(WrapperGenerator):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        import janis as j
+        import janis_core as j
 
         # save importing janis until this is initialised
         self.janis = j
