@@ -1,14 +1,13 @@
 from typing import List
 
+import janis_core as janis
 from aclimatise import cli_types
 from aclimatise.cli_types import CliType
 from aclimatise.converter import NamedArgument, WrapperGenerator
 from aclimatise.model import CliArgument, Command, Flag, Positional
 
-import janis_core as janis
 
 class JanisGenerator(WrapperGenerator):
-
     @classmethod
     def format(cls) -> str:
         return "janis"
@@ -36,7 +35,9 @@ class JanisGenerator(WrapperGenerator):
 
         return tool
 
-    def type_to_janis_type(self, typ: cli_types.CliType, optional: bool) -> janis.DataType:
+    def type_to_janis_type(
+        self, typ: cli_types.CliType, optional: bool
+    ) -> janis.DataType:
 
         if isinstance(typ, cli_types.CliFile):
             return janis.File(optional=optional)
