@@ -21,7 +21,7 @@ setup(
         "psutil",
         "deprecated",
         "attrs",
-        "janis-pipelines.core >= 0.11.2, <= 0.12.0",
+        "janis-pipelines.core >= 0.11.2",
     ],
     python_requires=">=3.6",
     entry_points={"console_scripts": ["aclimatise = aclimatise.cli:main"]},
