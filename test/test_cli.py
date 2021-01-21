@@ -11,7 +11,7 @@ from packaging import version
 from aclimatise.cli import main
 from aclimatise.yaml import yaml
 
-from .util import skip_not_installed, validate_cwl, validate_wdl
+from .util import skip_not_installed, validate_cwl, validate_janis, validate_wdl
 
 
 @pytest.fixture()
@@ -41,6 +41,14 @@ def test_pipe_cwl(runner, htseq_help):
     )
     cli_worked(result)
     validate_cwl(result.output)
+
+
+def test_pipe_janis(runner, htseq_help):
+    result = runner.invoke(
+        main, ["pipe", "htseq-count", "--format", "janis"], input=htseq_help
+    )
+    cli_worked(result)
+    validate_janis(result.output)
 
 
 @skip_not_installed("htseq-count")
