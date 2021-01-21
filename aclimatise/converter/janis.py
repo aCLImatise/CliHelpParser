@@ -5,14 +5,9 @@ from aclimatise.cli_types import CliType
 from aclimatise.converter import NamedArgument, WrapperGenerator
 from aclimatise.model import CliArgument, Command, Flag, Positional
 
+import janis_core as janis
 
 class JanisGenerator(WrapperGenerator):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        import janis_core as j
-
-        # save importing janis until this is initialised
-        self.janis = j
 
     @classmethod
     def format(cls) -> str:
@@ -23,14 +18,14 @@ class JanisGenerator(WrapperGenerator):
         clt = self.command_to_tool(cmd)
         return clt.translate("janis", to_console=False)
 
-    def command_to_tool(self, cmd: Command):
+    def command_to_tool(self, cmd: Command) -> janis.CommandToolBuilder:
 
         inputs: List[CliArgument] = [*cmd.named] + (
             [] if self.ignore_positionals else [*cmd.positional]
         )
         names = self.choose_variable_names(inputs)
 
-        tool = self.janis.CommandToolBuilder(
+        tool = janis.CommandToolBuilder(
             tool=cmd.as_filename,
             base_command=list(cmd.command),
             inputs=self.get_inputs(names),
@@ -41,45 +36,43 @@ class JanisGenerator(WrapperGenerator):
 
         return tool
 
-    def type_to_cwl_type(self, typ: cli_types.CliType, optional):
+    def type_to_janis_type(self, typ: cli_types.CliType, optional: bool) -> janis.DataType:
 
         if isinstance(typ, cli_types.CliFile):
-            return self.janis.File(optional=optional)
+            return janis.File(optional=optional)
         elif isinstance(typ, cli_types.CliDir):
-            return self.janis.Directory(optional=optional)
+            return janis.Directory(optional=optional)
         elif isinstance(typ, cli_types.CliString):
-            return self.janis.String(optional=optional)
+            return janis.String(optional=optional)
         elif isinstance(typ, cli_types.CliFloat):
-            return self.janis.Float(optional=optional)
+            return janis.Float(optional=optional)
         elif isinstance(typ, cli_types.CliInteger):
-            return self.janis.Int(optional=optional)
+            return janis.Int(optional=optional)
         elif isinstance(typ, cli_types.CliBoolean):
-            return self.janis.Boolean(optional=optional)
+            return janis.Boolean(optional=optional)
         elif isinstance(typ, cli_types.CliEnum):
-            return self.janis.String(optional=optional)
+            return janis.String(optional=optional)
         elif isinstance(typ, cli_types.CliList):
             # TODO: how is Array<String?> represented?
-            inner = self.type_to_cwl_type(typ.value, optional=False)
-            return self.janis.Array(inner, optional=optional)
+            inner = self.type_to_janis_type(typ.value, optional=False)
+            return janis.Array(inner, optional=optional)
 
         elif isinstance(typ, cli_types.CliTuple):
-            return self.type_to_cwl_type(
+            return self.type_to_janis_type(
                 CliType.lowest_common_type(typ.values), optional=False
             )
         else:
             raise Exception(f"Invalid type {typ}!")
 
-    def arg_to_janis_type(self, arg: CliArgument):
-        return self.type_to_cwl_type(arg.get_type(), arg.optional)
+    def arg_to_janis_type(self, arg: CliArgument) -> janis.DataType:
+        return self.type_to_janis_type(arg.get_type(), arg.optional)
 
-    def get_inputs(self, names: List[NamedArgument]):
-        import janis_core as j
-
+    def get_inputs(self, names: List[NamedArgument]) -> List[janis.ToolInput]:
         ret = []
         for arg in names:
             assert arg.name != "", arg
             ret.append(
-                j.ToolInput(
+                janis.ToolInput(
                     tag="in_" + arg.name,
                     input_type=self.arg_to_janis_type(arg.arg),
                     position=arg.arg.position
@@ -93,17 +86,17 @@ class JanisGenerator(WrapperGenerator):
             )
         return ret
 
-    def get_outputs(self, names: List[NamedArgument]):
+    def get_outputs(self, names: List[NamedArgument]) -> List[janis.ToolOutput]:
         ret = []
         for arg in names:
             typ = arg.arg.get_type()
             if isinstance(typ, cli_types.CliFileSystemType) and typ.output:
                 ret.append(
-                    self.janis.ToolOutput(
+                    janis.ToolOutput(
                         tag="out_" + arg.name,
                         output_type=self.arg_to_janis_type(arg.arg),
                         doc=arg.arg.description,
-                        selector=self.janis.InputSelector("in_" + arg.name),
+                        selector=janis.InputSelector("in_" + arg.name),
                     )
                 )
         return ret
