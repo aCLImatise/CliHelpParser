@@ -126,7 +126,7 @@ def explore(
 @click.option(
     "--format",
     "-f",
-    type=click.Choice(["wdl", "cwl", "yml"]),
+    type=click.Choice(["wdl", "cwl", "yml", "janis"]),
     default="cwl",
     help="The language in which to output the CLI wrapper",
 )

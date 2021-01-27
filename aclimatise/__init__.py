@@ -2,6 +2,7 @@ import typing
 
 from aclimatise.converter import WrapperGenerator
 from aclimatise.converter.cwl import CwlGenerator
+from aclimatise.converter.janis import JanisGenerator
 from aclimatise.converter.wdl import WdlGenerator
 from aclimatise.converter.yml import YmlGenerator
 from aclimatise.execution import Executor
@@ -38,6 +39,7 @@ __all__ = [
     CwlGenerator,
     WdlGenerator,
     YmlGenerator,
+    JanisGenerator,
     LocalExecutor,
     DockerExecutor,
     ManPageExecutor,
