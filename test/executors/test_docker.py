@@ -4,6 +4,20 @@ import pytest
 from aclimatise.execution.docker import DockerExecutor
 
 
+@pytest.mark.timeout(360)
+def test_docker_image_saved(bwamem_help):
+    client = docker.from_env()
+    container = client.containers.run(
+        "biocontainers/bwa:v0.7.17_cv1",
+        entrypoint=["sleep", "999999999"],
+        detach=True,
+    )
+
+    exec = DockerExecutor(container)
+    cmd = exec.convert(["bwa", "mem"])
+    assert cmd.docker_image == "biocontainers/bwa:v0.7.17_cv1"
+
+
 def test_docker(bwamem_help):
     client = docker.from_env()
     container = client.containers.run(
