@@ -1,7 +1,7 @@
 Changelog
 =========
 
-3.0.0 (2020-11-)
+3.0.0 (2021-01-27)
 ----------------
 Breaking Changes
 ****************
@@ -14,6 +14,7 @@ Breaking Changes
 New Features
 ************
 * Add ``docker_image`` field to ``Command``
+* Add `Janis <https://janis.readthedocs.io/en/latest/index.html>`_ converter (`#73 <https://github.com/aCLImatise/CliHelpParser/issues/73>`_)
 
 Bug Fixes
 *********
