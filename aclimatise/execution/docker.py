@@ -8,6 +8,7 @@ from unittest.mock import patch
 from docker.utils.socket import consume_socket_output, demux_adaptor, frames_iter
 
 from aclimatise.execution.help import CliHelpExecutor
+from aclimatise.model import Command
 
 
 def read_socket(sock, timeout: int = None) -> Tuple[bytes, bytes]:
@@ -40,9 +41,27 @@ class DockerExecutor(CliHelpExecutor):
     An executor that runs the commands on an already-running docker Container (not an Image!)
     """
 
-    def __init__(self, container: "docker.models.containers.Container", **kwargs):
+    def __init__(
+        self, container: "docker.models.containers.Container", save_image=True, **kwargs
+    ):
+        """
+        :param container: The object from the Docker API that represents the running container to run inside
+        :param save_image: If true (default), save the image name on the command, meaning that the resulting tool
+            definitions also use this Docker image
+        """
         super().__init__(**kwargs)
         self.container = container
+        self.save_image = save_image
+
+    def convert(
+        self,
+        cmd: List[str],
+    ) -> Command:
+        # Use the existing function, but patch in the docker image
+        cmd = super().convert(cmd)
+        if self.save_image:
+            cmd.docker_image = self.container.image.tags[0]
+        return cmd
 
     def execute(self, command: List[str]) -> str:
         _, sock = self.container.exec_run(

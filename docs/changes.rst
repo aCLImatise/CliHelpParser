@@ -14,6 +14,7 @@ Breaking Changes
 New Features
 ************
 * Add ``docker_image`` field to ``Command``
+* The ``DockerExecutor`` has been updated to automatically set this field based on the Docker image being used by it
 * Add `Janis <https://janis.readthedocs.io/en/latest/index.html>`_ converter (`#73 <https://github.com/aCLImatise/CliHelpParser/issues/73>`_)
 
 Bug Fixes
